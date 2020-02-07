@@ -40,6 +40,9 @@ private:
   // data sections corresponding to markers
   std::map<std::string,std::vector<unsigned char>> datasec_;
 
+  // TODO preliminary: for now, we assume 32/64 bit ? floats in all data
+  std::vector<double> datmes_;
+
 public:
 
   // constructor
@@ -85,8 +88,9 @@ public:
     {
       std::cout<<el.first<<"  ";
       for ( unsigned char c: el.second) std::cout<<std::hex<<int(c);
-      std::cout<<"\n";
+      std::cout<<"\n\n";
     }
+    std::cout<<std::dec;
   }
 
   // find predefined markers in data buffer
@@ -132,15 +136,108 @@ public:
               markseq.push_back(rawdata_[didx]);
             }
           }
+          datasec_.insert(std::pair<std::string,std::vector<unsigned char>>(mrk.first,markseq));
         }
       } 
     }
- 
-    for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
+
+  }
+
+  // get all predefined markers
+  std::map<std::string,std::vector<unsigned char>> get_markers()
+  {
+    return markers_;
+  }
+
+  // get data associated to specific marker
+  std::vector<unsigned char> get_marker_data(std::string marker)
+  {
+    return datasec_[marker];
+  }
+
+  // show hex dump
+  void show_hex(std::vector<unsigned char> &datavec, int width = 32, unsigned long int maxchars = 512)
+  {
+    // compose hex string and encoded string
+    std::stringstream hex, enc;
+
+    for ( unsigned long int i = 0; i < datavec.size() && i < maxchars; i++ )
     {
-      std::cout<<mrk.first<<"  "<<mrk.second.size()<<"\n";
+      if ( (int)(i+1)%width == 0 )
+      {
+        // print both strings
+        std::cout<<std::setw(3*width)<<std::left<<hex.str()<<"    "<<enc.str()<<"\n";
+        std::cout<<std::right;
+        
+        // clear stringstreams
+        hex.str(std::string());
+        enc.str(std::string());
+      }
+      else
+      {
+        // accumulate in stringstreams
+        hex<<std::nouppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<(int)datavec[i]<<" ";
+        // check if byte corresponds to some control character and if it's printable
+        int ic = (int)datavec[i];
+        if ( ic > 0x20 && ic < 0x7f )
+        {
+          enc<<(char)(datavec[i]);
+        }
+        else 
+        {
+          enc<<".";
+        }
+      }
+    }
+    // print final remaining part
+    std::cout<<std::setw(3*width)<<std::left<<hex.str()<<"    "<<enc.str()<<"\n";
+    std::cout<<std::right;
+    std::cout<<std::dec;
+  }
+
+  // convert actual measurement data
+  void convert_data()
+  {
+    // length of data array
+    unsigned long int datsize = datasec_["datas marker"].size();
+
+    assert ( (datsize-28)%4 == 0 && "length of buffer is not a multiple of 4" );
+
+    unsigned long int totnumfl = (datsize-28)/4;
+    for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
+    {
+      // assuming 4 byte float
+      float num = 0.0;
+      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
+      for ( int byi = 0; byi < (int)sizeof(float); byi++ )
+      {
+        pnum[byi] = (int)datasec_["datas marker"][(unsigned long int)(28+numfl*sizeof(float)+byi)];
+      }
+
+      // add number of array
+      datmes_.push_back((double)num);
+    }      
+  }
+
+  // get data array encoded as floats/doubles
+  std::vector<double>& get_data()
+  {
+    return datmes_;
+  }
+
+  // write data to csv-like file
+  void write_data(std::string filename)
+  {
+    // open file
+    std::ofstream fout(filename.c_str());
+
+    for ( auto el : datmes_ )
+    {
+      fout<<std::dec<<el<<"\n";
     }
 
+    // close file
+    fout.close();
   }
 
 };
