@@ -1,5 +1,8 @@
 //---------------------------------------------------------------------------//
 
+#ifndef RAW_EATER
+#define RAW_EATER
+
 #include <assert.h>
 #include <iostream>
 #include <fstream>
@@ -7,6 +10,9 @@
 #include <vector>
 #include <iterator>
 #include <map>
+
+#include "half_precision_floating_point.hpp"
+#include "endian.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -40,6 +46,9 @@ private:
   // data sections corresponding to markers
   std::map<std::string,std::vector<unsigned char>> datasec_;
 
+  // length of data array
+  unsigned long int datsize_;
+
   // TODO preliminary: for now, we assume 32/64 bit ? floats in all data
   std::vector<double> datmes_;
 
@@ -61,23 +70,28 @@ public:
                                        (std::istreambuf_iterator<char>()));
     rawdata_ = rawdata;
 
-    // show size of buffer
-    std::cout<<"size of buffer "<<rawdata_.size()<<"\n";
-
-    // show excerpt from buffer
-    int ista = 0, iend = 128;
-    for ( int i= ista; i < iend; i++ )
-    {
-      std::cout<<std::hex<<(int)rawdata_[i]<<" ";
-      if ( (i+1)%16 == 0 ) std::cout<<"\n";
-    }
-    std::cout<<"\n";
   }
 
   // destructor
   ~raw_eater()
   {
   
+  }
+
+  // display buffer/data properties
+  void show_buffer(int numel = 128)
+  {
+    // show size of buffer
+    std::cout<<"size of buffer "<<rawdata_.size()<<"\n\n";
+
+    // show excerpt from buffer
+    int ista = 0, iend = numel;
+    for ( int i= ista; i < iend; i++ )
+    {
+      std::cout<<std::hex<<(int)rawdata_[i]<<" ";
+      if ( (i+1)%16 == 0 ) std::cout<<"\n";
+    }
+    std::cout<<"\n";
   }
 
   // show predefined markers
@@ -135,6 +149,9 @@ public:
             {
               markseq.push_back(rawdata_[didx]);
             }
+
+            // obtain length of data segment
+            datsize_ = markseq.size();
           }
           datasec_.insert(std::pair<std::string,std::vector<unsigned char>>(mrk.first,markseq));
         }
@@ -198,12 +215,9 @@ public:
   // convert actual measurement data
   void convert_data()
   {
-    // length of data array
-    unsigned long int datsize = datasec_["datas marker"].size();
+    assert ( (datsize_-28)%4 == 0 && "length of buffer is not a multiple of 4" );
 
-    assert ( (datsize-28)%4 == 0 && "length of buffer is not a multiple of 4" );
-
-    unsigned long int totnumfl = (datsize-28)/4;
+    unsigned long int totnumfl = (datsize_-28)/(int)sizeof(float);
     for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
     {
       // assuming 4 byte float
@@ -211,12 +225,69 @@ public:
       uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
       for ( int byi = 0; byi < (int)sizeof(float); byi++ )
       {
+        // TODO what's the byte order in the file??
+        // for now, we just don't care...
         pnum[byi] = (int)datasec_["datas marker"][(unsigned long int)(28+numfl*sizeof(float)+byi)];
       }
 
       // add number of array
       datmes_.push_back((double)num);
     }      
+  }
+
+  // convert half-precision (16bit) floating point numbers
+  void convert_data_16_bit_float()
+  {
+    // single (32bit) floating point number
+    float fl = 0.0;
+
+    unsigned long int totnumby = (datsize_-28)/2;
+    for ( unsigned long int by = 0; by < totnumby; by++ )
+    {
+      // retrieve two bytes of floating point number
+      std::vector<uint8_t> pnum;
+      for ( int i = 0; i < 2; i++ ) pnum.push_back(datasec_["datas marker"][(unsigned long int)(28+by*2+i)]);
+
+      // obtain bitset
+      std::bitset<8> byA(pnum[0]), byB(pnum[1]);
+
+      // TODO all following code only works for little endian!!
+
+      // sign
+      float sign = byB[0];
+
+      // exponent of 16bit float
+      long int expo = 0;
+      for ( int i = 0; i < 5; i++ ) if ( byB[1+i] ) expo += pow(2.0,4-i);
+      expo -= 15;
+
+      // convert to exponent of 32bit float
+      
+
+      // mantissa
+      
+
+      // declare bitset of float
+      std::bitset<8> flA(0x00), flB(0x00), flC(0x00), flD(0x00);
+      
+      
+    }
+  }
+
+  // convert 16bit "decimal-encoding" floating point numbers
+  void convert_data_16_bit_decimal()
+  {
+    //assert ( (datsize_-29)%2 == 0 && "length of buffer is not a multiple of 2" );
+
+    unsigned long int totnumby = (datsize_-30)/2;
+    for ( unsigned long int by = 0; by < totnumby; by++ )
+    {
+      std::vector<uint8_t> pnum; 
+      for ( int i = 0; i < 2; i++ ) pnum.push_back(datasec_["datas marker"][(unsigned long int)(29+by*2+i)]);
+
+      datmes_.push_back((double)(     (((int)pnum[0]-128)*256 + (int)pnum[1])/100.0       )); 
+    
+    }
   }
 
   // get data array encoded as floats/doubles
@@ -226,14 +297,14 @@ public:
   }
 
   // write data to csv-like file
-  void write_data(std::string filename)
+  void write_data(std::string filename, int precision = 9)
   {
     // open file
     std::ofstream fout(filename.c_str());
 
     for ( auto el : datmes_ )
     {
-      fout<<std::dec<<el<<"\n";
+      fout<<std::dec<<std::setprecision(precision)<<el<<"\n";
     }
 
     // close file
@@ -241,5 +312,7 @@ public:
   }
 
 };
+
+#endif
 
 //---------------------------------------------------------------------------//
