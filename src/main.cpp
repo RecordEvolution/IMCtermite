@@ -54,28 +54,6 @@ int main(int argc, char* argv[])
   // write data in csv-file
   eatraw.write_data(std::string(argv[2]));
 
-  float ab = -0.75;
-  std::cout<<ab<<"\n";
-  uint8_t* pab = reinterpret_cast<uint8_t*>(&ab);
-  for ( int i = 0; i < (int)sizeof(float); i++ ) std::cout<<std::hex<<(int)pab[i]<<std::dec<<" ";
-  std::cout<<"\n";
-
-  uint8_t sc = 0x4f;
-  std::bitset<8> bssc(sc);
-  for ( int i = 0; i < 8; i++ ) std::cout<<bssc[i]<<" ";
-  std::cout<<"\n";
-  std::cout<<std::hex<<bssc.to_ulong()<<"\n\n";
-
-  endian endi;
-  std::cout<<(endi.little_endian()?"little endian":"big endian")<<"\n\n";
-
-  std::cout<<sizeof(long int)<<"\n";
-  std::cout<<sizeof(int)<<"\n";
-  std::cout<<sizeof(short int)<<"\n";
-  std::cout<<sizeof(unsigned int)<<"\n";
-  std::cout<<sizeof(unsigned short int)<<"\n";
-  std::cout<<sizeof(half_float::half)<<"\n";
-
 //  short int myi = 34;
 //  std::cout<<myi<<"\n";
 //  float myfl = 0.0;
