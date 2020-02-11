@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
   }
 
   // convert unsigned char data in buffer to desired data type
-  //eatraw.convert_data();
   eatraw.convert_data_16_bit_float();
+  //eatraw.convert_data_32_bit_float();
 
   // get array of encoded data
   std::vector<double> maindata = eatraw.get_data();
@@ -67,7 +67,21 @@ int main(int argc, char* argv[])
   std::cout<<std::hex<<bssc.to_ulong()<<"\n\n";
 
   endian endi;
-  std::cout<<(endi.little_endian()?"little endian":"big endian")<<"\n";
+  std::cout<<(endi.little_endian()?"little endian":"big endian")<<"\n\n";
+
+  std::cout<<sizeof(long int)<<"\n";
+  std::cout<<sizeof(int)<<"\n";
+  std::cout<<sizeof(short int)<<"\n";
+  std::cout<<sizeof(unsigned int)<<"\n";
+  std::cout<<sizeof(unsigned short int)<<"\n";
+  std::cout<<sizeof(half_float::half)<<"\n";
+
+//  short int myi = 34;
+//  std::cout<<myi<<"\n";
+//  float myfl = 0.0;
+//  myfl =  _cvtsh_ss(myi);
+////float _cvtsh_ss(unsigned short x);
+//  std::cout<<myfl<<"\n";
 
   return 0;
 }

@@ -6,12 +6,19 @@
 #include <assert.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <vector>
 #include <iterator>
 #include <map>
+#include <cmath>
 
-#include "half_precision_floating_point.hpp"
+// support for 16bit floats
+#include <emmintrin.h>
+#include <immintrin.h>
+//#include <f16cintrin.h>
+#include "half.hpp"
+//#include "half_precision_floating_point.hpp"
 #include "endian.hpp"
 
 //---------------------------------------------------------------------------//
@@ -213,14 +220,14 @@ public:
   }
 
   // convert actual measurement data
-  void convert_data()
+  void convert_data_32_bit_float()
   {
     assert ( (datsize_-28)%4 == 0 && "length of buffer is not a multiple of 4" );
 
     unsigned long int totnumfl = (datsize_-28)/(int)sizeof(float);
     for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
     {
-      // assuming 4 byte float
+      // assuming 4 byte (32bit) float
       float num = 0.0;
       uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
       for ( int byi = 0; byi < (int)sizeof(float); byi++ )
@@ -238,39 +245,23 @@ public:
   // convert half-precision (16bit) floating point numbers
   void convert_data_16_bit_float()
   {
-    // single (32bit) floating point number
-    float fl = 0.0;
+    assert ( (datsize_-28)%2 == 0 && "length of buffer is not a multiple of 2" );
 
     unsigned long int totnumby = (datsize_-28)/2;
     for ( unsigned long int by = 0; by < totnumby; by++ )
     {
-      // retrieve two bytes of floating point number
-      std::vector<uint8_t> pnum;
-      for ( int i = 0; i < 2; i++ ) pnum.push_back(datasec_["datas marker"][(unsigned long int)(28+by*2+i)]);
+      // declare single (16bit) floating point number
+      half_float::half hfl;
 
-      // obtain bitset
-      std::bitset<8> byA(pnum[0]), byB(pnum[1]);
+      // reinterpret bytes in buffer as memory of floating point number
+      uint8_t* pnum = reinterpret_cast<uint8_t*>(&hfl);
+      for ( int i = 0; i < (int)sizeof(half_float::half); i++ )
+      {
+        pnum[i] = (int)datasec_["datas marker"][(unsigned long int)(28+by*sizeof(half_float::half)+i)];
+      }
 
-      // TODO all following code only works for little endian!!
-
-      // sign
-      float sign = byB[0];
-
-      // exponent of 16bit float
-      long int expo = 0;
-      for ( int i = 0; i < 5; i++ ) if ( byB[1+i] ) expo += pow(2.0,4-i);
-      expo -= 15;
-
-      // convert to exponent of 32bit float
-      
-
-      // mantissa
-      
-
-      // declare bitset of float
-      std::bitset<8> flA(0x00), flB(0x00), flC(0x00), flD(0x00);
-      
-      
+      // add number to array
+      datmes_.push_back((double)hfl);
     }
   }
 
