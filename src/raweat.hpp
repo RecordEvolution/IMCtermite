@@ -57,6 +57,8 @@ private:
   unsigned long int datsize_;
 
   // TODO preliminary: for now, we assume 32/64 bit ? floats in all data
+  // index in buffer of datasec_["datas marker"] where actual data starts
+  unsigned long int datstartidx_;
   std::vector<double> datmes_;
 
 public:
@@ -159,7 +161,24 @@ public:
 
             // obtain length of data segment
             datsize_ = markseq.size();
+
+            // find starting index (supposed to be after fourth comma = 0x2c)
+            int countcomma = 0;
+            for ( unsigned long int buidx = 0; buidx < datsize_; buidx++ )
+            {
+              // count number of comma chars in head of data segment
+              if ( markseq[buidx] == 0x2c ) countcomma++;
+
+              // save position following fourth comma
+              if ( countcomma == 4 )
+              {
+                datstartidx_ = buidx + 1;
+                break;
+              }
+            }
           }
+
+          // save segment corresponding to marker
           datasec_.insert(std::pair<std::string,std::vector<unsigned char>>(mrk.first,markseq));
         }
       } 
@@ -268,16 +287,22 @@ public:
   // convert 16bit "decimal-encoding" floating point numbers
   void convert_data_16_bit_decimal()
   {
-    //assert ( (datsize_-29)%2 == 0 && "length of buffer is not a multiple of 2" );
+    assert ( (datsize_-datstartidx_)%2 == 0 && "length of data is not a multiple of 2" );
 
-    unsigned long int totnumby = (datsize_-30)/2;
+    double flstp = 0.04395;
+
+    // parse bytes in data buffer
+    unsigned long int totnumby = (datsize_-datstartidx_)/2;
     for ( unsigned long int by = 0; by < totnumby; by++ )
     {
+      // retrieve set of two subsequent bytes
       std::vector<uint8_t> pnum; 
-      for ( int i = 0; i < 2; i++ ) pnum.push_back(datasec_["datas marker"][(unsigned long int)(29+by*2+i)]);
+      for ( int i = 0; i < 2; i++ ) pnum.push_back(datasec_["datas marker"][(unsigned long int)(datstartidx_+by*2+i)]);
 
-      datmes_.push_back((double)(     (((int)pnum[0]-128)*256 + (int)pnum[1])/100.0       )); 
-    
+      // convert to double
+      //datmes_.push_back((double)(     (((int)pnum[0]-128)*256 + (int)pnum[1])/100.0       )); 
+      datmes_.push_back((double)(     (((int)pnum[1]-128)*256. + (int)pnum[0])/100.0       )); 
+      //datmes_.push_back( (double) ( ( (int)pnum[0] + (int)pnum[1]*256 )*flstp ) );
     }
   }
 

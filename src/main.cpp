@@ -43,7 +43,8 @@ int main(int argc, char* argv[])
   }
 
   // convert unsigned char data in buffer to desired data type
-  eatraw.convert_data_16_bit_float();
+  eatraw.convert_data_16_bit_decimal();
+  //eatraw.convert_data_16_bit_float();
   //eatraw.convert_data_32_bit_float();
 
   // get array of encoded data
