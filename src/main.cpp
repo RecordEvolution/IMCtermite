@@ -28,6 +28,9 @@ int main(int argc, char* argv[])
   // determine position of markers in buffer and read data
   eatraw.find_markers();
 
+  // split data segments into elements
+  eatraw.split_segments();
+
   std::cout<<"\n";
   std::map<std::string,std::vector<unsigned char>> marks = eatraw.get_markers();
   for ( auto mrk: marks )
@@ -40,12 +43,14 @@ int main(int argc, char* argv[])
     std::cout<<std::setfill('-')<<std::setw(96)<<'\n'<<std::setfill(' ');
     eatraw.show_hex(dat,32,512);
     std::cout<<"\n";
+
+    std::vector<std::string> segvec = eatraw.get_segment(mrk.first);
+    std::cout<<"number of elements in segment: "<<segvec.size()<<"\n\n";
+    //for ( auto el: segvec ) std::cout<<el<<"\n";
   }
 
   // convert unsigned char data in buffer to desired data type
-  eatraw.convert_data_16_bit_decimal();
-  //eatraw.convert_data_16_bit_float();
-  //eatraw.convert_data_32_bit_float();
+  eatraw.convert_data();
 
   // get array of encoded data
   std::vector<double> maindata = eatraw.get_data();

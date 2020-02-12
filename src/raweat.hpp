@@ -53,12 +53,13 @@ private:
   // data sections corresponding to markers
   std::map<std::string,std::vector<unsigned char>> datasec_;
 
+  // split segments into arrays of simple number/string element
+  std::map<std::string,std::vector<std::string>> segments_;
+
   // length of data array
   unsigned long int datsize_;
 
   // TODO preliminary: for now, we assume 32/64 bit ? floats in all data
-  // index in buffer of datasec_["datas marker"] where actual data starts
-  unsigned long int datstartidx_;
   std::vector<double> datmes_;
 
 public:
@@ -116,12 +117,14 @@ public:
     std::cout<<std::dec;
   }
 
+//---------------------------------------------------------------------------//
+
   // find predefined markers in data buffer
   void find_markers()
   {
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
-      assert( mrk.second.size() > 0 && "please don't defined any empty marker" );
+      assert( mrk.second.size() > 0 && "please don't define any empty marker" );
 
       // find marker's byte sequence in buffer
       for ( unsigned long int idx = 0; idx < rawdata_.size(); idx++ )
@@ -150,10 +153,7 @@ public:
           }
           else 
           {
-            // make sure the data marker is actually the last and extends until end of file
-            //assert( TODO && "data marker doesn't appear to be the very last");
-
-            // that's the data itself
+            // data marker is actually assumed to be the last and should extend until end of file
             for ( unsigned long int didx = idx; didx < rawdata_.size()-1; didx++ )
             {
               markseq.push_back(rawdata_[didx]);
@@ -161,21 +161,6 @@ public:
 
             // obtain length of data segment
             datsize_ = markseq.size();
-
-            // find starting index (supposed to be after fourth comma = 0x2c)
-            int countcomma = 0;
-            for ( unsigned long int buidx = 0; buidx < datsize_; buidx++ )
-            {
-              // count number of comma chars in head of data segment
-              if ( markseq[buidx] == 0x2c ) countcomma++;
-
-              // save position following fourth comma
-              if ( countcomma == 4 )
-              {
-                datstartidx_ = buidx + 1;
-                break;
-              }
-            }
           }
 
           // save segment corresponding to marker
@@ -197,6 +182,143 @@ public:
   {
     return datasec_[marker];
   }
+
+  // split data segments into arrays
+  void split_segments()
+  {
+    // split segments of all markers 
+    for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
+    {
+      // declare empty array for this segment and auxiliary string
+      std::vector<std::string> segvec;
+      std::string elstr("");
+
+      // only start collecting after first comma in segment
+      bool parse = false;
+
+      // count number of commata
+      long int commcount = 0;
+
+      // parse data segment
+      for ( unsigned char el: datasec_[mrk.first] )
+      {
+        // note that data segment of "datas marker" may contain any number of 0x2c's
+        if ( ( el != 0x2c && parse ) || ( mrk.first == "datas marker" && commcount > 2 ) )
+        {
+          elstr.push_back(el);
+        }
+        else if ( el == 0x2c && parse )
+        {
+          // comma marks end of element of segment: save string and reset it
+          segvec.push_back(elstr);
+          elstr = std::string("");
+          commcount++;
+        }
+        else 
+        {
+          // enable parsing after first comma
+          if ( el == 0x2c ) parse = true;
+        }
+      }
+      // include last element
+      segvec.push_back(elstr);
+
+      // save array of elements 
+      segments_.insert(std::pair<std::string,std::vector<std::string>>(mrk.first,segvec));;
+    }
+  }
+
+//---------------------------------------------------------------------------//
+
+  // convert actual measurement data
+  void convert_data()
+  {
+    // by convention, the actual data is the 4th element
+    std::string datstr = segments_["datas marker"][3];
+    std::vector<unsigned char> datbuf(datstr.begin(),datstr.end());
+
+    // retrieve datatype from segment
+    int typesize = std::stoi(segments_["datyp marker"][5]);
+
+    if ( typesize == 32  ) convert_data_32_bit_float(datbuf);
+    if ( false ) convert_data_16_bit_float();
+    if ( typesize == 16 ) convert_data_16_bit_decimal(datbuf);
+
+  }
+
+  // convert single precision 32bit floating point numbers
+  void convert_data_32_bit_float(std::vector<unsigned char> &datbuf)
+  {
+    // check size of buffer assuming size of single precision float is 4 byte
+    assert ( datbuf.size()%4 == 0 && "length of buffer is not a multiple of 4" );
+
+    // get number of single precision floats in buffer
+    unsigned long int totnumfl = datbuf.size()/(int)sizeof(float);
+    for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
+    {
+      // assuming 4 byte (32bit) float
+      float num = 0.0;
+      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
+
+      // parse all 4 bytes of the number
+      for ( int byi = 0; byi < (int)sizeof(float); byi++ )
+      {
+        // TODO what's the byte order (little/big endian) in the file??
+        // for now, we just don't care...
+        pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(float)+byi)];
+      }
+
+      // add number of array
+      datmes_.push_back((double)num);
+    }      
+  }
+
+  // convert half-precision (16bit) floating point numbers
+  void convert_data_16_bit_float()
+  {
+    assert ( (datsize_-28)%2 == 0 && "length of buffer is not a multiple of 2" );
+
+    unsigned long int totnumby = (datsize_-28)/2;
+    for ( unsigned long int by = 0; by < totnumby; by++ )
+    {
+      // declare single (16bit) floating point number
+      half_float::half hfl;
+
+      // reinterpret bytes in buffer as memory of floating point number
+      uint8_t* pnum = reinterpret_cast<uint8_t*>(&hfl);
+      for ( int i = 0; i < (int)sizeof(half_float::half); i++ )
+      {
+        pnum[i] = (int)datasec_["datas marker"][(unsigned long int)(28+by*sizeof(half_float::half)+i)];
+      }
+
+      // add number to array
+      datmes_.push_back((double)hfl);
+    }
+  }
+
+  // convert 16bit "decimal-encoding" floating point numbers
+  void convert_data_16_bit_decimal(std::vector<unsigned char> &datbuf)
+  {
+    assert ( datbuf.size()%2 == 0 && "length of data is not a multiple of 2" );
+
+    // encoding parameters
+    double shift = -128.;
+    double scale = 1.0/100.;
+    double offse = 0.0;
+
+    for ( unsigned long int idx = 0; idx < datbuf.size()-1; idx += 2 )
+    {
+      // convert to float
+      datmes_.push_back(
+
+        (double)( (int)(datbuf[idx])*1. + ( (int)(datbuf[idx+1])*1. + shift )*256. )*scale + offse
+
+      );
+    }
+
+  }
+
+//---------------------------------------------------------------------------//
 
   // show hex dump
   void show_hex(std::vector<unsigned char> &datavec, int width = 32, unsigned long int maxchars = 512)
@@ -238,78 +360,16 @@ public:
     std::cout<<std::dec;
   }
 
-  // convert actual measurement data
-  void convert_data_32_bit_float()
-  {
-    assert ( (datsize_-28)%4 == 0 && "length of buffer is not a multiple of 4" );
-
-    unsigned long int totnumfl = (datsize_-28)/(int)sizeof(float);
-    for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
-    {
-      // assuming 4 byte (32bit) float
-      float num = 0.0;
-      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
-      for ( int byi = 0; byi < (int)sizeof(float); byi++ )
-      {
-        // TODO what's the byte order in the file??
-        // for now, we just don't care...
-        pnum[byi] = (int)datasec_["datas marker"][(unsigned long int)(28+numfl*sizeof(float)+byi)];
-      }
-
-      // add number of array
-      datmes_.push_back((double)num);
-    }      
-  }
-
-  // convert half-precision (16bit) floating point numbers
-  void convert_data_16_bit_float()
-  {
-    assert ( (datsize_-28)%2 == 0 && "length of buffer is not a multiple of 2" );
-
-    unsigned long int totnumby = (datsize_-28)/2;
-    for ( unsigned long int by = 0; by < totnumby; by++ )
-    {
-      // declare single (16bit) floating point number
-      half_float::half hfl;
-
-      // reinterpret bytes in buffer as memory of floating point number
-      uint8_t* pnum = reinterpret_cast<uint8_t*>(&hfl);
-      for ( int i = 0; i < (int)sizeof(half_float::half); i++ )
-      {
-        pnum[i] = (int)datasec_["datas marker"][(unsigned long int)(28+by*sizeof(half_float::half)+i)];
-      }
-
-      // add number to array
-      datmes_.push_back((double)hfl);
-    }
-  }
-
-  // convert 16bit "decimal-encoding" floating point numbers
-  void convert_data_16_bit_decimal()
-  {
-    assert ( (datsize_-datstartidx_)%2 == 0 && "length of data is not a multiple of 2" );
-
-    double flstp = 0.04395;
-
-    // parse bytes in data buffer
-    unsigned long int totnumby = (datsize_-datstartidx_)/2;
-    for ( unsigned long int by = 0; by < totnumby; by++ )
-    {
-      // retrieve set of two subsequent bytes
-      std::vector<uint8_t> pnum; 
-      for ( int i = 0; i < 2; i++ ) pnum.push_back(datasec_["datas marker"][(unsigned long int)(datstartidx_+by*2+i)]);
-
-      // convert to double
-      //datmes_.push_back((double)(     (((int)pnum[0]-128)*256 + (int)pnum[1])/100.0       )); 
-      datmes_.push_back((double)(     (((int)pnum[1]-128)*256. + (int)pnum[0])/100.0       )); 
-      //datmes_.push_back( (double) ( ( (int)pnum[0] + (int)pnum[1]*256 )*flstp ) );
-    }
-  }
-
   // get data array encoded as floats/doubles
   std::vector<double>& get_data()
   {
     return datmes_;
+  }
+
+  // get segment's array of elements
+  std::vector<std::string> get_segment(std::string marker)
+  {
+    return segments_[marker];
   }
 
   // write data to csv-like file
