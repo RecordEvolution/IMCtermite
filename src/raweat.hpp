@@ -238,12 +238,67 @@ public:
     std::vector<unsigned char> datbuf(datstr.begin(),datstr.end());
 
     // retrieve datatype from segment
+    int dattype = std::stoi(segments_["datyp marker"][4]);
     int typesize = std::stoi(segments_["datyp marker"][5]);
 
-    if ( typesize == 32  ) convert_data_32_bit_float(datbuf);
-    if ( false ) convert_data_16_bit_float();
-    if ( typesize == 16 ) convert_data_16_bit_decimal(datbuf);
+    std::cout<<dattype<<"\n";
 
+    // retrieve transformation index, factor and offset
+    int trafo = std::stoi(segments_["punit marker"][2]);
+    double factor = std::stod(segments_["punit marker"][3]);
+    double offset = std::stod(segments_["punit marker"][4]);
+
+    // if traf = 0, make sure that factor and offset don't affect result
+    assert ( ( trafo == 0 && factor == 1.0 && offset == 0.0 )
+          || ( trafo == 1 && factor != 1.0 && offset != 0.0 ) ); 
+
+    // just don't support weird datatypes
+    assert ( dattype > 2 && dattype < 9 );
+
+    // switch for datatypes
+    switch ( dattype )
+    {
+      case 3 :
+        assert ( sizeof(unsigned short int)*8 == typesize ); 
+        convert_data_as_type<unsigned short int>(datbuf,factor,offset); 
+        break;
+      case 4 :
+        assert ( sizeof(signed short int)*8 == typesize ); 
+        convert_data_as_type<signed short int>(datbuf,factor,offset); 
+        break;
+      case 5 :
+        assert ( sizeof(unsigned long int)*8 == typesize ); 
+        convert_data_as_type<unsigned long int>(datbuf,factor,offset); 
+        break;
+      case 6 :
+        assert ( sizeof(signed long int)*8 == typesize ); 
+        convert_data_as_type<signed short int>(datbuf,factor,offset); 
+        break;
+      case 7 :
+        assert ( sizeof(float)*8 == typesize ); 
+        convert_data_as_type<float>(datbuf,factor,offset); 
+        break;
+      case 8 :
+        assert ( sizeof(double)*8 == typesize ); 
+        convert_data_as_type<double>(datbuf,factor,offset); 
+        break;
+    }
+
+//
+//    if ( trafo == 0 && typesize == 32  ) 
+//    {
+//      convert_data_32_bit_float(datbuf);
+//    }
+//    else if ( trafo == 1 && typesize == 16 ) 
+//    {
+//      convert_data_16_bit_decimal(datbuf,factor,offset);
+//    }
+//    else
+//    {
+//      // TODO
+//      assert( false && "any other datatypes not yet implemented" );
+//      convert_data_16_bit_float();
+//    }
   }
 
   // convert single precision 32bit floating point numbers
@@ -296,25 +351,73 @@ public:
     }
   }
 
+  // convert bytes to specific datatype
+  template<typename dattype> void convert_data_as_type(std::vector<unsigned char> &datbuf, double factor, double offset)
+  {
+    // check consistency of bufffer size with size of datatype
+    assert ( datbuf.size()%sizeof(dattype) == 0 && "length of buffer is not a multiple of size of datatype" );
+   
+    // get number of numbers in buffer
+    unsigned long int totnum = datbuf.size()/sizeof(dattype); 
+
+    for ( unsigned long int numfl = 0; numfl < totnum; numfl++ )
+    {
+      // declare instance of required datatype and perform recast as uint8_t
+      dattype num;
+      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
+
+      // parse all  bytes of the number
+      for ( int byi = 0; byi < (int)sizeof(dattype); byi++ )
+      {
+        pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(dattype)+byi)];
+      }
+
+      // add number of array
+      datmes_.push_back((double)num * factor + offset);
+    }
+  }
+
   // convert 16bit "decimal-encoding" floating point numbers
-  void convert_data_16_bit_decimal(std::vector<unsigned char> &datbuf)
+  void convert_data_16_bit_decimal(std::vector<unsigned char> &datbuf, double factor, double offset)
   {
     assert ( datbuf.size()%2 == 0 && "length of data is not a multiple of 2" );
 
-    // encoding parameters
-    double shift = -128.;
-    double scale = 1.0/100.;
-    double offse = 0.0;
-
-    for ( unsigned long int idx = 0; idx < datbuf.size()-1; idx += 2 )
+    // get number of single precision floats in buffer
+    unsigned long int totnumfl = datbuf.size()/(int)sizeof(short int);
+    for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
     {
-      // convert to float
-      datmes_.push_back(
+      // assuming 2 byte (16bit) short int
+      short int num = 0.0;
+      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
 
-        (double)( (int)(datbuf[idx])*1. + ( (int)(datbuf[idx+1])*1. + shift )*256. )*scale + offse
+      // parse all 2 bytes of the number
+      for ( int byi = 0; byi < (int)sizeof(short int); byi++ )
+      {
+        pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(short int)+byi)];
+      }
 
-      );
+      // add number of array
+      datmes_.push_back((double)num * factor + offset);
     }
+
+    // encoding parameters
+    //double shift = -128.;
+    //double scale = 1.0/100.;
+    //double offse = 0.0;
+
+//    for ( unsigned long int idx = 0; idx < datbuf.size()-1; idx += 2 )
+//    {
+//      // convert both bytes to doubles
+//      double bytA = (int)(datbuf[idx])*1.;
+//      double bytB = (int)(datbuf[idx+1])*1.;
+//
+//      // convert to float
+//      datmes_.push_back(
+//        ( bytA + bytB*256. )*factor + offset
+//      //  (double)( (int)(datbuf[idx])*1. + ( (int)(datbuf[idx+1])*1. + shift )*256. )*scale + offse
+//
+//      );
+//    }
 
   }
 
@@ -360,6 +463,36 @@ public:
     std::cout<<std::dec;
   }
 
+  // get timestep
+  double get_dt()
+  {
+    return std::stod(segments_["sampl marker"][2]);
+  }
+
+  // get time unit
+  std::string get_temp_unit()
+  {
+    return segments_["sampl marker"][5];
+  }
+
+  // get name of measured entity
+  std::string get_name()
+  {
+    return segments_["ename marker"][6];
+  }
+
+  // get unit of measured entity
+  std::string get_unit()
+  {
+    return segments_["punit marker"][7];
+  }
+
+  // get time offset 
+  double get_time_offset()
+  {
+    return std::stod(segments_["minma marker"][11]);
+  }
+
   // get data array encoded as floats/doubles
   std::vector<double>& get_data()
   {
@@ -373,14 +506,57 @@ public:
   }
 
   // write data to csv-like file
-  void write_data(std::string filename, int precision = 9)
+  void write_data(std::string filename, int precision = 9, int width = 25)
   {
     // open file
     std::ofstream fout(filename.c_str());
 
+    // write header
+//    fout<<"# ";
+    std::string colA = std::string("Time [") + get_temp_unit() + std::string("]");
+    std::string colB = get_name() + std::string(" [") + get_unit() + std::string("]");
+    if ( width > 0 )
+    { 
+//      fout<<std::setw(width)<<std::left<<colA;
+//      fout<<std::setw(width)<<std::left<<colB;
+        fout<<std::setw(width)<<std::right<<"Time";
+        fout<<std::setw(width)<<std::right<<get_name();
+        fout<<"\n";
+        fout<<std::setw(width)<<std::right<<get_temp_unit();
+        fout<<std::setw(width)<<std::right<<get_unit();
+    } 
+    else 
+    {
+//      fout<<colA<<","<<colB;
+      fout<<"Time"<<","<<get_name()<<"\n";
+      fout<<get_temp_unit()<<";"<<get_unit();
+    }
+    fout<<"\n";
+
+    // get time step and offset
+    double dt = get_dt();
+    double timoff = get_time_offset();
+
+    // count sample index
+    unsigned long int tidx = 0;
     for ( auto el : datmes_ )
     {
-      fout<<std::dec<<std::setprecision(precision)<<el<<"\n";
+      // get time
+      double tim = tidx*dt + timoff;
+
+      if ( width > 0 )
+      {
+        fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<tim;
+        fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<el;
+      }
+      else
+      {
+        fout<<std::fixed<<std::dec<<std::setprecision(precision)<<tim<<","<<el;
+      }
+      fout<<"\n";
+
+      // keep track of timestep
+      tidx++;
     }
 
     // close file

@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
     std::vector<std::string> segvec = eatraw.get_segment(mrk.first);
     std::cout<<"number of elements in segment: "<<segvec.size()<<"\n\n";
-    //for ( auto el: segvec ) std::cout<<el<<"\n";
+//    for ( auto el: segvec ) std::cout<<el<<"\n";
   }
 
   // convert unsigned char data in buffer to desired data type
@@ -59,13 +59,6 @@ int main(int argc, char* argv[])
 
   // write data in csv-file
   eatraw.write_data(std::string(argv[2]));
-
-//  short int myi = 34;
-//  std::cout<<myi<<"\n";
-//  float myfl = 0.0;
-//  myfl =  _cvtsh_ss(myi);
-////float _cvtsh_ss(unsigned short x);
-//  std::cout<<myfl<<"\n";
 
   return 0;
 }
