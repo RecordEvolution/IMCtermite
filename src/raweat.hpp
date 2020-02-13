@@ -13,13 +13,14 @@
 #include <map>
 #include <cmath>
 
+#include "endian.hpp"
+
 // support for 16bit floats
 #include <emmintrin.h>
 #include <immintrin.h>
 //#include <f16cintrin.h>
 #include "half.hpp"
 //#include "half_precision_floating_point.hpp"
-#include "endian.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -59,7 +60,7 @@ private:
   // length of data array
   unsigned long int datsize_;
 
-  // TODO preliminary: for now, we assume 32/64 bit ? floats in all data
+  // save all data, i.e. physical values of measured entities as 64bit double
   std::vector<double> datmes_;
 
 public:
@@ -233,15 +234,15 @@ public:
   // convert actual measurement data
   void convert_data()
   {
-    // by convention, the actual data is the 4th element
+    assert( segments_.size() > 0 && "extract markers and separate into segments before conversion!" );
+
+    // by convention, the actual data is the 4th element in respective segment
     std::string datstr = segments_["datas marker"][3];
     std::vector<unsigned char> datbuf(datstr.begin(),datstr.end());
 
-    // retrieve datatype from segment
+    // retrieve datatype from datatype segment
     int dattype = std::stoi(segments_["datyp marker"][4]);
     int typesize = std::stoi(segments_["datyp marker"][5]);
-
-    std::cout<<dattype<<"\n";
 
     // retrieve transformation index, factor and offset
     int trafo = std::stoi(segments_["punit marker"][2]);
@@ -284,71 +285,6 @@ public:
         break;
     }
 
-//
-//    if ( trafo == 0 && typesize == 32  ) 
-//    {
-//      convert_data_32_bit_float(datbuf);
-//    }
-//    else if ( trafo == 1 && typesize == 16 ) 
-//    {
-//      convert_data_16_bit_decimal(datbuf,factor,offset);
-//    }
-//    else
-//    {
-//      // TODO
-//      assert( false && "any other datatypes not yet implemented" );
-//      convert_data_16_bit_float();
-//    }
-  }
-
-  // convert single precision 32bit floating point numbers
-  void convert_data_32_bit_float(std::vector<unsigned char> &datbuf)
-  {
-    // check size of buffer assuming size of single precision float is 4 byte
-    assert ( datbuf.size()%4 == 0 && "length of buffer is not a multiple of 4" );
-
-    // get number of single precision floats in buffer
-    unsigned long int totnumfl = datbuf.size()/(int)sizeof(float);
-    for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
-    {
-      // assuming 4 byte (32bit) float
-      float num = 0.0;
-      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
-
-      // parse all 4 bytes of the number
-      for ( int byi = 0; byi < (int)sizeof(float); byi++ )
-      {
-        // TODO what's the byte order (little/big endian) in the file??
-        // for now, we just don't care...
-        pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(float)+byi)];
-      }
-
-      // add number of array
-      datmes_.push_back((double)num);
-    }      
-  }
-
-  // convert half-precision (16bit) floating point numbers
-  void convert_data_16_bit_float()
-  {
-    assert ( (datsize_-28)%2 == 0 && "length of buffer is not a multiple of 2" );
-
-    unsigned long int totnumby = (datsize_-28)/2;
-    for ( unsigned long int by = 0; by < totnumby; by++ )
-    {
-      // declare single (16bit) floating point number
-      half_float::half hfl;
-
-      // reinterpret bytes in buffer as memory of floating point number
-      uint8_t* pnum = reinterpret_cast<uint8_t*>(&hfl);
-      for ( int i = 0; i < (int)sizeof(half_float::half); i++ )
-      {
-        pnum[i] = (int)datasec_["datas marker"][(unsigned long int)(28+by*sizeof(half_float::half)+i)];
-      }
-
-      // add number to array
-      datmes_.push_back((double)hfl);
-    }
   }
 
   // convert bytes to specific datatype
@@ -362,7 +298,7 @@ public:
 
     for ( unsigned long int numfl = 0; numfl < totnum; numfl++ )
     {
-      // declare instance of required datatype and perform recast as uint8_t
+      // declare instance of required datatype and perform recast in terms of uint8_t
       dattype num;
       uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
 
@@ -375,50 +311,6 @@ public:
       // add number of array
       datmes_.push_back((double)num * factor + offset);
     }
-  }
-
-  // convert 16bit "decimal-encoding" floating point numbers
-  void convert_data_16_bit_decimal(std::vector<unsigned char> &datbuf, double factor, double offset)
-  {
-    assert ( datbuf.size()%2 == 0 && "length of data is not a multiple of 2" );
-
-    // get number of single precision floats in buffer
-    unsigned long int totnumfl = datbuf.size()/(int)sizeof(short int);
-    for ( unsigned long int numfl = 0; numfl < totnumfl; numfl++ )
-    {
-      // assuming 2 byte (16bit) short int
-      short int num = 0.0;
-      uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
-
-      // parse all 2 bytes of the number
-      for ( int byi = 0; byi < (int)sizeof(short int); byi++ )
-      {
-        pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(short int)+byi)];
-      }
-
-      // add number of array
-      datmes_.push_back((double)num * factor + offset);
-    }
-
-    // encoding parameters
-    //double shift = -128.;
-    //double scale = 1.0/100.;
-    //double offse = 0.0;
-
-//    for ( unsigned long int idx = 0; idx < datbuf.size()-1; idx += 2 )
-//    {
-//      // convert both bytes to doubles
-//      double bytA = (int)(datbuf[idx])*1.;
-//      double bytB = (int)(datbuf[idx+1])*1.;
-//
-//      // convert to float
-//      datmes_.push_back(
-//        ( bytA + bytB*256. )*factor + offset
-//      //  (double)( (int)(datbuf[idx])*1. + ( (int)(datbuf[idx+1])*1. + shift )*256. )*scale + offse
-//
-//      );
-//    }
-
   }
 
 //---------------------------------------------------------------------------//
