@@ -170,6 +170,15 @@ public:
       } 
     }
 
+    // check length of all markers, i.e. check if we actually have a valid .raw file
+    unsigned long int totalmarksize = 0;
+    for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
+    {
+      //assert ( datasec_[mrk.first].size() > 0 && "marker segment of length zero" );
+      totalmarksize += datasec_[mrk.first].size();
+    }
+    assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
+
   }
 
   // get all predefined markers
@@ -251,7 +260,7 @@ public:
 
     // if traf = 0, make sure that factor and offset don't affect result
     assert ( ( trafo == 0 && factor == 1.0 && offset == 0.0 )
-          || ( trafo == 1 && factor != 1.0 && offset != 0.0 ) ); 
+          || ( trafo == 1 ) ); 
 
     // just don't support weird datatypes
     assert ( dattype > 2 && dattype < 9 );
@@ -323,6 +332,21 @@ public:
 
     for ( unsigned long int i = 0; i < datavec.size() && i < maxchars; i++ )
     {
+      // accumulate in stringstreams
+      hex<<std::nouppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<(int)datavec[i]<<" ";
+      
+      // check if byte corresponds to some control character and if it's printable
+      int ic = (int)datavec[i];
+      if ( ic > 0x20 && ic < 0x7f )
+      {
+        enc<<(char)(datavec[i]);
+      }
+      else 
+      {
+        enc<<".";
+      }
+
+      // every 'width' number of chars constitute a row
       if ( (int)(i+1)%width == 0 )
       {
         // print both strings
@@ -333,22 +357,8 @@ public:
         hex.str(std::string());
         enc.str(std::string());
       }
-      else
-      {
-        // accumulate in stringstreams
-        hex<<std::nouppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<(int)datavec[i]<<" ";
-        // check if byte corresponds to some control character and if it's printable
-        int ic = (int)datavec[i];
-        if ( ic > 0x20 && ic < 0x7f )
-        {
-          enc<<(char)(datavec[i]);
-        }
-        else 
-        {
-          enc<<".";
-        }
-      }
     }
+
     // print final remaining part
     std::cout<<std::setw(3*width)<<std::left<<hex.str()<<"    "<<enc.str()<<"\n";
     std::cout<<std::right;
