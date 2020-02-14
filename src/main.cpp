@@ -8,14 +8,22 @@
 
 int main(int argc, char* argv[])
 {
-  // path of filename provided ?
-  assert( argc > 2 && "please provide a filename and path for input and output" );
-
 //  std::cout<<"number of CLI-arguments: "<<argc<<"\n";
 //  for ( int i = 0; i < argc; i++ ) std::cout<<std::setw(5)<<i<<":   "<<argv[i]<<"\n";
 
-  // check number of CLI arguments
-  assert( argc == 3 );
+//  path of filename provided ?
+//  assert( argc > 2 && "please provide a filename and path for input and output" );
+
+//  check number of CLI arguments
+//  assert( argc == 3 );
+
+  if ( argc != 3 ) //or ( argc == 1 && std::string(argv[1]) == str::string("--help") )
+  {
+    std::cout<<"\n"<<"Usage: ./eatit INPUTFILE OUTPUTFILE"<<"\n"
+                   <<"Convert any file in imc-format .raw to plain text .csv"<<"\n"
+                   <<"Example: ./eatit Druck_THZ_DK.raw druck_thz_dk.csv"<<"\n\n";
+    return 0;
+  }
 
   // get name/path of file from CLI argument
   std::string rawfile(argv[1]);
