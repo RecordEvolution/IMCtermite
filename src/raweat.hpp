@@ -127,6 +127,9 @@ public:
   // find predefined markers in data buffer
   void find_markers()
   {
+    assert( datasec_.size() == 0 );
+    assert( segments_.size() == 0 );
+
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
       assert( mrk.second.size() > 0 && "please don't define any empty marker" );
@@ -200,6 +203,9 @@ public:
   // split data segments into arrays
   void split_segments()
   {
+    assert( datasec_.size() > 0 );
+    assert( segments_.size() == 0 );
+
     // split segments of all markers 
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
@@ -245,9 +251,10 @@ public:
 //---------------------------------------------------------------------------//
 
   // convert actual measurement data
-  void convert_data()
+  void convert_data(bool showlog = false)
   {
     assert( segments_.size() > 0 && "extract markers and separate into segments before conversion!" );
+    assert( datmes_.size() == 0 );
 
     // by convention, the actual data is the 4th element in respective segment
     std::string datstr = segments_["datas marker"][3];
@@ -298,6 +305,11 @@ public:
         break;
     }
 
+    // show excerpt of result
+    if ( showlog ) 
+    {
+      std::cout<<"length of data: "<<datmes_.size()<<"\n";
+    }
   }
 
   // convert bytes to specific datatype

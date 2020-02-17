@@ -1,7 +1,7 @@
 
 import raw_eater
 
-eatraw = raw_eater.raweater(b"/home/mario/raw_eater/sample/VehicleSpeed_HS.raw")
+eatraw = raw_eater.raweater(b"sample/pressure_Vacuum.raw")
 
 print(eatraw.channel_name())
 print(eatraw.unit())
