@@ -71,16 +71,20 @@ public:
     // open file and put data in buffer
     std::ifstream fin(rawfile.c_str(),std::ifstream::binary);
     assert( fin.good() && "failed to open file" );
-    try {
-      std::ifstream fin(rawfile.c_str(),std::ifstream::binary);
-    }
-    catch (std::ifstream::failure e) {
-      std::cerr<<"opening file " + rawfile + " failed";
-    }
+//    try {
+//      std::ifstream fin(rawfile.c_str(),std::ifstream::binary);
+//    }
+//    catch (std::ifstream::failure e) {
+//      std::cerr<<"opening file " + rawfile + " failed";
+//    }
     std::vector<unsigned char> rawdata((std::istreambuf_iterator<char>(fin)),
                                        (std::istreambuf_iterator<char>()));
     rawdata_ = rawdata;
 
+    // prepare and convert data
+    find_markers();
+    split_segments();
+    convert_data();
   }
 
   // destructor
@@ -368,48 +372,86 @@ public:
   // get timestep
   double get_dt()
   {
+    assert ( segments_.size() > 0 );
+
     return std::stod(segments_["sampl marker"][2]);
   }
 
   // get time unit
   std::string get_temp_unit()
   {
+    assert ( segments_.size() > 0 );
+
     return segments_["sampl marker"][5];
   }
 
   // get name of measured entity
   std::string get_name()
   {
+    assert ( segments_.size() > 0 );
+
     return segments_["ename marker"][6];
   }
 
   // get unit of measured entity
   std::string get_unit()
   {
+    assert ( segments_.size() > 0 );
+
     return segments_["punit marker"][7];
   }
 
   // get time offset 
   double get_time_offset()
   {
+    assert ( segments_.size() > 0 );
+
     return std::stod(segments_["minma marker"][11]);
+  }
+
+  // get time array
+  std::vector<double> get_time()
+  {
+    assert ( datmes_.size() > 0 );
+
+    // declare array of time
+    std::vector<double> timearr;
+
+    // get time step and offset
+    double dt = get_dt();
+    double timoff = get_time_offset();
+
+    // fill array
+    for ( unsigned long int t = 0; t < datmes_.size(); t++ )
+    {
+      timearr.push_back(timoff + t*dt);
+    }
+
+    return timearr;
   }
 
   // get data array encoded as floats/doubles
   std::vector<double>& get_data()
   {
+    assert ( datmes_.size() > 0 );
+
     return datmes_;
   }
 
   // get segment's array of elements
   std::vector<std::string> get_segment(std::string marker)
   {
+    assert ( segments_.size() > 0 );
+
     return segments_[marker];
   }
 
   // write data to csv-like file
   void write_data(std::string filename, int precision = 9, int width = 25)
   {
+    assert ( segments_.size() > 0 );
+    assert ( datmes_.size() > 0 );
+
     // open file
     std::ofstream fout(filename.c_str());
 

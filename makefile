@@ -29,7 +29,18 @@ else
 	@exit 1
 endif
 
-# deinstall
-deinstall :
+# uninstall
+uninstall :
 	rm /usr/local/bin/$(EXE)
+
+# build python module
+build : setup.py raw_eater.pyx raw_eater.pxd $(SRC)raweat.hpp
+	python3 setup.py build_ext --inplace
+
+install_py : setup.py raw_eater.pyx raw_eater.pxd $(SRC)raweat.hpp
+	python3 setup.py install
+
+clean_py :
+	rm -f raw_eater.cpython-36m-x86_64-linux-gnu.so
+	rm -f raw_eater.cpp
 
