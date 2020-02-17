@@ -2,7 +2,7 @@
 
 #include <iomanip>
 #include <iostream>
-#include "../src/raweat.hpp"
+#include "../lib/raweat.hpp"
 
 //---------------------------------------------------------------------------//
 

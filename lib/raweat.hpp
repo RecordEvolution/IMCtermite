@@ -442,6 +442,12 @@ public:
     return timearr;
   }
 
+  // get size/length of data
+  unsigned long int get_n()
+  {
+    return datmes_.size();
+  }
+
   // get data array encoded as floats/doubles
   std::vector<double>& get_data()
   {

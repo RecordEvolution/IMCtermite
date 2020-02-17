@@ -4,13 +4,18 @@ SHELL:=/bin/bash
 RAW = ../raw/
 
 SRC = src/
+LIB = lib/
 EXE = eatraw
 
 CCC = g++ -std=c++11
 OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 
 # build executable 
-$(EXE) : $(SRC)main.cpp $(SRC)raweat.hpp $(SRC)half_precision_floating_point.hpp
+$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp
+	$(CCC) $(OPT) $< -o $@
+
+# build target for conversion set of .raw files
+eatall : $(SRC)eatall.cpp $(LIB)raweat.hpp
 	$(CCC) $(OPT) $< -o $@
 
 # remove executable
