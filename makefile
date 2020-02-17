@@ -23,7 +23,7 @@ chexe:=$(shell command -v $(EXE))
 # install executable if name does not exist yet
 install : $(EXE)
 ifeq ($(chexe),)
-	sudo cp $(EXE) /usr/local/bin/
+	cp $(EXE) /usr/local/bin/
 else
 	@echo "executable with same name already exists! choose different name!"
 	@exit 1
@@ -31,5 +31,5 @@ endif
 
 # deinstall
 deinstall :
-	sudo rm /usr/local/bin/$(EXE)
+	rm /usr/local/bin/$(EXE)
 
