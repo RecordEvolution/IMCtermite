@@ -33,9 +33,14 @@ int main(int argc, char* argv[])
   std::vector<std::vector<std::string>> channelinfo;
 
   // process all .raw files provided
+  std::cout<<"\n"<<std::setw(50)<<std::right<<"file name"
+                 <<std::setw(12)<<std::right<<"start"
+                 <<std::setw(12)<<std::right<<"end"
+                 <<std::setw(12)<<std::right<<"dt"<<"\n";
+  std::cout<<std::setfill('-')<<std::setw(88)<<"\n"<<std::setfill(' ');
   for ( auto rawfile: rawfiles )
   {
-    std::cout<<rawfile<<"\n";
+    std::cout<<std::setw(50)<<rawfile;
 
     // declare instance of "raw_eater"
     raw_eater eatraw(rawfile);
@@ -52,18 +57,31 @@ int main(int argc, char* argv[])
     std::vector<double> channtime = {toff,toff+(n-1)*dt,dt};
     timedata.push_back(channtime);
 
+    std::cout<<std::setw(12)<<std::setprecision(9)<<channtime[0]
+             <<std::setw(12)<<std::setprecision(9)<<channtime[1]
+             <<std::setw(12)<<std::setprecision(9)<<channtime[2];
+    std::cout<<"\n";
+
     // collect channel info
     std::vector<std::string> channinfo = {eatraw.get_name(),eatraw.get_unit(),eatraw.get_temp_unit()};
     channelinfo.push_back(channinfo);
   }
 
-  // number of channels
+  // obtain number of channels
   int num_chann = (int)alldata.size();
 
-  // make sure all files feature same time unit
-  for ( int ch = 0; ch < num_chann-1; ch++ )
+  // usually, all channels should roughly have the same start/end time
+  for ( int ch = 1; ch < num_chann; ch++ )
   {
-    assert( channelinfo[ch][2] == channelinfo[ch+1][2] && "time unit apparently differs in some channels!" );
+    assert( fabs(timedata[ch][0]-timedata[0][0]) < 10*timedata[ch][2] );
+    assert( fabs(timedata[ch][1]-timedata[0][1]) < 10*timedata[ch][2] );
+  }
+
+
+  // make sure all files feature same time unit
+  for ( int ch = 1; ch < num_chann; ch++ )
+  {
+    assert( channelinfo[ch][2] == channelinfo[0][2] && "time unit apparently differs in some channels!" );
   }
 
   // open .csv-file for dumping all data
@@ -86,9 +104,11 @@ int main(int argc, char* argv[])
   // set of "next" indices for all channels
   std::vector<unsigned long int> channidx(num_chann,0);
 
-  // while times in any channel left
+  unsigned long int tidx = 0;
+
+  // while data in any channel left
   bool sometimeleft = true;
-  while ( sometimeleft )
+  while ( sometimeleft && tidx < 2500 )
   {
     // find this round's "earliest" time w.r.t. to all channels
     double firsttime = 1.0e10;
@@ -97,7 +117,7 @@ int main(int argc, char* argv[])
       // get time to process in this channel
       double chtimenow = timedata[ch][0] + channidx[ch] * timedata[ch][2];
       
-      if ( chtimenow <= firsttime ) // and channidx[ch]+1 < alldata[ch].size() )
+      if ( chtimenow <= firsttime and channidx[ch] < alldata[ch].size() )
       {
          firsttime = chtimenow;
       }
@@ -107,9 +127,9 @@ int main(int argc, char* argv[])
     fout<<std::fixed<<std::dec<<std::setprecision(doubleprec)
         <<std::setw(width)<<std::right<<firsttime;
     
-    std::cout<<std::setprecision(9)<<firsttime<<"  "<<sometimeleft<<" ";
-    for ( int ch = 0; ch < num_chann; ch++ ) std::cout<<channidx[ch]<<" / "<<alldata[ch].size()<<" ";
-    std::cout<<"\n";
+//    std::cout<<std::setprecision(9)<<std::setw(20)<<firsttime<<"  "<<std::setw(20)<<sometimeleft<<" ";
+//    for ( int ch = 0; ch < num_chann; ch++ ) std::cout<<channidx[ch]<<" / "<<alldata[ch].size()<<" ";
+//    std::cout<<"\n";
 
     // reset continuation flag and try to find channel with remaining data
     sometimeleft = false;
@@ -142,6 +162,8 @@ int main(int argc, char* argv[])
 
     // add line break
     fout<<"\n";
+
+    tidx++;
   }
 
   // close .csv-file
