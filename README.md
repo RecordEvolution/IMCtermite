@@ -110,3 +110,4 @@ section in the file). The markers have the following meaning:
 
 - https://ch.mathworks.com/matlabcentral/fileexchange/30187-sequnce-to-read-famos-data-into-matlab-workspace
 - https://community.ptc.com/t5/PTC-Mathcad/FAMOS-IMC-raw-data-in-MathCAD/td-p/130378
+- http://marmatek.com/wp-content/uploads/2014/04/imc_STUDIO_Manual.pdf
