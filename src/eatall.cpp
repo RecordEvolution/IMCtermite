@@ -11,17 +11,17 @@ int main(int argc, char* argv[])
   std::cout<<"number of CLI-arguments: "<<argc<<"\n";
   for ( int i = 0; i < argc; i++ ) std::cout<<std::setw(5)<<i<<":   "<<argv[i]<<"\n";
 
-  // check number of CLI arguments
-  assert( argc >= 3 );
-
-  // provide --help like return statement 
+  // provide --help like return statement
   if ( argc < 3 )
   {
     std::cout<<"\n"<<"Usage: ./eatit INPUTRAW_1 INPUTRAW_2 ...INPUTRAW_N OUTPUTFILE"<<"\n"
-                   <<"Convert set of related files in imc-format .raw corresponding to same measurement to single plain text .csv"<<"\n"
+                   <<"Convert set of related files in imc-format .raw originating from same measurement to single plain text .csv"<<"\n"
                    <<"Example: ./eatit Druck_THZ_DK.raw pressure_Vacuum.raw druck_thz_dk.csv"<<"\n\n";
     return 0;
   }
+
+  // check number of CLI arguments
+  assert( argc >= 3 );
 
   // get list of names/paths of raw-files from CLI argument
   std::vector<std::string> rawfiles;
@@ -66,6 +66,7 @@ int main(int argc, char* argv[])
     std::vector<std::string> channinfo = {eatraw.get_name(),eatraw.get_unit(),eatraw.get_temp_unit()};
     channelinfo.push_back(channinfo);
   }
+  std::cout<<"\n";
 
   // obtain number of channels
   int num_chann = (int)alldata.size();
@@ -86,7 +87,7 @@ int main(int argc, char* argv[])
 
   // open .csv-file for dumping all data
   std::ofstream fout(argv[argc-1]);
-  
+
   // define output properties
   int width = 30;
   int doubleprec = 9;
@@ -116,17 +117,17 @@ int main(int argc, char* argv[])
     {
       // get time to process in this channel
       double chtimenow = timedata[ch][0] + channidx[ch] * timedata[ch][2];
-      
+
       if ( chtimenow <= firsttime and channidx[ch] < alldata[ch].size() )
       {
          firsttime = chtimenow;
       }
     }
 
-    // print time step 
+    // print time step
     fout<<std::fixed<<std::dec<<std::setprecision(doubleprec)
         <<std::setw(width)<<std::right<<firsttime;
-    
+
 //    std::cout<<std::setprecision(9)<<std::setw(20)<<firsttime<<"  "<<std::setw(20)<<sometimeleft<<" ";
 //    for ( int ch = 0; ch < num_chann; ch++ ) std::cout<<channidx[ch]<<" / "<<alldata[ch].size()<<" ";
 //    std::cout<<"\n";
@@ -139,18 +140,18 @@ int main(int argc, char* argv[])
     {
       // this channel's time step
       double chtimenow = timedata[ch][0] + channidx[ch] * timedata[ch][2];
-      
+
       // get set of channels featuring next time step
       if ( chtimenow == firsttime && channidx[ch] < alldata[ch].size() )
       {
         // write actual data to file
         fout<<std::fixed<<std::dec<<std::setprecision(doubleprec)
             <<std::setw(width)<<std::right<<alldata[ch][channidx[ch]];
-        
+
         // increment time index of channel
         channidx[ch] = channidx[ch] + 1;
       }
-      else 
+      else
       {
         // this channel gets a null = empty string for this timestep
         fout<<std::setw(width)<<"";

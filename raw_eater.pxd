@@ -11,7 +11,7 @@ from libcpp cimport bool
 
 # these method names have to match the C definitions of the methods!!
 
-cdef extern from "raweat.hpp":
+cdef extern from "lib/raweat.hpp":
     cdef cppclass raw_eater:
         raw_eater(string) except +
         # get channel name and unit

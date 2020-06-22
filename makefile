@@ -10,7 +10,7 @@ EXE = eatraw
 CCC = g++ -std=c++11
 OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 
-# build executable 
+# build executable
 $(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp
 	$(CCC) $(OPT) $< -o $@
 
@@ -40,13 +40,15 @@ uninstall :
 	rm /usr/local/bin/$(EXE)
 
 # build python module
-build : setup.py raw_eater.pyx raw_eater.pxd $(SRC)raweat.hpp
+build : setup.py raw_eater.pyx raw_eater.pxd $(LIB)raweat.hpp
 	python3 setup.py build_ext --inplace
+	cp raw_eater.cpython-*.so pyt/
 
-install_py : setup.py raw_eater.pyx raw_eater.pxd $(SRC)raweat.hpp
+py_install: setup.py raw_eater.pyx raw_eater.pxd $(LIB)raweat.hpp
 	python3 setup.py install
 
-clean_py :
-	rm -f raw_eater.cpython-36m-x86_64-linux-gnu.so
+py_clean :
+	rm -f raw_eater.cpython-*.so
+	rm -f pyt/raw_eater.cpython-*.so
 	rm -f raw_eater.cpp
-
+	rm -rf build/
