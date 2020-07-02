@@ -4,3 +4,12 @@
 *.csv
 
 eatraw
+
+nohup.out
+
+.DS_Store
+
+*.so
+
+raw_eater.cpp
+
