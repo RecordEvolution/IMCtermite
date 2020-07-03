@@ -299,9 +299,19 @@ public:
                <<"trafo:      "<<trafo<<"\n"
                <<"factor:     "<<factor<<"\n"
                <<"offset:     "<<offset<<"\n\n";
+      std::cout<<"sizeof(unsigned char):      "<<sizeof(unsigned char)<<"\n"
+               <<"sizeof(signed char):        "<<sizeof(signed char)<<"\n"
+               <<"sizeof(unsigned short int): "<<sizeof(unsigned short int)<<"\n"
+               <<"sizeof(signed short int):   "<<sizeof(signed short int)<<"\n"
+               <<"sizeof(int):                "<<sizeof(int)<<"\n"
+               <<"sizeof(unsigned long int):  "<<sizeof(unsigned long int)<<"\n"
+               <<"sizeof(signed long int):    "<<sizeof(signed long int)<<"\n"
+               <<"sizeof(float):              "<<sizeof(float)<<"\n"
+               <<"sizeof(double):             "<<sizeof(double)<<"\n"
+               <<"\n\n";
     }
 
-    // if traf = 0, make sure that factor and offset don't affect result
+    // if trafo = 0, make sure that factor and offset don't affect result
     assert ( ( ( trafo == 0 && factor == 1.0 && offset == 0.0 )
             || ( trafo == 1 ) )
             && "internally inconsistent 'punit' marker" );
@@ -333,8 +343,11 @@ public:
         convert_data_as_type<unsigned long int>(datbuf,factor,offset);
         break;
       case 6 :
-        assert ( sizeof(signed long int)*8 == typesize );
-        convert_data_as_type<signed short int>(datbuf,factor,offset);
+        std::cout<<"warning: 'signed long int' datatype with experimental support\n";
+        // assert ( sizeof(signed long int)*8 == typesize );
+        // convert_data_as_type<signed long int>(datbuf,factor,offset);
+        assert ( sizeof(int)*8 == typesize );
+        convert_data_as_type<int>(datbuf,factor,offset);
         break;
       case 7 :
         assert ( sizeof(float)*8 == typesize );
