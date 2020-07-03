@@ -14,6 +14,9 @@ OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 $(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp
 	$(CCC) $(OPT) $< -o $@
 
+eatdev : $(SRC)main_dev.cpp $(LIB)raweat.hpp
+	$(CCC) $(OPT) $< -o $@
+
 # build target for conversion set of .raw files
 eatall : $(SRC)eatall.cpp $(LIB)raweat.hpp
 	$(CCC) $(OPT) $< -o $@

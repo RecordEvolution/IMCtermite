@@ -1,4 +1,11 @@
 //---------------------------------------------------------------------------//
+//
+//  @file raweat.hpp
+//  @author Mario Fink <mario.fink@record-evolution.de>
+//  @date Feb 2020, 2020-07-03
+//  @brief header only class for decoding the imc ".raw" format
+//
+//---------------------------------------------------------------------------//
 
 #ifndef RAW_EATER
 #define RAW_EATER
@@ -14,6 +21,7 @@
 #include <cmath>
 
 #include "endian.hpp"
+#include "hexshow.hpp"
 
 // support for 16bit floats
 #include <emmintrin.h>
@@ -36,7 +44,7 @@ private:
   std::vector<unsigned char> rawdata_;
 
   // file format markers
-  std::map<std::string,std::vector<unsigned char>> markers_ = { 
+  std::map<std::string,std::vector<unsigned char>> markers_ = {
       {"intro marker",{0x7c,0x43,0x46}},
       {"fileo marker",{0x7c,0x43,0x4b}},
       {"vendo marker",{0x7c,0x4e,0x4f}},
@@ -68,45 +76,45 @@ public:
   // constructor
   raw_eater(std::string rawfile) : rawfile_(rawfile)
   {
-    // open file and put data in buffer
-    std::ifstream fin(rawfile.c_str(),std::ifstream::binary);
-    assert( fin.good() && "failed to open file" );
-//    try {
-//      std::ifstream fin(rawfile.c_str(),std::ifstream::binary);
-//    }
-//    catch (std::ifstream::failure e) {
-//      std::cerr<<"opening file " + rawfile + " failed";
-//    }
+    // open file
+    std::ifstream fin(rawfile_.c_str(),std::ifstream::binary);
+    assert ( fin.good() &&  "failed to open file" );
+
+    // put data in buffer
     std::vector<unsigned char> rawdata((std::istreambuf_iterator<char>(fin)),
                                        (std::istreambuf_iterator<char>()));
     rawdata_ = rawdata;
 
-    // prepare and convert data
+    // close file
+    fin.close();
+
+    // show raw data
+    this->show_buffer();
+
+    // display predefined markers
+    this->show_markers();
+
+    // extract data corresponding to predefined markers from buffer
     find_markers();
+
+    // split data corresponding to markers into segments
     split_segments();
-    convert_data();
+
+    // convert binary data to arrays of intrinsic data types
+    convert_data(true);
   }
 
   // destructor
   ~raw_eater()
   {
-  
+
   }
 
   // display buffer/data properties
-  void show_buffer(int numel = 128)
+  void show_buffer(int numel = 32)
   {
-    // show size of buffer
-    std::cout<<"size of buffer "<<rawdata_.size()<<"\n\n";
-
-    // show excerpt from buffer
-    int ista = 0, iend = numel;
-    for ( int i= ista; i < iend; i++ )
-    {
-      std::cout<<std::hex<<(int)rawdata_[i]<<" ";
-      if ( (i+1)%16 == 0 ) std::cout<<"\n";
-    }
-    std::cout<<"\n";
+    hex::show(rawdata_,numel,0,0);
+    // this->show_hex(rawdata_,32,0);
   }
 
   // show predefined markers
@@ -117,12 +125,13 @@ public:
     {
       std::cout<<el.first<<"  ";
       for ( unsigned char c: el.second) std::cout<<std::hex<<int(c);
-      std::cout<<"\n\n";
+      std::cout<<"\n";
     }
     std::cout<<std::dec;
+    std::cout<<"\n";
   }
 
-//---------------------------------------------------------------------------//
+  //-------------------------------------------------------------------------//
 
   // find predefined markers in data buffer
   void find_markers()
@@ -132,19 +141,21 @@ public:
 
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
-      assert( mrk.second.size() > 0 && "please don't define any empty marker" );
+      assert( mrk.second.size() > 0 && "please don't define any empty markers" );
 
       // find marker's byte sequence in buffer
       for ( unsigned long int idx = 0; idx < rawdata_.size(); idx++ )
       {
+        // for every byte in buffer, check, if the three subsequent bytes
+        // correspond to required predefined marker
         bool gotit = true;
         for ( unsigned long int mrkidx = 0; mrkidx < mrk.second.size() && gotit; mrkidx ++ )
         {
           if ( ! (mrk.second[mrkidx] == rawdata_[idx+mrkidx]) ) gotit = false;
         }
-        
-        // if we got the marker, collect following bytes until end of marker byte 0x 3b
-        if ( gotit ) 
+
+        // if we got the marker, collect following bytes until end of marker byte 0x3b
+        if ( gotit )
         {
           // array of data associated to marker
           std::vector<unsigned char> markseq;
@@ -159,9 +170,10 @@ public:
               seqidx++;
             }
           }
-          else 
+          else
           {
-            // data marker is actually assumed to be the last and should extend until end of file
+            // marker 'datas' is the data marker and is supposed to be the last
+            // and should extend until end of file
             for ( unsigned long int didx = idx; didx < rawdata_.size()-1; didx++ )
             {
               markseq.push_back(rawdata_[didx]);
@@ -174,7 +186,7 @@ public:
           // save segment corresponding to marker
           datasec_.insert(std::pair<std::string,std::vector<unsigned char>>(mrk.first,markseq));
         }
-      } 
+      }
     }
 
     // check length of all markers, i.e. check if we actually have a valid .raw file
@@ -182,9 +194,14 @@ public:
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
       //assert ( datasec_[mrk.first].size() > 0 && "marker segment of length zero" );
+      if ( datasec_[mrk.first].size() == 0 )
+      {
+        std::cout<<"warning: "<<mrk.first<<" not found in buffer\n";
+      }
       totalmarksize += datasec_[mrk.first].size();
     }
     assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
+    std::cout<<"\n";
 
   }
 
@@ -206,7 +223,7 @@ public:
     assert( datasec_.size() > 0 );
     assert( segments_.size() == 0 );
 
-    // split segments of all markers 
+    // split segments of all markers
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
       // declare empty array for this segment and auxiliary string
@@ -222,7 +239,8 @@ public:
       // parse data segment
       for ( unsigned char el: datasec_[mrk.first] )
       {
-        // note that data segment of "datas marker" may contain any number of 0x2c's
+        // note that data segment of "datas marker" may contain any number
+        // of 0x2c's (0x2c = comma ',')
         if ( ( el != 0x2c && parse ) || ( mrk.first == "datas marker" && commcount > 2 ) )
         {
           elstr.push_back(el);
@@ -234,7 +252,7 @@ public:
           elstr = std::string("");
           commcount++;
         }
-        else 
+        else
         {
           // enable parsing after first comma
           if ( el == 0x2c ) parse = true;
@@ -243,12 +261,12 @@ public:
       // include last element
       segvec.push_back(elstr);
 
-      // save array of elements 
+      // save array of elements
       segments_.insert(std::pair<std::string,std::vector<std::string>>(mrk.first,segvec));;
     }
   }
 
-//---------------------------------------------------------------------------//
+  //-------------------------------------------------------------------------//
 
   // convert actual measurement data
   void convert_data(bool showlog = false)
@@ -265,50 +283,90 @@ public:
     int typesize = std::stoi(segments_["datyp marker"][5]);
 
     // retrieve transformation index, factor and offset
-    int trafo = std::stoi(segments_["punit marker"][2]);
-    double factor = std::stod(segments_["punit marker"][3]);
-    double offset = std::stod(segments_["punit marker"][4]);
+    int trafo = 0;
+    double factor = 1., offset = 0.;
+    if ( segments_["punit marker"].size() > 4 )
+    {
+      trafo = std::stoi(segments_["punit marker"][2]);
+      factor = std::stod(segments_["punit marker"][3]);
+      offset = std::stod(segments_["punit marker"][4]);
+    }
+
+    if ( showlog )
+    {
+      std::cout<<"dattype:    "<<dattype<<"\n"
+               <<"typesize:   "<<typesize<<"\n"
+               <<"trafo:      "<<trafo<<"\n"
+               <<"factor:     "<<factor<<"\n"
+               <<"offset:     "<<offset<<"\n\n";
+    }
 
     // if traf = 0, make sure that factor and offset don't affect result
-    assert ( ( trafo == 0 && factor == 1.0 && offset == 0.0 )
-          || ( trafo == 1 ) ); 
+    assert ( ( ( trafo == 0 && factor == 1.0 && offset == 0.0 )
+            || ( trafo == 1 ) )
+            && "internally inconsistent 'punit' marker" );
 
     // just don't support weird datatypes
-    assert ( dattype > 2 && dattype < 9 );
+    assert ( dattype > 2 && dattype < 12 );
 
     // switch for datatypes
     switch ( dattype )
     {
+      case 1 :
+        assert ( sizeof(unsigned char)*8 == typesize );
+        convert_data_as_type<unsigned char>(datbuf,factor,offset);
+        break;
+      case 2 :
+        assert ( sizeof(signed char)*8 == typesize );
+        convert_data_as_type<signed char>(datbuf,factor,offset);
+        break;
       case 3 :
-        assert ( sizeof(unsigned short int)*8 == typesize ); 
-        convert_data_as_type<unsigned short int>(datbuf,factor,offset); 
+        assert ( sizeof(unsigned short int)*8 == typesize );
+        convert_data_as_type<unsigned short int>(datbuf,factor,offset);
         break;
       case 4 :
-        assert ( sizeof(signed short int)*8 == typesize ); 
-        convert_data_as_type<signed short int>(datbuf,factor,offset); 
+        assert ( sizeof(signed short int)*8 == typesize );
+        convert_data_as_type<signed short int>(datbuf,factor,offset);
         break;
       case 5 :
-        assert ( sizeof(unsigned long int)*8 == typesize ); 
-        convert_data_as_type<unsigned long int>(datbuf,factor,offset); 
+        assert ( sizeof(unsigned long int)*8 == typesize );
+        convert_data_as_type<unsigned long int>(datbuf,factor,offset);
         break;
       case 6 :
-        assert ( sizeof(signed long int)*8 == typesize ); 
-        convert_data_as_type<signed short int>(datbuf,factor,offset); 
+        assert ( sizeof(signed long int)*8 == typesize );
+        convert_data_as_type<signed short int>(datbuf,factor,offset);
         break;
       case 7 :
-        assert ( sizeof(float)*8 == typesize ); 
-        convert_data_as_type<float>(datbuf,factor,offset); 
+        assert ( sizeof(float)*8 == typesize );
+        convert_data_as_type<float>(datbuf,factor,offset);
         break;
       case 8 :
-        assert ( sizeof(double)*8 == typesize ); 
-        convert_data_as_type<double>(datbuf,factor,offset); 
+        assert ( sizeof(double)*8 == typesize );
+        convert_data_as_type<double>(datbuf,factor,offset);
+        break;
+      case 9 :
+        std::cerr<<"'imc Devices Transitional Recording' datatype not supported\n";
+        break;
+      case 10 :
+        std::cerr<<"'Timestamp Ascii' datatype not supported\n";
+        break;
+      case 11 :
+        std::cout<<"warning: '2-Byte-Word digital' datatype with experimental support\n";
+        assert ( sizeof(short int)*8 == typesize );
+        convert_data_as_type<int>(datbuf,factor,offset);
         break;
     }
 
     // show excerpt of result
-    if ( showlog ) 
+    if ( showlog )
     {
-      std::cout<<"length of data: "<<datmes_.size()<<"\n";
+      std::cout<<"\nlength of data: "<<datmes_.size()<<"\n";
+      std::cout<<"\nheader excerpt of data:\n";
+      for ( unsigned long int i = 0; i < datmes_.size() && i < 10; i++ )
+      {
+        std::cout<<datmes_[i]<<" ";
+      }
+      std::cout<<"\n\n";
     }
   }
 
@@ -317,9 +375,9 @@ public:
   {
     // check consistency of bufffer size with size of datatype
     assert ( datbuf.size()%sizeof(dattype) == 0 && "length of buffer is not a multiple of size of datatype" );
-   
+
     // get number of numbers in buffer
-    unsigned long int totnum = datbuf.size()/sizeof(dattype); 
+    unsigned long int totnum = datbuf.size()/sizeof(dattype);
 
     for ( unsigned long int numfl = 0; numfl < totnum; numfl++ )
     {
@@ -327,7 +385,7 @@ public:
       dattype num;
       uint8_t* pnum = reinterpret_cast<uint8_t*>(&num);
 
-      // parse all  bytes of the number
+      // parse all bytes of the number
       for ( int byi = 0; byi < (int)sizeof(dattype); byi++ )
       {
         pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(dattype)+byi)];
@@ -338,7 +396,7 @@ public:
     }
   }
 
-//---------------------------------------------------------------------------//
+  //-------------------------------------------------------------------------//
 
   // show hex dump
   void show_hex(std::vector<unsigned char> &datavec, int width = 32, unsigned long int maxchars = 512)
@@ -350,14 +408,14 @@ public:
     {
       // accumulate in stringstreams
       hex<<std::nouppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<(int)datavec[i]<<" ";
-      
+
       // check if byte corresponds to some control character and if it's printable
       int ic = (int)datavec[i];
       if ( ic > 0x20 && ic < 0x7f )
       {
         enc<<(char)(datavec[i]);
       }
-      else 
+      else
       {
         enc<<".";
       }
@@ -368,7 +426,7 @@ public:
         // print both strings
         std::cout<<std::setw(3*width)<<std::left<<hex.str()<<"    "<<enc.str()<<"\n";
         std::cout<<std::right;
-        
+
         // clear stringstreams
         hex.str(std::string());
         enc.str(std::string());
@@ -413,7 +471,7 @@ public:
     return segments_["punit marker"][7];
   }
 
-  // get time offset 
+  // get time offset
   double get_time_offset()
   {
     assert ( segments_.size() > 0 );
@@ -478,7 +536,7 @@ public:
     std::string colA = std::string("Time [") + get_temp_unit() + std::string("]");
     std::string colB = get_name() + std::string(" [") + get_unit() + std::string("]");
     if ( width > 0 )
-    { 
+    {
 //      fout<<std::setw(width)<<std::left<<colA;
 //      fout<<std::setw(width)<<std::left<<colB;
         fout<<std::setw(width)<<std::right<<"Time";
@@ -486,8 +544,8 @@ public:
         fout<<"\n";
         fout<<std::setw(width)<<std::right<<get_temp_unit();
         fout<<std::setw(width)<<std::right<<get_unit();
-    } 
-    else 
+    }
+    else
     {
 //      fout<<colA<<","<<colB;
       fout<<"Time"<<","<<get_name()<<"\n";

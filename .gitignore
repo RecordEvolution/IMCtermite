@@ -4,6 +4,7 @@
 *.csv
 
 eatraw
+eatdev
 
 nohup.out
 
@@ -12,4 +13,3 @@ nohup.out
 *.so
 
 raw_eater.cpp
-
