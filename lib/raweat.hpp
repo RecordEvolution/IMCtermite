@@ -20,15 +20,15 @@
 #include <map>
 #include <cmath>
 
-#include "endian.hpp"
+// #include "endian.hpp"
 #include "hexshow.hpp"
 
 // support for 16bit floats
-#include <emmintrin.h>
-#include <immintrin.h>
-//#include <f16cintrin.h>
-#include "half.hpp"
-//#include "half_precision_floating_point.hpp"
+// #include <emmintrin.h>
+// #include <immintrin.h>
+// #include <f16cintrin.h>
+// #include "half.hpp"
+// #include "half_precision_floating_point.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -366,7 +366,7 @@ public:
       case 11 :
         std::cout<<"warning: '2-Byte-Word digital' datatype with experimental support\n";
         assert ( sizeof(short int)*8 == typesize );
-        convert_data_as_type<int>(datbuf,factor,offset);
+        convert_data_as_type<short int>(datbuf,factor,offset);
         break;
     }
 
