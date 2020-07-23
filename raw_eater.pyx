@@ -14,6 +14,9 @@ cdef class raweater:
     def __dealloc__(self):
         del self.rawit
 
+    def validity(self):
+        return self.rawit.get_valid()
+
     def channel_name(self):
         return self.rawit.get_name()
 
@@ -34,4 +37,3 @@ cdef class raweater:
 
     def print(self, const char* csvfile):
         return self.rawit.write_data(csvfile)
-

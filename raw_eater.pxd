@@ -14,6 +14,8 @@ from libcpp cimport bool
 cdef extern from "lib/raweat.hpp":
     cdef cppclass raw_eater:
         raw_eater(string) except +
+        # get validity of data format
+        bool get_valid()
         # get channel name and unit
         string get_name()
         string get_unit()

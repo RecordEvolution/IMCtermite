@@ -71,6 +71,9 @@ private:
   // save all data, i.e. physical values of measured entities as 64bit double
   std::vector<double> datmes_;
 
+  // check format validity
+  bool valid_ = true;
+
 public:
 
   // constructor
@@ -100,11 +103,18 @@ public:
     // extract data corresponding to predefined markers from buffer
     find_markers();
 
-    // split data corresponding to markers into segments
-    split_segments();
+    // proceed only, if markers suggest data is valid *.raw format
+    if ( valid_ )
+    {
+      // split data corresponding to markers into segments
+      split_segments();
 
-    // convert binary data to arrays of intrinsic data types
-    convert_data(showlog);
+      // convert binary data to arrays of intrinsic data types
+      convert_data(showlog);
+
+      // check result
+      if ( segments_.size() == 0 || datmes_.size() == 0 ) valid_ = false;
+    }
   }
 
   // destructor
@@ -203,9 +213,13 @@ public:
       }
       totalmarksize += datasec_[mrk.first].size();
     }
-    assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
-    std::cout<<"\n";
+    // std::cout<<"totalmarksize "<<totalmarksize<<"\n";
 
+    // check validity of format
+    // assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
+    if ( totalmarksize < 100 ) valid_ = false;
+
+    std::cout<<"\n";
   }
 
   // get all predefined markers
@@ -320,69 +334,77 @@ public:
             && "internally inconsistent 'punit' marker" );
 
     // just don't support weird datatypes
-    assert ( dattype > 2 && dattype < 12 );
-
-    // switch for datatypes
-    switch ( dattype )
+    // assert ( dattype > 2 && dattype < 12 );
+    if ( dattype == 9 || dattype == 10 || dattype > 11 )
     {
-      case 1 :
-        assert ( sizeof(unsigned char)*8 == typesize );
-        convert_data_as_type<unsigned char>(datbuf,factor,offset);
-        break;
-      case 2 :
-        assert ( sizeof(signed char)*8 == typesize );
-        convert_data_as_type<signed char>(datbuf,factor,offset);
-        break;
-      case 3 :
-        assert ( sizeof(unsigned short int)*8 == typesize );
-        convert_data_as_type<unsigned short int>(datbuf,factor,offset);
-        break;
-      case 4 :
-        assert ( sizeof(signed short int)*8 == typesize );
-        convert_data_as_type<signed short int>(datbuf,factor,offset);
-        break;
-      case 5 :
-        assert ( sizeof(unsigned long int)*8 == typesize );
-        convert_data_as_type<unsigned long int>(datbuf,factor,offset);
-        break;
-      case 6 :
-        std::cout<<"warning: 'signed long int' datatype with experimental support\n";
-        // assert ( sizeof(signed long int)*8 == typesize );
-        // convert_data_as_type<signed long int>(datbuf,factor,offset);
-        assert ( sizeof(int)*8 == typesize );
-        convert_data_as_type<int>(datbuf,factor,offset);
-        break;
-      case 7 :
-        assert ( sizeof(float)*8 == typesize );
-        convert_data_as_type<float>(datbuf,factor,offset);
-        break;
-      case 8 :
-        assert ( sizeof(double)*8 == typesize );
-        convert_data_as_type<double>(datbuf,factor,offset);
-        break;
-      case 9 :
-        std::cerr<<"'imc Devices Transitional Recording' datatype not supported\n";
-        break;
-      case 10 :
-        std::cerr<<"'Timestamp Ascii' datatype not supported\n";
-        break;
-      case 11 :
-        std::cout<<"warning: '2-Byte-Word digital' datatype with experimental support\n";
-        assert ( sizeof(short int)*8 == typesize );
-        convert_data_as_type<short int>(datbuf,factor,offset);
-        break;
+      valid_ = false;
     }
-
-    // show excerpt of result
-    if ( showlog )
+    else
     {
-      std::cout<<"\nlength of data: "<<datmes_.size()<<"\n";
-      std::cout<<"\nheader excerpt of data:\n";
-      for ( unsigned long int i = 0; i < datmes_.size() && i < 10; i++ )
+
+      // switch for datatypes
+      switch ( dattype )
       {
-        std::cout<<datmes_[i]<<" ";
+        case 1 :
+          assert ( sizeof(unsigned char)*8 == typesize );
+          convert_data_as_type<unsigned char>(datbuf,factor,offset);
+          break;
+        case 2 :
+          assert ( sizeof(signed char)*8 == typesize );
+          convert_data_as_type<signed char>(datbuf,factor,offset);
+          break;
+        case 3 :
+          assert ( sizeof(unsigned short int)*8 == typesize );
+          convert_data_as_type<unsigned short int>(datbuf,factor,offset);
+          break;
+        case 4 :
+          assert ( sizeof(signed short int)*8 == typesize );
+          convert_data_as_type<signed short int>(datbuf,factor,offset);
+          break;
+        case 5 :
+          assert ( sizeof(unsigned long int)*8 == typesize );
+          convert_data_as_type<unsigned long int>(datbuf,factor,offset);
+          break;
+        case 6 :
+          std::cout<<"warning: 'signed long int' datatype with experimental support\n";
+          // assert ( sizeof(signed long int)*8 == typesize );
+          // convert_data_as_type<signed long int>(datbuf,factor,offset);
+          assert ( sizeof(int)*8 == typesize );
+          convert_data_as_type<int>(datbuf,factor,offset);
+          break;
+        case 7 :
+          assert ( sizeof(float)*8 == typesize );
+          convert_data_as_type<float>(datbuf,factor,offset);
+          break;
+        case 8 :
+          assert ( sizeof(double)*8 == typesize );
+          convert_data_as_type<double>(datbuf,factor,offset);
+          break;
+        case 9 :
+          std::cerr<<"'imc Devices Transitional Recording' datatype not supported\n";
+          break;
+        case 10 :
+          std::cerr<<"'Timestamp Ascii' datatype not supported\n";
+          break;
+        case 11 :
+          std::cout<<"warning: '2-Byte-Word digital' datatype with experimental support\n";
+          assert ( sizeof(short int)*8 == typesize );
+          convert_data_as_type<short int>(datbuf,factor,offset);
+          break;
       }
-      std::cout<<"\n\n";
+
+      // show excerpt of result
+      if ( showlog )
+      {
+        std::cout<<"\nlength of data: "<<datmes_.size()<<"\n";
+        std::cout<<"\nheader excerpt of data:\n";
+        for ( unsigned long int i = 0; i < datmes_.size() && i < 10; i++ )
+        {
+          std::cout<<datmes_[i]<<" ";
+        }
+        std::cout<<"\n\n";
+      }
+
     }
   }
 
@@ -455,65 +477,78 @@ public:
     std::cout<<std::dec;
   }
 
+  // get validity of format
+  bool get_valid()
+  {
+    return valid_;
+  }
+
   // get timestep
   double get_dt()
   {
-    assert ( segments_.size() > 0 );
+    // assert ( segments_.size() > 0 );
 
-    return std::stod(segments_["sampl marker"][2]);
+    return valid_ ? std::stod(segments_["sampl marker"][2]) : 0.0;
   }
 
   // get time unit
   std::string get_temp_unit()
   {
-    assert ( segments_.size() > 0 );
+    // assert ( segments_.size() > 0 );
 
-    return segments_["sampl marker"][5];
+    return valid_ ? segments_["sampl marker"][5] : std::string("None");
   }
 
   // get name of measured entity
   std::string get_name()
   {
-    assert ( segments_.size() > 0 );
+    // assert ( segments_.size() > 0 );
 
-    return segments_["ename marker"][6];
+    return valid_ ? segments_["ename marker"][6] : std::string("None");
   }
 
   // get unit of measured entity
   std::string get_unit()
   {
-    assert ( segments_.size() > 0 );
+    // assert ( segments_.size() > 0 );
 
-    return segments_["punit marker"][7];
+    return valid_ ? segments_["punit marker"][7] : std::string("None");
   }
 
   // get time offset
   double get_time_offset()
   {
-    assert ( segments_.size() > 0 );
+    // assert ( segments_.size() > 0 );
 
-    return std::stod(segments_["minma marker"][11]);
+    return valid_ ? std::stod(segments_["minma marker"][11]) : -1.0;
   }
 
   // get time array
   std::vector<double> get_time()
   {
-    assert ( datmes_.size() > 0 );
+    // assert ( datmes_.size() > 0 );
 
-    // declare array of time
-    std::vector<double> timearr;
-
-    // get time step and offset
-    double dt = get_dt();
-    double timoff = get_time_offset();
-
-    // fill array
-    for ( unsigned long int t = 0; t < datmes_.size(); t++ )
+    if ( valid_ )
     {
-      timearr.push_back(timoff + t*dt);
-    }
+      // declare array of time
+      std::vector<double> timearr;
 
-    return timearr;
+      // get time step and offset
+      double dt = get_dt();
+      double timoff = get_time_offset();
+
+      // fill array
+      for ( unsigned long int t = 0; t < datmes_.size(); t++ )
+      {
+        timearr.push_back(timoff + t*dt);
+      }
+
+      return timearr;
+    }
+    else
+    {
+      return std::vector<double>();
+    }
   }
 
   // get size/length of data
@@ -525,7 +560,7 @@ public:
   // get data array encoded as floats/doubles
   std::vector<double>& get_data()
   {
-    assert ( datmes_.size() > 0 );
+    // assert ( datmes_.size() > 0 );
 
     return datmes_;
   }
@@ -541,62 +576,65 @@ public:
   // write data to csv-like file
   void write_data(std::string filename, int precision = 9, int width = 25)
   {
-    assert ( segments_.size() > 0 );
-    assert ( datmes_.size() > 0 );
+    // assert ( segments_.size() > 0 );
+    // assert ( datmes_.size() > 0 );
 
-    // open file
-    std::ofstream fout(filename.c_str());
-
-    // write header
-//    fout<<"# ";
-    std::string colA = std::string("Time [") + get_temp_unit() + std::string("]");
-    std::string colB = get_name() + std::string(" [") + get_unit() + std::string("]");
-    if ( width > 0 )
+    if ( valid_ )
     {
-//      fout<<std::setw(width)<<std::left<<colA;
-//      fout<<std::setw(width)<<std::left<<colB;
-        fout<<std::setw(width)<<std::right<<"Time";
-        fout<<std::setw(width)<<std::right<<get_name();
-        fout<<"\n";
-        fout<<std::setw(width)<<std::right<<get_temp_unit();
-        fout<<std::setw(width)<<std::right<<get_unit();
-    }
-    else
-    {
-//      fout<<colA<<","<<colB;
-      fout<<"Time"<<","<<get_name()<<"\n";
-      fout<<get_temp_unit()<<";"<<get_unit();
-    }
-    fout<<"\n";
+      // open file
+      std::ofstream fout(filename.c_str());
 
-    // get time step and offset
-    double dt = get_dt();
-    double timoff = get_time_offset();
-
-    // count sample index
-    unsigned long int tidx = 0;
-    for ( auto el : datmes_ )
-    {
-      // get time
-      double tim = tidx*dt + timoff;
-
+      // write header
+  //    fout<<"# ";
+      std::string colA = std::string("Time [") + get_temp_unit() + std::string("]");
+      std::string colB = get_name() + std::string(" [") + get_unit() + std::string("]");
       if ( width > 0 )
       {
-        fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<tim;
-        fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<el;
+  //      fout<<std::setw(width)<<std::left<<colA;
+  //      fout<<std::setw(width)<<std::left<<colB;
+          fout<<std::setw(width)<<std::right<<"Time";
+          fout<<std::setw(width)<<std::right<<get_name();
+          fout<<"\n";
+          fout<<std::setw(width)<<std::right<<get_temp_unit();
+          fout<<std::setw(width)<<std::right<<get_unit();
       }
       else
       {
-        fout<<std::fixed<<std::dec<<std::setprecision(precision)<<tim<<","<<el;
+  //      fout<<colA<<","<<colB;
+        fout<<"Time"<<","<<get_name()<<"\n";
+        fout<<get_temp_unit()<<";"<<get_unit();
       }
       fout<<"\n";
 
-      // keep track of timestep
-      tidx++;
-    }
+      // get time step and offset
+      double dt = get_dt();
+      double timoff = get_time_offset();
 
-    // close file
-    fout.close();
+      // count sample index
+      unsigned long int tidx = 0;
+      for ( auto el : datmes_ )
+      {
+        // get time
+        double tim = tidx*dt + timoff;
+
+        if ( width > 0 )
+        {
+          fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<tim;
+          fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<el;
+        }
+        else
+        {
+          fout<<std::fixed<<std::dec<<std::setprecision(precision)<<tim<<","<<el;
+        }
+        fout<<"\n";
+
+        // keep track of timestep
+        tidx++;
+      }
+
+      // close file
+      fout.close();
+    }
   }
 
 };
