@@ -74,7 +74,7 @@ private:
 public:
 
   // constructor
-  raw_eater(std::string rawfile) : rawfile_(rawfile)
+  raw_eater(std::string rawfile, bool showlog = false) : rawfile_(rawfile)
   {
     // open file
     std::ifstream fin(rawfile_.c_str(),std::ifstream::binary);
@@ -88,11 +88,14 @@ public:
     // close file
     fin.close();
 
-    // show raw data
-    this->show_buffer();
+    if ( showlog )
+    {
+      // show raw data
+      this->show_buffer();
 
-    // display predefined markers
-    this->show_markers();
+      // display predefined markers
+      this->show_markers();
+    }
 
     // extract data corresponding to predefined markers from buffer
     find_markers();
@@ -101,7 +104,7 @@ public:
     split_segments();
 
     // convert binary data to arrays of intrinsic data types
-    convert_data(true);
+    convert_data(showlog);
   }
 
   // destructor
