@@ -12,4 +12,4 @@ print(eatraw.unit())
 print(eatraw.get_time())
 print(eatraw.get_channel())
 
-eatraw.print(b"mycsv.csv")
+eatraw.write_table(b"mycsv.csv",ord(' '))

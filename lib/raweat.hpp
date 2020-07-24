@@ -214,12 +214,11 @@ public:
       totalmarksize += datasec_[mrk.first].size();
     }
     // std::cout<<"totalmarksize "<<totalmarksize<<"\n";
+    // std::cout<<"\n";
 
     // check validity of format
     // assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
     if ( totalmarksize < 100 ) valid_ = false;
-
-    std::cout<<"\n";
   }
 
   // get all predefined markers
@@ -573,38 +572,29 @@ public:
     return segments_[marker];
   }
 
-  // write data to csv-like file
-  void write_data(std::string filename, int precision = 9, int width = 25)
+  // write csv file
+  void write_table(std::string filename, char delimiter = ',', int precision = 6, int width = 25)
   {
-    // assert ( segments_.size() > 0 );
-    // assert ( datmes_.size() > 0 );
-
     if ( valid_ )
     {
       // open file
       std::ofstream fout(filename.c_str());
 
-      // write header
-  //    fout<<"# ";
+      // define column names (including units)
       std::string colA = std::string("Time [") + get_temp_unit() + std::string("]");
       std::string colB = get_name() + std::string(" [") + get_unit() + std::string("]");
-      if ( width > 0 )
+
+      // write header
+      if ( delimiter != ' ' )
       {
-  //      fout<<std::setw(width)<<std::left<<colA;
-  //      fout<<std::setw(width)<<std::left<<colB;
-          fout<<std::setw(width)<<std::right<<"Time";
-          fout<<std::setw(width)<<std::right<<get_name();
-          fout<<"\n";
-          fout<<std::setw(width)<<std::right<<get_temp_unit();
-          fout<<std::setw(width)<<std::right<<get_unit();
+        fout<<colA<<delimiter<<colB<<"\n";
       }
       else
       {
-  //      fout<<colA<<","<<colB;
-        fout<<"Time"<<","<<get_name()<<"\n";
-        fout<<get_temp_unit()<<";"<<get_unit();
+        fout<<std::setw(width)<<std::right<<colA;
+        fout<<std::setw(width)<<std::right<<colB;
+        fout<<"\n";
       }
-      fout<<"\n";
 
       // get time step and offset
       double dt = get_dt();
@@ -617,16 +607,19 @@ public:
         // get time
         double tim = tidx*dt + timoff;
 
-        if ( width > 0 )
+        if ( delimiter != ' ' )
         {
-          fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<tim;
-          fout<<std::fixed<<std::dec<<std::setprecision(precision)<<std::setw(width)<<std::right<<el;
+          fout<<std::fixed<<std::dec<<std::setprecision(precision)
+              <<tim<<delimiter<<el<<"\n";
         }
         else
         {
-          fout<<std::fixed<<std::dec<<std::setprecision(precision)<<tim<<","<<el;
+          fout<<std::fixed<<std::dec<<std::setprecision(precision)
+              <<std::setw(width)<<std::right<<tim;
+          fout<<std::fixed<<std::dec<<std::setprecision(precision)
+              <<std::setw(width)<<std::right<<el;
+          fout<<"\n";
         }
-        fout<<"\n";
 
         // keep track of timestep
         tidx++;

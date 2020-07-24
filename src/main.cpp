@@ -51,13 +51,14 @@ int main(int argc, char* argv[])
 //    //for ( auto el: segvec ) std::cout<<el<<"\n";
 //  }
 
-  // get array of encoded data 
+  // get array of encoded data
 //  std::vector<double> maindata = eatraw.get_data();
 //  std::cout<<"\nsize of data array: "<<maindata.size()<<"\n\n";
 //  for ( unsigned long int i = 0; i < 10; i++ ) std::cout<<mydata[i]<<"\n";
 
   // write data in csv-file
-  eatraw.write_data(std::string(argv[2]));
+  // eatraw.write_data(std::string(argv[2]));
+  eatraw.write_table(std::string(argv[2]),' ');
 
   return 0;
 }

@@ -35,5 +35,5 @@ cdef class raweater:
     def get_channel(self):
         return self.rawit.get_data()
 
-    def print(self, const char* csvfile):
-        return self.rawit.write_data(csvfile)
+    def write_table(self, const char* csvfile, char delimiter):
+        return self.rawit.write_table(csvfile,delimiter)

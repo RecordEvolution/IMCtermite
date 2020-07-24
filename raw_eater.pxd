@@ -26,4 +26,4 @@ cdef extern from "lib/raweat.hpp":
         vector[double] get_time()
         vector[double] get_data()
         # dump all data to .csv
-        void write_data(const char*)
+        void write_table(const char*,char delimiter)

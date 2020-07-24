@@ -25,6 +25,7 @@ eatall : $(SRC)eatall.cpp $(LIB)raweat.hpp
 clean :
 	rm -f $(EXE)
 	rm -f eatall
+	rm -f eatdev
 
 # check existence of name of executable globally
 chexe:=$(shell command -v $(EXE))
