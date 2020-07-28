@@ -511,7 +511,14 @@ public:
   {
     // assert ( segments_.size() > 0 );
 
-    return valid_ ? segments_["punit marker"][7] : std::string("None");
+    if ( datasec_["punit"].size() > 0 )
+    {
+      return valid_ ? segments_["punit marker"][7] : std::string("None");
+    }
+    else
+    {
+      return std::string("None");
+    }
   }
 
   // get time offset
