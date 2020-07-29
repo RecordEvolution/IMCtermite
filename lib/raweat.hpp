@@ -529,8 +529,9 @@ public:
   std::string get_unit()
   {
     // assert ( segments_.size() > 0 );
-
-    if ( datasec_["punit"].size() > 0 )
+    
+    if ( datasec_["punit marker"].size() > 0
+     && segments_["punit marker"].size() > 6 )
     {
       return valid_ ? segments_["punit marker"][7] : std::string("None");
     }
