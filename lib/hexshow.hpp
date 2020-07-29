@@ -43,9 +43,13 @@ namespace hex
       unsigned char elcl = ( (int)el > 0x1f && (int)el < 0x7f) ? el : '.';
       sschr<<std::dec<<std::setfill(' ')<<elcl;
 
-      // do actual printing
-      if ( (idx+1)%width == 0 )
+      // do actual printing (including very last potentially incomplete line)
+      if ( (idx+1)%width == 0 || i == breakidx-1 )
       {
+        // fill up any hexadecimal string that is shorter than default width
+        while ( sshex.str().size() < 3*width+10 ) sshex<<" ";
+
+        // print hexadecimal and ascii representation
         std::cout<<sshex.str()<<"    "<<sschr.str();
         std::cout<<"\n";
 

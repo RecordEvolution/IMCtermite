@@ -106,6 +106,9 @@ public:
     // proceed only, if markers suggest data is valid *.raw format
     if ( valid_ )
     {
+      // show detected markers
+      if ( showlog ) display_markers();
+
       // split data corresponding to markers into segments
       split_segments();
 
@@ -219,6 +222,22 @@ public:
     // check validity of format
     // assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
     if ( totalmarksize < 100 ) valid_ = false;
+  }
+
+  // display content of found markers
+  void display_markers()
+  {
+    for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
+    {
+      // extract data of marker
+      std::vector<unsigned char> mrkdat = this->datasec_[mrk.first];
+
+      // show name of marker and its data
+      std::cout<<mrk.first<<" : "<<mrkdat.size()
+               <<"\n------------------------------------\n";
+      hex::show(mrkdat,32,0,0);
+    }
+    std::cout<<"\n";
   }
 
   // get all predefined markers

@@ -11,7 +11,7 @@ CCC = g++ -std=c++11
 OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 
 # build executable
-$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp
+$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp
 	$(CCC) $(OPT) $< -o $@
 
 eatdev : $(SRC)main_dev.cpp $(LIB)raweat.hpp

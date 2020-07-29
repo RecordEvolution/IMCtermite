@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   std::string rawfile(argv[1]);
 
   // declare instance of "raw_eater"
-  raw_eater eatraw(rawfile);
+  raw_eater eatraw(rawfile,true);
 
   //eatraw.show_markers();
 
