@@ -5,7 +5,7 @@ The _raw_eater_ package is used to parse files with extension `*.raw`, which
 are usually binary files produced by the labsoftware _Famos_ to dump measurement
 time series.
 
-## File Structure
+## .raw-file format structure
 
 The binary `*.raw` file features a series of markers that indicate the starting
 point of various blocks of information. Every markers is introduced by character
@@ -101,9 +101,15 @@ section in the file). The markers have the following meaning:
         provide the number of values and the actual data,
         e.g. `|CS,1, 341299, 1, ...data... ;`
 
-## Open Issues and question?
+### Open Issues and question?
 
 - which parameter indicate(s) little vs. big endian?
+
+## .parquet-file writer
+
+The extracted and converted data originating from the *.raw file format may be efficiently grouped and
+written as .parquet files
+[parquet file writer example](https://github.com/apache/parquet-cpp/blob/master/examples/low-level-api/reader-writer.cc)
 
 
 ## References
@@ -111,3 +117,8 @@ section in the file). The markers have the following meaning:
 - https://ch.mathworks.com/matlabcentral/fileexchange/30187-sequnce-to-read-famos-data-into-matlab-workspace
 - https://community.ptc.com/t5/PTC-Mathcad/FAMOS-IMC-raw-data-in-MathCAD/td-p/130378
 - http://marmatek.com/wp-content/uploads/2014/04/imc_STUDIO_Manual.pdf
+
+### Parquet
+
+- https://github.com/apache/parquet-cpp
+- https://github.com/apache/parquet-cpp/tree/master/examples
