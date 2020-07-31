@@ -11,6 +11,7 @@ extensions = Extension(
     language='c++',
     extra_compile_args=['-std=c++11','-Wno-unused-variable'],
     extra_link_args=['-std=c++11'],
+    #extra_objects=["lib/parquet/libarrow.so.200.0.0"],
 )
 
 setup(
