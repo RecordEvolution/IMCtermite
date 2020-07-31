@@ -1,19 +1,29 @@
+#-----------------------------------------------------------------------------#
 
+# choose shell
 SHELL:=/bin/bash
 
 RAW = ../raw/
 
+# directory names
 SRC = src/
 LIB = lib/
+
+# name of executable
 EXE = eatraw
 
+# compiler and its options
 CCC = g++ -std=c++11
 OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
+
+#-----------------------------------------------------------------------------#
+# C++
 
 # build executable
 $(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp
 	$(CCC) $(OPT) $< -o $@
 
+# development version
 eatdev : $(SRC)main_dev.cpp $(LIB)raweat.hpp
 	$(CCC) $(OPT) $< -o $@
 
@@ -35,13 +45,16 @@ install : $(EXE)
 ifeq ($(chexe),)
 	cp $(EXE) /usr/local/bin/
 else
-	@echo "executable with same name already exists! choose different name!"
+	@echo "executable with name already exists! choose different name!"
 	@exit 1
 endif
 
 # uninstall
 uninstall :
 	rm /usr/local/bin/$(EXE)
+
+#-----------------------------------------------------------------------------#
+# Python
 
 # build python module
 build : setup.py raw_eater.pyx raw_eater.pxd $(LIB)raweat.hpp
@@ -56,3 +69,6 @@ py_clean :
 	rm -f pyt/raw_eater.cpython-*.so
 	rm -f raw_eater.cpp
 	rm -rf build/
+
+#-----------------------------------------------------------------------------#
+
