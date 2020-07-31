@@ -1,9 +1,10 @@
+#-----------------------------------------------------------------------------#
 
 PARQUETDIR := /home/mario/Desktop/Record_Evolution/parquet-cpp
 ARROWDIR := /home/mario/Desktop/Record_Evolution/arrow/cpp/src
 
 CPP := g++ -std=c++14
-OPT := 
+OPT :=
 #-Wall -Woverflow -Wpedantic -Wextra -Waddress -Waligned-new -Walloc-zero
 
 prepare : collect_parquet modify_parquet collect_arrow modify_arrow
@@ -12,7 +13,7 @@ collect_parquet :
 	cp -r $(PARQUETDIR)/src/parquet ./
 	cp $(PARQUETDIR)/examples/low-level-api/reader_writer.h ./
 	cp $(PARQUETDIR)/examples/low-level-api/reader-writer.cc ./
-	
+
 modify_parquet :
 	cp parquet/parquet_version.h.in parquet/parquet_version.h
 	sed -i 's/ReadableFileInterface/ReadWriteFileInterface/g' parquet/util/memory.h
@@ -31,15 +32,51 @@ collect_test :
 
 subst :
 	sed -i 's/#include \"arrow\//\/\/#include \"arrow/g' parquet/properties.h
-	
+
 test :
 	$(CPP) $(OPT) -I$(PWD) reader-writer.cc
 
 clean :
 	rm -r parquet/ arrow/
 	rm reader-writer.cc reader_writer.h
+#-----------------------------------------------------------------------------#
 
-#------------------------------------------------------------------------------------#
+# choose shell
+SHELL:=/bin/bash
+
+SRC = reader-writer
+
+# specify path of cloned directory
+ARROWGIT := /home/mario/Desktop/Record_Evolution/arrow
+
+filewriter : parquet/file_writer.cc
+		$(CPP) -c $(OPT) $<
+
+# build executable (and generate dependency file)
+readwrite : reader-writer.cc
+		$(CPP) $(OPT) -MMD $< -I ./
+
+# generate dependency file
+$(SRC).d : $(SRC).cc
+		$(CPP) -c -MMD $< -I ./ -I $(ARROWGIT)/cpp/src/
+
+# extract source dependencies
+extract-dep : $(SRC).d
+		@# extract relevant dependencies
+		cat $< | sed 's/ /\n/g' | awk 'NF' | grep -v '\\' | grep '\/' > deps.log
+		cat deps.log | sed ':a;N;$!ba;s/\n/ /g' > headers.log
+		cat headers.log | sed 's/.h$$/.cc/g' > sources.log
+		@# copy required sources
+		mkdir -p temp/
+		cp --parents `cat headers.log` temp/
+		cp --parents `cat sources.log` temp/ 2>/dev/null
+		mv temp$(ARROWGIT)/cpp/src/* ./
+		rm -r temp
+
+clean-dep :
+		rm -f deps.log headers.log sources.log $(SRC).d
+
+#-----------------------------------------------------------------------------#
 # only use more recent and up to date repository arrow.git
 
 # build arrow shared/static libraries
@@ -56,6 +93,4 @@ example :
 # set environment variable LD_LIBRARY_PATH=../../../../cpp/build/release/ before launching executable
 
 
-
-
-
+#------------------------------------------------------------------------------------#
