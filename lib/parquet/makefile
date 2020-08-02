@@ -4,8 +4,7 @@ PARQUETDIR := /home/mario/Desktop/Record_Evolution/parquet-cpp
 ARROWDIR := /home/mario/Desktop/Record_Evolution/arrow/cpp/src
 
 CPP := g++ -std=c++14
-OPT :=
-#-Wall -Woverflow -Wpedantic -Wextra -Waddress -Waligned-new -Walloc-zero
+OPT := -Wall -Woverflow -Wpedantic -Wextra -Waddress -Waligned-new -Walloc-zero
 
 prepare : collect_parquet modify_parquet collect_arrow modify_arrow
 
@@ -75,6 +74,39 @@ extract-dep : $(SRC).d
 
 clean-dep :
 		rm -f deps.log headers.log sources.log $(SRC).d
+
+#-----------------------------------------------------------------------------#
+# prepare source
+#
+# before: $ cd arrow/cpp/  and compile relevant sources by 
+#         $ cmake . -D ARROW_PARQUET=ON -D PARQUET_BUILD_EXAMPLES=ON -D ARROW_WITH_SNAPPY=ON
+#         $ cmake .. -D ARROW_PARQUET=ON ARROW_BUILD_EXAMPLES=ON
+
+cp-src : deps.log
+	mkdir src
+	cat deps.log | while read f; do echo $f; cp --parents $f src/; done;
+	mv src/home/mario/Desktop/arrow/cpp/* src/
+	rm -r src/home/
+
+deps.log :
+	python3 generate_deps.py reader-writer.cc $<
+
+
+SRC := $(shell find src/ -name '*.cc')
+
+# OBJ := $(apprefix obj/, $(SRC:%.cc=%.o))
+OBJ := $(addprefix bin/,$(notdir $(SRC:%.cc=%.o)))
+
+check :
+	echo $(SRC)
+	echo $(OBJ)
+
+reader-writer-example : reader-writer.cc $(OBJ)
+	g++ $< -I src/src/ -o $@ $(OBJ)
+
+$(OBJ) : $(SRC)
+	$(CPP) $(OPT) -c $< -o $@ -I src/src/
+
 
 #-----------------------------------------------------------------------------#
 # only use more recent and up to date repository arrow.git

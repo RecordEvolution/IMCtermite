@@ -13,3 +13,6 @@ nohup.out
 *.so
 
 raw_eater.cpp
+
+*.o
+
