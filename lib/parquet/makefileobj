@@ -1,57 +1,3 @@
-#-----------------------------------------------------------------------------#
-
-CPP := g++ -std=c++14
-CPPFLAGS := -Woverflow -Wpedantic -Wextra -Waddress -Waligned-new -Walloc-zero
-
-SRC := src/
-BIN := bin/
-
-LIBS := -I src/src/ -I src/thrift_ep-install/include/ -I src/boost_ep-prefix/src/boost_ep/
-
-#-----------------------------------------------------------------------------#
-# prepare source
-#
-# before: $ cd arrow/cpp/  and compile relevant sources by
-#         $ cmake . -D ARROW_PARQUET=ON -D PARQUET_BUILD_EXAMPLES=ON -D ARROW_WITH_SNAPPY=ON
-#         $ cmake .. -D ARROW_PARQUET=ON ARROW_BUILD_EXAMPLES=ON
-
-lib :
-	cmake . -D ARROW_WITH_BROTLI=ON -D ARROW_WITH_BZ2=ON -D ARROW_WITH_LZ4=ON -D ARROW_WITH_SNAPPY=ON -D ARROW_WITH_ZLIB=ON -D ARROW_PARQUET=ON -D ARROW_PYTHON=ON
-
-# cp-src : deps.log
-# 	./src_copy.sh
-
-deps.log :
-	python3 generate_deps.py reader-writer.cc $@
-
-SRC := $(shell find $(SRC) -name '*.cc')
-
-# OBJ := $(apprefix obj/, $(SRC:%.cc=%.o))
-OBJ := $(addprefix $(BIN),$(notdir $(SRC:%.cc=%.o)))
-
-check :
-	@echo $(SRC)
-	@echo $(OBJ)
-
-# vpath %.cc src/
-
-reader-writer-example : reader-writer.cc $(OBJ) bin/utilmemory.o
-	$(CPP) $(CPPFLAGS) $< $(LIBS) -o $@ $(OBJ) bin/utilmemory.o
-
-# $(OBJ) : $(SRC)
-# 	$(CPP) $(OPT) -c $< -o $@ -I src/src/
-#
-# $(BIN)%.o : $(SRC)
-# 	$(CPP) $(OPT) -c $< -I src/src/ -o $@
-
-clean-obj :
-	rm -f $(OBJ)
-
-# => do build with cmake like here
-# https://arrow.apache.org/docs/developers/python.html#build-and-test
-
-#-----------------------------------------------------------------------------#
-
 bin/type.o : src/src/arrow/type.cc
 	$(CPP) $(CPPFLAGS) -c $< $(LIBS) -o $@
 
@@ -109,7 +55,7 @@ bin/scalar.o : src/src/arrow/scalar.cc
 bin/string.o : src/src/arrow/util/string.cc
 	$(CPP) $(CPPFLAGS) -c $< $(LIBS) -o $@
 
-bin/utilmemory.o : src/src/arrow/util/memory.cc
+bin/memory.o : src/src/arrow/util/memory.cc
 	$(CPP) $(CPPFLAGS) -c $< $(LIBS) -o $@
 
 bin/future.o : src/src/arrow/util/future.cc
@@ -354,3 +300,4 @@ bin/platform.o : src/src/parquet/platform.cc
 
 bin/column_reader.o : src/src/parquet/column_reader.cc
 	$(CPP) $(CPPFLAGS) -c $< $(LIBS) -o $@
+
