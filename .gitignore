@@ -1,8 +1,6 @@
 
 /build
 
-*.csv
-
 eatraw
 eatdev
 
@@ -15,4 +13,3 @@ nohup.out
 raw_eater.cpp
 
 *.o
-

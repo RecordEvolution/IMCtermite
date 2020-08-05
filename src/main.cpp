@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
 //  for ( unsigned long int i = 0; i < 10; i++ ) std::cout<<mydata[i]<<"\n";
 
   // write data in csv-file
-  // eatraw.write_data(std::string(argv[2]));
-  eatraw.write_table(std::string(argv[2]),' ');
+  eatraw.write_table(std::string(argv[2]));
+  // eatraw.write_table(std::string(argv[2]),' ');
 
   return 0;
 }
