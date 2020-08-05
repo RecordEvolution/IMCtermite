@@ -10,8 +10,8 @@ print(tb)
 
 parquetfile = 'pressureVacuum.parquet'
 
-pq.write_table(tb,parquetfile,compression='SNAPPY')
-#  {‘NONE’, ‘SNAPPY’, ‘GZIP’, ‘LZO’, ‘BROTLI’, ‘LZ4’, ‘ZSTD’}
+pq.write_table(tb,parquetfile,compression='BROTLI')
+#  {'NONE', 'SNAPPY', 'GZIP', 'LZO', 'BROTLI', 'LZ4', 'ZSTD'}
 
 df = pq.read_table(parquetfile,columns=None)
 
