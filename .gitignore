@@ -12,4 +12,6 @@ nohup.out
 
 raw_eater.cpp
 
+cyt/*.cpp
+
 *.o

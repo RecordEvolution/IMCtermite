@@ -15,7 +15,8 @@ for rf in rawlist :
     print("converting " + str(rf) + "...\n" + 90*("-") + "\n")
 
     # setup instance of "raw_eater" and trigger conversion
-    eatraw = raw_eater.raweater(rf.encode())
+    # eatraw = raw_eater.raweater(rf.encode())
+    eatraw = raw_meat.rawmerger(rf.encode())
 
     # check validity of file format
     if eatraw.validity() :

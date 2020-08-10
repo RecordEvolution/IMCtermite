@@ -30,7 +30,10 @@ int main(int argc, char* argv[])
   std::string rawfile(argv[1]);
 
   // declare instance of "raw_eater"
-  raw_eater eatraw(rawfile,true);
+  // raw_eater eatraw(rawfile,true);
+
+  // declare instance of "raw_merger"
+  raw_merger eatmea(rawfile);
 
   //eatraw.show_markers();
 
@@ -58,8 +61,10 @@ int main(int argc, char* argv[])
 //  for ( unsigned long int i = 0; i < 10; i++ ) std::cout<<mydata[i]<<"\n";
 
   // write data in csv-file
-  eatraw.write_table(std::string(argv[2]));
+  // eatraw.write_table(std::string(argv[2]));
   // eatraw.write_table(std::string(argv[2]),' ');
+  // eatmea.write_table(std::string(argv[2]));
+  eatmea.write_table(std::string(argv[2]),' ');
 
   return 0;
 }

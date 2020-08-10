@@ -83,6 +83,27 @@ public:
     this->setup_and_conversion(showlog);
   }
 
+  raw_eater()
+  {
+
+  }
+
+  // provide/set new raw file
+  void set_file(std::string rawfile)
+  {
+    std::cout<<"raw_eater::set_file "<<rawfile<<"\n";
+    // set file
+    rawfile_ = rawfile;
+
+    // reset arrays
+    datasec_.clear();
+    segments_.clear();
+    datmes_.clear();
+
+    // do setup and conversion
+    setup_and_conversion(true);
+  }
+
   // set up and conversion
   void setup_and_conversion(bool showlog)
   {
