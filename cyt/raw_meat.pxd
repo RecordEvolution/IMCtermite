@@ -6,14 +6,10 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
-#cdef extern from "raweat.hpp":
-#    pass
-
-# these method names have to match the C definitions of the methods!!
-
-cdef extern from "lib/raweat.hpp":
-    cdef cppclass raw_eater:
-        raw_eater(string) except +
+# these method names have to match the C++ definitions of the methods!!
+cdef extern from "../lib/rawmerge.hpp":
+    cdef cppclass raw_merger:
+        raw_merger(string) except +
         # get validity of data format
         bool get_valid()
         # get channel name and unit
@@ -27,3 +23,5 @@ cdef extern from "lib/raweat.hpp":
         vector[double] get_data()
         # dump all data to .csv
         void write_table(const char*,char delimiter)
+        # add channel and try to merge it
+        bool add_channel(string)

@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <iostream>
 #include "../lib/raweat.hpp"
+#include "../lib/rawmerge.hpp"
 
 //---------------------------------------------------------------------------//
 

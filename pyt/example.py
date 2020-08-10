@@ -1,10 +1,11 @@
 
 import raw_eater
+import raw_meat
 
-rawlist = [ "sample/VehicleSpeed_HS.raw",
-            "sample/Rangerover_Evoque_F-RR534_2019-05-07/ABS_A_Port1.raw",
+rawlist = [ "smp/VehicleSpeed_HS.raw",
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/ABS_A_Port1.raw",
             "./pyt/example.py",
-            "sample/Rangerover_Evoque_F-RR534_2019-05-07/LateralAcceleration_HS.raw" ]
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/LateralAcceleration_HS.raw" ]
 
 print("")
 

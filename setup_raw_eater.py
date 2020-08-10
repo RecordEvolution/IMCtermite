@@ -4,11 +4,7 @@ from Cython.Build import cythonize
 
 extensions = Extension(
     name="raw_eater",
-    version="0.1.0",
-    author="Mario Fink",
-    author_email="mario.fink@record-evolution.de",
-    url="https://github.com/RecordEvolution/raw_eater.git",
-    sources=["raw_eater.pyx"],
+    sources=["cyt/raw_eater.pyx"],
     # libraries=[""],
     library_dirs=["src"],
     include_dirs=["src"],

@@ -20,7 +20,7 @@ OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 # C++
 
 # build executable
-$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp
+$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp $(LIB)rawmerge.hpp
 	$(CCC) $(OPT) $< -o $@
 
 # development version
@@ -57,18 +57,26 @@ uninstall :
 # Python
 
 # build python module
-build : setup.py raw_eater.pyx raw_eater.pxd $(LIB)raweat.hpp
-	python3 setup.py build_ext --inplace
+build : setup_raw_eater.py cyt/raw_eater.pyx cyt/raw_eater.pxd $(LIB)raweat.hpp \
+        setup_raw_meat.py cyt/raw_meat.pyx cyt/raw_meat.pxd $(LIB)rawmerge.hpp
+	python3 setup_raw_eater.py build_ext --inplace
+	python3 setup_raw_meat.py build_ext --inplace
 	cp raw_eater.cpython-*.so pyt/
+	cp raw_meat.cpython-*.so pyt/
 
-py_install: setup.py raw_eater.pyx raw_eater.pxd $(LIB)raweat.hpp
-	python3 setup.py install
+py_install: setup_raw_eater.py cyt/raw_eater.pyx cyt/raw_eater.pxd $(LIB)raweat.hpp \
+            setup_raw_meat.py cyt/raw_meat.pyx cyt/raw_meat.pxd $(LIB)rawmerge.hpp
+	python3 setup_raw_eater.py install --record files_raw_eater.txt
+	python3 setup_raw_meat.py install --record files_raw_meat.txt
 
 py_clean :
 	rm -f raw_eater.cpython-*.so
 	rm -f pyt/raw_eater.cpython-*.so
-	rm -f raw_eater.cpp
+	rm -f cyt/raw_eater.cpp
+	rm -f raw_meat.cpython-*.so
+	rm -f pyt/raw_meat.cpython-*.so
+	rm -f cyt/raw_meat.cpp
 	rm -rf build/
+	rm -f *.txt
 
 #-----------------------------------------------------------------------------#
-
