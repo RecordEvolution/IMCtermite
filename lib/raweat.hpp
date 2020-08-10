@@ -89,9 +89,8 @@ public:
   }
 
   // provide/set new raw file
-  void set_file(std::string rawfile)
+  void set_file(std::string rawfile, bool showlog = false)
   {
-    std::cout<<"raw_eater::set_file "<<rawfile<<"\n";
     // set file
     rawfile_ = rawfile;
 
@@ -101,7 +100,7 @@ public:
     datmes_.clear();
 
     // do setup and conversion
-    setup_and_conversion(true);
+    setup_and_conversion(showlog);
   }
 
   // set up and conversion

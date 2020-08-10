@@ -33,7 +33,9 @@ int main(int argc, char* argv[])
   // raw_eater eatraw(rawfile,true);
 
   // declare instance of "raw_merger"
-  raw_merger eatmea(rawfile);
+  raw_merger eatmea;
+  eatmea.add_channel(rawfile,true);
+  eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
 
   //eatraw.show_markers();
 
