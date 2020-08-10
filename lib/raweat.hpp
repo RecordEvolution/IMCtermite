@@ -447,7 +447,7 @@ public:
         pnum[byi] = (int)datbuf[(unsigned long int)(numfl*sizeof(dattype)+byi)];
       }
 
-      // add number of array
+      // add number to array
       datmes_.push_back((double)num * factor + offset);
     }
   }
@@ -529,7 +529,7 @@ public:
   std::string get_unit()
   {
     // assert ( segments_.size() > 0 );
-    
+
     if ( datasec_["punit marker"].size() > 0
      && segments_["punit marker"].size() > 6 )
     {
