@@ -79,6 +79,16 @@ public:
   // constructor
   raw_eater(std::string rawfile, bool showlog = false) : rawfile_(rawfile)
   {
+    // trigger setup and conversion
+    this->setup_and_conversion(showlog);
+  }
+
+  // set up and conversion
+  void setup_and_conversion(bool showlog)
+  {
+    // make sure 'raw_file' is already set
+    assert ( !rawfile_.empty() );
+
     // open file
     std::ifstream fin(rawfile_.c_str(),std::ifstream::binary);
     assert ( fin.good() &&  "failed to open file" );
@@ -504,32 +514,27 @@ public:
   // get timestep
   double get_dt()
   {
-    // assert ( segments_.size() > 0 );
-
-    return valid_ ? std::stod(segments_["sampl marker"][2]) : 0.0;
+    return valid_ && segments_["sampl marker"].size() > 1 ?
+      std::stod(segments_["sampl marker"][2]) : 0.0;
   }
 
   // get time unit
   std::string get_temp_unit()
   {
-    // assert ( segments_.size() > 0 );
-
-    return valid_ ? segments_["sampl marker"][5] : std::string("None");
+    return valid_ && segments_["sampl marker"].size() > 4 ?
+      segments_["sampl marker"][5] : std::string("None");
   }
 
   // get name of measured entity
   std::string get_name()
   {
-    // assert ( segments_.size() > 0 );
-
-    return valid_ ? segments_["ename marker"][6] : std::string("None");
+    return valid_ && segments_["ename marker"].size() > 5
+      ? segments_["ename marker"][6] : std::string("None");
   }
 
   // get unit of measured entity
   std::string get_unit()
   {
-    // assert ( segments_.size() > 0 );
-
     if ( datasec_["punit marker"].size() > 0
      && segments_["punit marker"].size() > 6 )
     {
@@ -544,9 +549,8 @@ public:
   // get time offset
   double get_time_offset()
   {
-    // assert ( segments_.size() > 0 );
-
-    return valid_ ? std::stod(segments_["minma marker"][11]) : -1.0;
+    return valid_ && segments_["minma marker"].size() > 10 ?
+      std::stod(segments_["minma marker"][11]) : -1.0;
   }
 
   // get time array
@@ -586,8 +590,6 @@ public:
   // get data array encoded as floats/doubles
   std::vector<double>& get_data()
   {
-    // assert ( datmes_.size() > 0 );
-
     return datmes_;
   }
 
