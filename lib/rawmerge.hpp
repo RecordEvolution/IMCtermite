@@ -11,6 +11,7 @@
 #define RAW_MERGER
 
 #include "raweat.hpp"
+#include <limits>
 
 //---------------------------------------------------------------------------//
 
@@ -114,25 +115,33 @@ public:
       // check consistency of temporal unit
       if ( this->get_temp_unit() == this->temp_unit_ )
       {
-        // get time series
+        // get new time series and data
         std::vector<double> ts = this->get_time();
+        std::vector<double> td = this->get_data();
 
         // compare start/end of timeseries (define tolerance)
         double deltat = 10*this->dt_;
         if ( ( this->timeseries_[0]     - ts[0]     < deltat  )
           && ( this->timeseries_.back() - ts.back() < deltat ) )
         {
-          // submerge channels and their time series
-          // TODO
-          // this->merge_channels(this.timeseries_,this)
+          // resulting new time series
+          std::vector<double> newts;
+          std::vector<std::vector<double>> newchannels;
 
-          // insert channel data and its meta data
-          this->channels_.push_back(this->get_data());
+          // submerge channel with currently defined time series
+          bool succ = this->merge_channels(this->timeseries_,this->channels_, // current timeseries and exisiting channels
+                                           ts,td,                             // new timeseries and associated channel to add
+                                           newts,newchannels);                // resulting new timeseries and new group of channels
+
+          // save result in members
+          this->timeseries_ = newts;
+          this->channels_ = newchannels;
+
+          // insert channel's meta data
           this->channel_names_.push_back(this->get_name() + std::string(" [")
                                        + this->get_unit() + std::string("]"));
 
-
-          return true;
+          return succ;
         }
         else
         {
@@ -153,6 +162,110 @@ public:
         return false;
       }
     }
+  }
+
+  // merge new channel and associated time series with exisiting channels and
+  // their already merged timeseries
+  bool merge_channels(std::vector<double>& current_timeseries,             // current timeseries and associated...
+                      std::vector<std::vector<double>>& current_channels,  // ...exisiting (n) channels
+                      std::vector<double>& new_timeseries,                 // new timeseries and associated...
+                      std::vector<double>& new_channel,                    // ...new channel
+                      std::vector<double>& result_timeseries,              // resulting timeseries ...
+                      std::vector<std::vector<double>>& result_channels,   // ...and associated (n+1) channels
+                      double placeholder = std::numeric_limits<double>::quiet_NaN(),
+                      bool showlog = true)
+  {
+    if ( showlog )
+    {
+      std::cout<<"merge_channels:\n"
+               <<"current timeseries length: "<<std::setw(5)<<current_timeseries.size()
+                                              <<std::setw(10)<<std::setprecision(8)<<current_timeseries[0]
+                                              <<std::setw(10)<<std::setprecision(8)<<current_timeseries.back()<<"\n"
+               <<"number of exist. channels: "<<std::setw(5)<<current_channels.size()<<"\n"
+               <<"new timeseries length    : "<<std::setw(5)<<new_timeseries.size()
+                                              <<std::setw(10)<<std::setprecision(8)<<new_timeseries[0]
+                                              <<std::setw(10)<<std::setprecision(8)<<new_timeseries.back()<<"\n"
+               <<"new channel length       : "<<std::setw(5)<<new_channel.size()<<"\n\n";
+    }
+
+    // the prepared resulting timeseries and channels are supposed to be empty
+    assert ( result_timeseries.size() == 0 && result_channels.size() == 0 );
+
+    // make sure new channel and its timeseries are consistent
+    if ( new_timeseries.size() != new_channel.size() ) return false;
+
+    // check consistency of all exisiting channels and their timeseries as well
+    for ( std::vector<double> chan: current_channels )
+    {
+      if ( chan.size() != current_timeseries.size() ) return false;
+    }
+
+    // number of current exisiting channels
+    unsigned long int numchannels = current_channels.size();
+
+    // insert empty (n+1) channels
+    for ( unsigned long int i = 0; i < numchannels+1; i++ )
+    {
+      result_channels.push_back(std::vector<double>());
+    }
+
+    // current time step index for both (current and new) series
+    unsigned long int idxCur = 0, idxNew = 0;
+
+    // process all time steps in both time series
+    while ( idxCur < current_timeseries.size() || idxNew < new_timeseries.size() )
+    {
+      // if point in time of "current_timeseries" is BEFORE time of "new_timeseries"
+      // or "new_timeseries" is depleted
+      if ( current_timeseries[idxCur] + 1.0e-10 < new_timeseries[idxNew]
+        || idxNew == new_timeseries.size() )
+      {
+        // keep current data as it is ...
+        for ( unsigned long int ch = 0; ch < numchannels; ch++ )
+        {
+          result_channels[ch].push_back(current_channels[ch][idxCur]);
+        }
+        // and insert placeholder in new channel
+        result_channels[numchannels].push_back(placeholder);
+
+        // add timestep to resulting timeseries and increment associated counter
+        result_timeseries.push_back(current_timeseries[idxCur]);
+        idxCur++;
+      }
+      // ...just reversed...
+      else if ( current_timeseries[idxCur] > new_timeseries[idxNew] + 1.0e-10
+             || idxCur == current_timeseries.size() )
+      {
+        // insert placeholders for all exisiting channels...
+        for ( unsigned long int ch = 0; ch < numchannels; ch++ )
+        {
+          result_channels[ch].push_back(placeholder);
+        }
+        //...and add new channel as it is
+        result_channels[numchannels].push_back(new_channel[idxNew]);
+
+        // add timestep to resulting timeseries and increment associated counter
+        result_timeseries.push_back(new_timeseries[idxNew]);
+        idxNew++;
+      }
+      // ...points in time of both timeseries match...
+      else
+      {
+        // add ALL, i.e. both current and new data to result
+        for ( unsigned long int ch = 0; ch < numchannels; ch++ )
+        {
+          result_channels[ch].push_back(current_channels[ch][idxCur]);
+        }
+        result_channels[numchannels].push_back(new_channel[idxNew]);
+
+        // add timestep to resulting timeseries and increment both counters
+        result_timeseries.push_back(new_timeseries[idxNew]);
+        idxNew++;
+        idxCur++;
+      }
+    }
+
+    return true;
   }
 
   // print all data to file
