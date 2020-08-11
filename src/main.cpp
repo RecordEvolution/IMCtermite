@@ -36,6 +36,8 @@ int main(int argc, char* argv[])
   raw_merger eatmea;
   eatmea.add_channel(rawfile,true);
   eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
+  eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
+  eatmea.add_channel("smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw",true);
 
   //eatraw.show_markers();
 

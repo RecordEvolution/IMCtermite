@@ -65,6 +65,12 @@ public:
     return this->timeseries_;
   }
 
+  // get number of channels
+  unsigned long int get_num_channels()
+  {
+    return this->channels_.size();
+  }
+
   // get array representation i-th channel
   std::vector<double> get_channel(long unsigned int chidx)
   {
