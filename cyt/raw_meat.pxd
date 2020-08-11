@@ -22,6 +22,14 @@ cdef extern from "../lib/rawmerge.hpp":
         vector[double] get_time()
         vector[double] get_data()
         # dump all data to .csv
-        void write_table(const char*,char delimiter)
+        void write_table(const char*,char)
         # add channel and try to merge it
         bool add_channel(string)
+        # get total number of (added) channels
+        int get_num_channels()
+        # get list of channel names
+        vector[string] get_channel_names()
+        # get data of particular channel
+        vector[double] get_channel(int)
+        # get total merged time series
+        vector[double] get_time_series()

@@ -63,6 +63,7 @@ build : setup_raw_eater.py cyt/raw_eater.pyx cyt/raw_eater.pxd $(LIB)raweat.hpp 
 	python3 setup_raw_meat.py build_ext --inplace
 	cp raw_eater.cpython-*.so pyt/
 	cp raw_meat.cpython-*.so pyt/
+	rm *.so
 
 py_install: setup_raw_eater.py cyt/raw_eater.pyx cyt/raw_eater.pxd $(LIB)raweat.hpp \
             setup_raw_meat.py cyt/raw_meat.pyx cyt/raw_meat.pxd $(LIB)rawmerge.hpp

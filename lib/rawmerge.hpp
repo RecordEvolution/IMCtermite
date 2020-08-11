@@ -39,7 +39,7 @@ public:
   raw_merger(std::string rawfile): raw_eater(rawfile)
   {
     // add first initial channel
-    this->add_channel(rawfile);
+    //this->add_channel(rawfile);
   }
 
   raw_merger(): raw_eater()

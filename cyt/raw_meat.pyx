@@ -41,3 +41,15 @@ cdef class rawmerger:
 
     def add_channel(self, string rawfile):
         return self.rawit.add_channel(rawfile)
+
+    def get_num_channels(self):
+        return self.rawit.get_num_channels()
+
+    def get_channel_names(self):
+        return self.rawit.get_channel_names()
+
+    def get_channel_by_index(self, int chidx):
+        return self.rawit.get_channel(chidx)
+
+    def get_time_series(self):
+        return self.rawit.get_time_series()
