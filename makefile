@@ -8,6 +8,7 @@ RAW = ../raw/
 # directory names
 SRC = src/
 LIB = lib/
+CYT = cyt/
 
 # name of executable
 EXE = eatraw
@@ -57,26 +58,26 @@ uninstall :
 # Python
 
 # build python module
-build : setup_raw_eater.py cyt/raw_eater.pyx cyt/raw_eater.pxd $(LIB)raweat.hpp \
-        setup_raw_meat.py cyt/raw_meat.pyx cyt/raw_meat.pxd $(LIB)rawmerge.hpp
-	python3 setup_raw_eater.py build_ext --inplace
-	python3 setup_raw_meat.py build_ext --inplace
+py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
+     $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp
+	python3 $(CYT)setup_raw_eater.py build_ext --inplace
+	python3 $(CYT)setup_raw_meat.py build_ext --inplace
 	cp raw_eater.cpython-*.so pyt/
 	cp raw_meat.cpython-*.so pyt/
 	rm *.so
 
-py_install: setup_raw_eater.py cyt/raw_eater.pyx cyt/raw_eater.pxd $(LIB)raweat.hpp \
-            setup_raw_meat.py cyt/raw_meat.pyx cyt/raw_meat.pxd $(LIB)rawmerge.hpp
-	python3 setup_raw_eater.py install --record files_raw_eater.txt
-	python3 setup_raw_meat.py install --record files_raw_meat.txt
+py-install: $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
+            $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp
+	python3 $(CYT)setup_raw_eater.py install --record files_raw_eater.txt
+	python3 $(CYT)setup_raw_meat.py install --record files_raw_meat.txt
 
-py_clean :
+py-clean :
 	rm -f raw_eater.cpython-*.so
 	rm -f pyt/raw_eater.cpython-*.so
-	rm -f cyt/raw_eater.cpp
+	rm -f $(CYT)raw_eater.cpp
 	rm -f raw_meat.cpython-*.so
 	rm -f pyt/raw_meat.cpython-*.so
-	rm -f cyt/raw_meat.cpp
+	rm -f $(CYT)raw_meat.cpp
 	rm -rf build/
 	rm -f *.txt
 
