@@ -6,17 +6,19 @@ import raw_meat
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-rawlist = [ "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePedalActiveQF_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePressure_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/EngineSpeed_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_FL.raw",
+rawlist = [
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePedalActiveQF_HS.raw",
+             "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePressure_HS.raw",
+             "smp/Rangerover_Evoque_F-RR534_2019-05-07/EngineSpeed_HS.raw",
+             "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_FL.raw",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_RL.raw",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_Vacuum.raw",
             "smp/VehicleSpeed_HS.raw",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/ABS_A_Port1.raw",
             "./pyt/example.py",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/LateralAcceleration_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw" ]
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw"
+          ]
 
 print("")
 
@@ -35,7 +37,7 @@ for rf in rawlist :
     if eatraw.validity() :
 
         # show channel name and its unit
-        entity = eatraw.channel_name().decode()
+        entity = eatraw.channel_name().decode(encoding='UTF-8',errors='ignore')
         unit = eatraw.unit().decode(encoding='UTF-8',errors='ignore')
         print("\nentity: " + str(entity))
         print("unit:   " + str(unit) + "\n")
@@ -64,25 +66,35 @@ for rf in rawlist :
 
 #-----------------------------------------------------------------------------#
 
+print("convert and merge channels " + "\n" + 90*("-") + "\n")
+
 # setup new instance to merge channels
 eatmea = raw_meat.rawmerger(rawlist[0].encode())
 
+# add every single channel/file in list
 for rf in rawlist :
     print("\nadding channel " + str(rf))
-    eatmea.add_channel(rf.encode())
+    succ = eatmea.add_channel(rf.encode())
+    if succ :
+        print("\nrecent time series: length: " + str(len(eatmea.get_time_series())) + "\n")
+    else :
+        print("\nfailed to add channel\n")
 
+# show summary of successfully merged channels
 print("\nmerged channels:\n")
-print("number of channels: " + str(eatmea.get_num_channels()))
-print("channel names: " + str(eatmea.get_channel_names()))
 
+# get number of successfully merged channels and their names (+units)
 numch = eatmea.get_num_channels()
-chnames = eatmea.get_channel_names()
+chnames = [chnm.decode(encoding='UTF-8',errors='ignore') for chnm in eatmea.get_channel_names()]
+print("number of channels: " + str(numch))
+print("channel names: " + str(chnames))
 
+# obtain final time series
 timse = eatmea.get_time_series()
 print("\nfinal time series:\nlength:" + str(len(timse)) + "\n")
 
 # get time unit and prepend column name
-chnames.insert(0,"Time ["+str(eatmea.time_unit())+"]")
+chnames.insert(0,"Time ["+str(eatmea.time_unit().decode(encoding='UTF-8',errors='ignore'))+"]")
 
 # prepare list of pyarrow arrays
 pyarrs = []
@@ -93,17 +105,19 @@ for i in range(0,numch) :
     dat = eatmea.get_channel_by_index(i)
     print("length: " + str(len(dat)))
     pyarrs.append(pa.array(dat))
-
+print("")
 # print("\npyarrow arrays\n" + str(pyarrs))
 
-# prepare pyarrow table from data
+# create pyarrow table from data
 pyarwtab = pa.Table.from_arrays(pyarrs,chnames)
-print(pyarwtab)
+print("\n" + 60*"-" + "\n" + str(pyarwtab) + "\n")
 
+# write pyarrow table to .parquet file with compression
 pq.write_table(pyarwtab,'allchannels.parquet',compression='BROTLI')  # compression='BROTLI', 'SNAPPY')
 
+# try to read and decode the .parquet file
 df = pq.read_table('allchannels.parquet')
-print(df)
 print(df.to_pandas())
+df.to_pandas().to_csv('allchannels.csv',index=False,encoding='utf-8',sep=",")
 
 #-----------------------------------------------------------------------------#

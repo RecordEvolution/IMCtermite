@@ -79,13 +79,13 @@ public:
   }
 
   // add a single channel and its associated time series
-  bool add_channel(std::string rawfile, bool log = false)
+  bool add_channel(std::string rawfile, bool showlog = false)
   {
     // set raw file and perform conversion
-    this->set_file(rawfile,false);
+    this->set_file(rawfile,showlog);
 
     // show channel name, unit, timestep, time unit, etc.
-    if ( log )
+    if ( showlog && this->get_valid() )
     {
       std::cout<<this->get_name()<<" ["<<this->get_unit()<<"]"<<"\n";
       std::cout<<"Time ["<<this->get_temp_unit()<<"]"<<"\n";
@@ -98,7 +98,7 @@ public:
     // add first/initial time series (and channel data)
     if ( this->get_valid() && timeseries_.size() == 0 && channels_.size() == 0 )
     {
-      std::cout<<"adding initial channel "<<rawfile<<"\n\n";
+      if ( showlog ) std::cout<<"adding initial channel "<<rawfile<<"\n\n";
 
       // insert timeseries and its unit
       this->timeseries_ = this->get_time();
@@ -114,9 +114,9 @@ public:
 
       return true;
     }
-    else
+    else if ( this->get_valid() )
     {
-      std::cout<<"adding next channel "<<rawfile<<"\n\n";
+      if ( showlog ) std::cout<<"adding next channel "<<rawfile<<"\n\n";
 
       // check consistency of temporal unit
       if ( this->get_temp_unit() == this->temp_unit_ )
@@ -163,10 +163,18 @@ public:
       {
         // refuse to merge due to different temporal units
         std::cerr<<"rawmerge: add_channel '"<<rawfile
-                 <<"' : inconsistent time units\n";
+                 <<"' : inconsistent time units: '"
+                 <<this->get_temp_unit()<<"' versus '"<<this->temp_unit_<<"'\n";
 
         return false;
       }
+    }
+    else
+    {
+      // provided file does not feature a valid .raw format
+      std::cerr<<"rawmerge: add_channel '"<<rawfile<<"' : invalid .raw file\n";
+
+      return false;
     }
   }
 
@@ -179,7 +187,7 @@ public:
                       std::vector<double>& result_timeseries,              // resulting timeseries ...
                       std::vector<std::vector<double>>& result_channels,   // ...and associated (n+1) channels
                       double placeholder = std::numeric_limits<double>::quiet_NaN(),
-                      bool showlog = true)
+                      bool showlog = false)
   {
     if ( showlog )
     {
@@ -221,11 +229,19 @@ public:
     // process all time steps in both time series
     while ( idxCur < current_timeseries.size() || idxNew < new_timeseries.size() )
     {
+      if ( showlog ) std::cout<<"idxCur "<<std::setw(6)<<idxCur
+                              <<std::setw(20)<<std::right<<current_timeseries[idxCur]<<"\n"
+                              <<"idxNew "<<std::setw(6)<<idxNew
+                              <<std::setw(20)<<std::right<<new_timeseries[idxNew]<<"\n";
+
       // if point in time of "current_timeseries" is BEFORE time of "new_timeseries"
       // or "new_timeseries" is depleted
-      if ( current_timeseries[idxCur] + 1.0e-10 < new_timeseries[idxNew]
-        || idxNew == new_timeseries.size() )
+      if ( idxCur < current_timeseries.size() &&
+         ( current_timeseries[idxCur] + 1.0e-10 < new_timeseries[idxNew]
+        || idxNew == new_timeseries.size() ) )
       {
+        if ( showlog ) std::cout<<"push_back A\n";
+
         // keep current data as it is ...
         for ( unsigned long int ch = 0; ch < numchannels; ch++ )
         {
@@ -239,9 +255,12 @@ public:
         idxCur++;
       }
       // ...just reversed...
-      else if ( current_timeseries[idxCur] > new_timeseries[idxNew] + 1.0e-10
-             || idxCur == current_timeseries.size() )
+      else if ( idxNew < new_timeseries.size() &&
+              ( current_timeseries[idxCur] > new_timeseries[idxNew] + 1.0e-10
+             || idxCur == current_timeseries.size() ) )
       {
+        if ( showlog ) std::cout<<"push_back B\n";
+
         // insert placeholders for all exisiting channels...
         for ( unsigned long int ch = 0; ch < numchannels; ch++ )
         {
@@ -257,6 +276,8 @@ public:
       // ...points in time of both timeseries match...
       else
       {
+        if ( showlog ) std::cout<<"push_back C\n";
+
         // add ALL, i.e. both current and new data to result
         for ( unsigned long int ch = 0; ch < numchannels; ch++ )
         {

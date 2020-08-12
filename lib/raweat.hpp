@@ -251,7 +251,7 @@ public:
 
     // check validity of format
     // assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
-    if ( totalmarksize < 100 ) valid_ = false;
+    valid_ = ( totalmarksize < 100 ) ? false : true;
   }
 
   // display content of found markers
