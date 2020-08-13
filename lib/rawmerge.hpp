@@ -296,7 +296,7 @@ public:
   }
 
   // print all data to file
-  void write_table(std::string filename, char delimiter = ',', int precision = 6, int width = 25)
+  void write_table_all(std::string filename, char delimiter = ',', int precision = 6, int width = 25)
   {
     // if at least one channel including its time series is present
     if ( timeseries_.size() > 0 && channels_.size() > 0 )

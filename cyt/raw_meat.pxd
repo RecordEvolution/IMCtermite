@@ -33,3 +33,5 @@ cdef extern from "../lib/rawmerge.hpp":
         vector[double] get_channel(int)
         # get total merged time series
         vector[double] get_time_series()
+        # dump all channels to .csv
+        void write_table_all(const char*,char)

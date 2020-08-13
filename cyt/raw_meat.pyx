@@ -53,3 +53,6 @@ cdef class rawmerger:
 
     def get_time_series(self):
         return self.rawit.get_time_series()
+
+    def write_table_all(self, const char* csvfile, char delimiter):
+        return self.rawit.write_table_all(csvfile,delimiter)

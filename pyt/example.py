@@ -83,6 +83,9 @@ for rf in rawlist :
 # show summary of successfully merged channels
 print("\nmerged channels:\n")
 
+# write merged table to .csv output
+eatmea.write_table_all('allchannels.csv'.encode(),ord(','))
+
 # get number of successfully merged channels and their names (+units)
 numch = eatmea.get_num_channels()
 chnames = [chnm.decode(encoding='UTF-8',errors='ignore') for chnm in eatmea.get_channel_names()]
@@ -118,6 +121,6 @@ pq.write_table(pyarwtab,'allchannels.parquet',compression='BROTLI')  # compressi
 # try to read and decode the .parquet file
 df = pq.read_table('allchannels.parquet')
 print(df.to_pandas())
-df.to_pandas().to_csv('allchannels.csv',index=False,encoding='utf-8',sep=",")
+# df.to_pandas().to_csv('allchannels.csv',index=False,encoding='utf-8',sep=",")
 
 #-----------------------------------------------------------------------------#
