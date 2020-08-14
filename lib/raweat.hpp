@@ -80,7 +80,7 @@ public:
   raw_eater(std::string rawfile, bool showlog = false) : rawfile_(rawfile)
   {
     // trigger setup and conversion
-    this->setup_and_conversion(showlog);
+    if ( ! rawfile.empty() ) this->setup_and_conversion(showlog);
   }
 
   raw_eater()
