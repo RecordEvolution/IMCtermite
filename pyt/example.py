@@ -69,7 +69,7 @@ for rf in rawlist :
 print("convert and merge channels " + "\n" + 90*("-") + "\n")
 
 # setup new instance to merge channels
-eatmea = raw_meat.rawmerger(rawlist[0].encode())
+eatmea = raw_meat.rawmerger(''.encode()) #rawlist[0].encode())
 
 # add every single channel/file in list
 for rf in rawlist :

@@ -11,6 +11,7 @@ nohup.out
 *.so
 
 raw_eater.cpp
+raw_meat.cpp
 
 cyt/*.cpp
 
