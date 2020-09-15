@@ -6,14 +6,22 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
-#cdef extern from "raweat.hpp":
+# to include implemenation/definition file
+#cdef extern from "raweat.cpp":
 #    pass
 
 # these method names have to match the C definitions of the methods!!
+#
+# for how to overload the constructor see
+# https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
 
 cdef extern from "../lib/raweat.hpp":
     cdef cppclass raw_eater:
+        # constructor(s)
+        raw_eater() except+
         raw_eater(string) except +
+        # set new file for decoding
+        void set_file(string)
         # get validity of data format
         bool get_valid()
         # get channel name and unit

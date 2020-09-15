@@ -24,14 +24,21 @@ print("")
 
 #-----------------------------------------------------------------------------#
 
+# alternatively create "empty" instance of "raw_eater" and set file names
+eatraw = raw_eater.raweater()
+# eatraw.set_file("../smp/pressure_Vacuum.raw".encode())
+
 # convert every single listed file
 for rf in rawlist :
 
     print("converting " + str(rf) + "...\n" + 90*("-") + "\n")
 
     # setup instance of "raw_eater" and trigger conversion
-    eatraw = raw_eater.raweater(rf.encode())
+    # eatraw = raw_eater.raweater(rf.encode())
     # eatraw = raw_meat.rawmerger(rf.encode())
+
+    # use global instance of "raw_eater"
+    eatraw.set_file(rf.encode())
 
     # check validity of file format
     if eatraw.validity() :
