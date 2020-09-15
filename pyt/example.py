@@ -6,11 +6,11 @@ import raw_meat
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-rawlist = [
+rawlist1 = [
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePedalActiveQF_HS.raw",
-             "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePressure_HS.raw",
-             "smp/Rangerover_Evoque_F-RR534_2019-05-07/EngineSpeed_HS.raw",
-             "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_FL.raw",
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePressure_HS.raw",
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/EngineSpeed_HS.raw",
+            "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_FL.raw",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_RL.raw",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_Vacuum.raw",
             "smp/VehicleSpeed_HS.raw",
@@ -19,6 +19,49 @@ rawlist = [
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/LateralAcceleration_HS.raw",
             "smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw"
           ]
+
+rawlist2 = [
+"smp/Mercedes_E-Klasse-2019-08-08/ACC_lat.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/ACC_long.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_AccelPdlPosn.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_AirTemp_Outsd_IC.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_AirTemp_Outsd.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkPdl_Stat.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkTrq_D_V2.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkTrq_R.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkTrq_V2.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_EngLoad_OBD.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_EngRPM.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_Odo.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_PkBrk_Stat.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_StWhl_Angl.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_StWhl_AnglSpd.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_TC_liquidFuelCons1.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_VehSpd_Disp.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_FL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_FR.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_RL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_RR.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/GPS.height.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/GPS.speed.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/GPS.time.sec.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Pressure_FL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Pressure_PC.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Pressure_RR.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Pressure_SC.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/setup_id.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_FL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_FR.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_RL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_RR.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Temp_Fluid_FL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Temp_Fluid_RL.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Travel_Piston.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/Vacuum_Booster.raw",
+"smp/Mercedes_E-Klasse-2019-08-08/vehicle_id.raw"
+]
+
+rawlist = rawlist2
 
 print("")
 

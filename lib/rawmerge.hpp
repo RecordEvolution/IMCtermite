@@ -126,9 +126,12 @@ public:
         std::vector<double> td = this->get_data();
 
         // compare start/end of timeseries (define tolerance)
-        double deltat = 10*this->dt_;
+        double deltat = 7*fmax(this->get_dt(),this->dt_);
         if ( ( this->timeseries_[0]     - ts[0]     < deltat  )
           && ( this->timeseries_.back() - ts.back() < deltat ) )
+        // double tol = 0.001;
+        // if ( ( (this->timeseries_[0]-ts[0])/ts[0] < tol )
+        //   && ( (this->timeseries_.back()-ts.back())/ts.back() < tol ) )
         {
           // resulting new time series
           std::vector<double> newts;
