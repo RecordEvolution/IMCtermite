@@ -30,6 +30,9 @@ cdef class raweater:
       raise ValueError("'" + str(rawfile) + "' does not exist")
     self.rawit.set_file(rawfile)
 
+  def do_conversion(self):
+      self.rawit.setup_and_conversion()
+
   def validity(self):
     return self.rawit.get_valid()
 

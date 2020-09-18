@@ -23,8 +23,8 @@ cdef extern from "../lib/rawmerge.hpp":
         vector[double] get_data()
         # dump all data to .csv
         void write_table(const char*,char)
-        # add channel and try to merge it
-        bool add_channel(string)
+        # add channel and try to merge it (pass C++ exceptions to Python)
+        bool add_channel(string) except +
         # get total number of (added) channels
         int get_num_channels()
         # get list of channel names

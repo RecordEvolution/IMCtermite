@@ -1,6 +1,4 @@
 
-/build
-
 eatraw
 eatdev
 
@@ -8,11 +6,14 @@ nohup.out
 
 .DS_Store
 
-*.so
-
 raw_eater.cpp
 raw_meat.cpp
 
 cyt/*.cpp
+/build
 
+*.log
+*.so
 *.o
+*.csv
+*.parquet

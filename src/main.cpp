@@ -9,14 +9,6 @@
 
 int main(int argc, char* argv[])
 {
-//  std::cout<<"number of CLI-arguments: "<<argc<<"\n";
-//  for ( int i = 0; i < argc; i++ ) std::cout<<std::setw(5)<<i<<":   "<<argv[i]<<"\n";
-
-//  path of filename provided ?
-//  assert( argc > 2 && "please provide a filename and path for input and output" );
-
-//  check number of CLI arguments
-//  assert( argc == 3 );
 
   if ( argc != 3 ) //or ( argc == 1 && std::string(argv[1]) == str::string("--help") )
   {
@@ -29,19 +21,18 @@ int main(int argc, char* argv[])
   // get name/path of file from CLI argument
   std::string rawfile(argv[1]);
 
-  // declare instance of "raw_eater"
-  raw_eater eatraw(rawfile,true);
+  // declare instance of 'raw_eater' (and decode data)
+  raw_eater eatraw; //rawfile,false);
 
-  // declare instance of "raw_merger"
-//  raw_merger eatmea;
-//  eatmea.add_channel(rawfile,true);
-//  eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
-//  eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
-//  eatmea.add_channel("smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw",true);
+  // set file to be decoded
+  eatraw.set_file(rawfile,true);
 
-  //eatraw.show_markers();
+  // do conversion
+  eatraw.setup_and_conversion(false);
 
-//  std::cout<<"\n";
+  // eatraw.show_markers();
+
+  //  std::cout<<"\n";
 //  std::map<std::string,std::vector<unsigned char>> marks = eatraw.get_markers();
 //  for ( auto mrk: marks )
 //  {
@@ -67,10 +58,32 @@ int main(int argc, char* argv[])
   // write data in csv-file
   if ( eatraw.get_valid() )
   {
-    // eatraw.write_table(std::string(argv[2]));
     eatraw.write_table(std::string(argv[2]),' ');
-    // eatmea.write_table(std::string(argv[2]));
-    // eatmea.write_table(std::string(argv[2]),' ');
+  }
+  else
+  {
+    std::cout<<"=> invalid/corrupt .raw file\n";
+  }
+
+//---------------------------------------------------------------------------//
+
+  // declare instance of 'raw_merger'
+  raw_merger eatmea;
+
+  // add channels
+  eatmea.add_channel(rawfile,false);
+  // eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
+  // eatmea.add_channel("smp/Mercedes_E-Klasse-2019-08-08/Flex_StWhl_AnglSpd.raw",false);
+  // eatmea.add_channel("smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw",false);
+
+  // write merged table
+  if ( eatmea.get_num_channels() > 0 )
+  {
+    eatmea.write_table_all("output/allchannels.csv",' ');
+  }
+  else
+  {
+    std::cout<<"no valid channel added\n";
   }
 
   return 0;

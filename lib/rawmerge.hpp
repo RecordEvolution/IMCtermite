@@ -83,13 +83,19 @@ public:
   {
     // set raw file and perform conversion
     this->set_file(rawfile,showlog);
+    // try {
+    this->setup_and_conversion();
+    // } catch (const std::exception& e) {
+    //   // throw;
+    //   std::cout<<e.what();
+    // }
 
     // show channel name, unit, timestep, time unit, etc.
     if ( showlog && this->get_valid() )
     {
-      std::cout<<this->get_name()<<" ["<<this->get_unit()<<"]"<<"\n";
       std::cout<<"Time ["<<this->get_temp_unit()<<"]"<<"\n";
       for ( unsigned long int i = 0; i < 5; i++ ) std::cout<<this->get_time()[i]<<"\n";
+      std::cout<<this->get_name()<<" ["<<this->get_unit()<<"]"<<"\n";
       for ( unsigned long int i = 0; i < 5; i++ ) std::cout<<this->get_data()[i]<<"\n";
       std::cout<<"lenght of channel "<<this->get_time().size()<<"\n";
       std::cout<<"\n";
@@ -126,12 +132,9 @@ public:
         std::vector<double> td = this->get_data();
 
         // compare start/end of timeseries (define tolerance)
-        double deltat = 7*fmax(this->get_dt(),this->dt_);
-        if ( ( this->timeseries_[0]     - ts[0]     < deltat  )
-          && ( this->timeseries_.back() - ts.back() < deltat ) )
-        // double tol = 0.001;
-        // if ( ( (this->timeseries_[0]-ts[0])/ts[0] < tol )
-        //   && ( (this->timeseries_.back()-ts.back())/ts.back() < tol ) )
+        double deltat = 9*fmax(this->get_dt(),this->dt_);
+        if ( ( fabs( this->timeseries_[0]     - ts[0] )     < deltat  )
+          && ( fabs( this->timeseries_.back() - ts.back() ) < deltat ) )
         {
           // resulting new time series
           std::vector<double> newts;
@@ -155,9 +158,14 @@ public:
         else
         {
           // refuse to merge due to inconsistent start of timeseries
-          std::cerr<<"rawmerge: add_channel '"<<rawfile
-                   <<"' : inconsistent start of time series, i.e. "
-                   <<timeseries_[0]<<" vs. "<<ts[0]<<"\n";
+          std::string errmess = std::string("rawmerge: add_channel '") + rawfile
+                              + std::string("' : inconsistent start of time series, i.e. ")
+                              + std::to_string(timeseries_[0]) + std::string(" vs. ")
+                              + std::to_string(ts[0])
+                              + std::string("( timesteps: ") + std::to_string(this->get_dt())
+                              + std::string(" and ") + std::to_string(this->dt_) + std::string(")");
+          // std::cerr<<errmess<<"\n";
+          throw std::runtime_error(errmess);
 
           return false;
         }
@@ -165,9 +173,12 @@ public:
       else
       {
         // refuse to merge due to different temporal units
-        std::cerr<<"rawmerge: add_channel '"<<rawfile
-                 <<"' : inconsistent time units: '"
-                 <<this->get_temp_unit()<<"' versus '"<<this->temp_unit_<<"'\n";
+        std::string errmess = std::string("rawmerge: add_channel '") + rawfile
+                            + std::string("' : inconsistent time units: ', i.e. '")
+                            + this->get_temp_unit() + std::string("' vs. '")
+                            + this->temp_unit_ + std::string("'");
+        // std::cerr<<errmess<<"\n";
+        throw std::runtime_error(errmess);
 
         return false;
       }
@@ -175,7 +186,10 @@ public:
     else
     {
       // provided file does not feature a valid .raw format
-      std::cerr<<"rawmerge: add_channel '"<<rawfile<<"' : invalid .raw file\n";
+      std::string errmess = std::string("rawmerge: add_channel '") + rawfile
+                          + std::string("' : invalid .raw file");
+      // std::cerr<<errmess<<"\n";
+      throw std::runtime_error(errmess);
 
       return false;
     }

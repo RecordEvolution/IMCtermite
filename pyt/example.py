@@ -5,65 +5,23 @@ import raw_eater
 import raw_meat
 import pyarrow as pa
 import pyarrow.parquet as pq
+import glob
+from pathlib import Path
 
-rawlist1 = [
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePedalActiveQF_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/BrakePressure_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/EngineSpeed_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_FL.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_RL.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/pressure_Vacuum.raw",
-            "smp/VehicleSpeed_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/ABS_A_Port1.raw",
-            "./pyt/example.py",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/LateralAcceleration_HS.raw",
-            "smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw"
-          ]
+fileobj1 = Path("smp/Rangerover_Evoque_F-RR534_2019-05-07/").rglob("*.raw")
+rawlist1 = [str(fl) for fl in fileobj1]
 
-rawlist2 = [
-"smp/Mercedes_E-Klasse-2019-08-08/ACC_lat.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/ACC_long.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_AccelPdlPosn.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_AirTemp_Outsd_IC.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_AirTemp_Outsd.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkPdl_Stat.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkTrq_D_V2.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkTrq_R.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_BrkTrq_V2.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_EngLoad_OBD.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_EngRPM.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_Odo.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_PkBrk_Stat.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_StWhl_Angl.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_StWhl_AnglSpd.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_TC_liquidFuelCons1.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_VehSpd_Disp.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_FL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_FR.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_RL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Flex_WhlRPM_RR.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/GPS.height.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/GPS.speed.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/GPS.time.sec.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Pressure_FL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Pressure_PC.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Pressure_RR.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Pressure_SC.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/setup_id.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_FL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_FR.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_RL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Temp_Disc_RR.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Temp_Fluid_FL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Temp_Fluid_RL.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Travel_Piston.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/Vacuum_Booster.raw",
-"smp/Mercedes_E-Klasse-2019-08-08/vehicle_id.raw"
-]
+fileobj2 = Path("smp/Mercedes_E-Klasse-2019-08-08/").rglob("*.raw")
+rawlist2 = [str(fl) for fl in fileobj2]
 
-rawlist = rawlist2
+rawlist = rawlist1 #[rawlist1[0],rawlist1[4],rawlist2[0],rawlist2[6]]
+for fil in rawlist2 :
+    rawlist.append(fil)
+rawlist.append("smp/pressure_Vacuum.asc")
 
 print("")
+print(rawlist)
+print()
 
 #-----------------------------------------------------------------------------#
 
@@ -80,8 +38,12 @@ for rf in rawlist :
     # eatraw = raw_eater.raweater(rf.encode())
     # eatraw = raw_meat.rawmerger(rf.encode())
 
-    # use global instance of "raw_eater"
+    # use global instance of "raw_eater" to set file and perform decoding
     eatraw.set_file(rf.encode())
+    try :
+        eatraw.do_conversion()
+    except RuntimeError as e :
+        print("conversion failed: " + str(e))
 
     # check validity of file format
     if eatraw.validity() :
@@ -106,7 +68,7 @@ for rf in rawlist :
         outname = rf.split('/')[-1].replace('raw','csv')
 
         print("write output to : " + outname)
-        eatraw.write_table((outname).encode(),ord(' '))
+        eatraw.write_table(("output/"+outname).encode(),ord(' '))
 
     else :
 
@@ -124,17 +86,17 @@ eatmea = raw_meat.rawmerger(''.encode()) #rawlist[0].encode())
 # add every single channel/file in list
 for rf in rawlist :
     print("\nadding channel " + str(rf))
-    succ = eatmea.add_channel(rf.encode())
-    if succ :
+    try :
+        succ = eatmea.add_channel(rf.encode())
         print("\nrecent time series: length: " + str(len(eatmea.get_time_series())) + "\n")
-    else :
-        print("\nfailed to add channel\n")
+    except RuntimeError as e :
+        print("failed to add channel: " + str(e))
 
 # show summary of successfully merged channels
 print("\nmerged channels:\n")
 
 # write merged table to .csv output
-eatmea.write_table_all('allchannels.csv'.encode(),ord(','))
+eatmea.write_table_all('output/allchannels.csv'.encode(),ord(','))
 
 # get number of successfully merged channels and their names (+units)
 numch = eatmea.get_num_channels()
@@ -166,10 +128,10 @@ pyarwtab = pa.Table.from_arrays(pyarrs,chnames)
 print("\n" + 60*"-" + "\n" + str(pyarwtab) + "\n")
 
 # write pyarrow table to .parquet file with compression
-pq.write_table(pyarwtab,'allchannels.parquet',compression='BROTLI')  # compression='BROTLI', 'SNAPPY')
+pq.write_table(pyarwtab,'output/allchannels.parquet',compression='BROTLI')  # compression='BROTLI', 'SNAPPY')
 
 # try to read and decode the .parquet file
-df = pq.read_table('allchannels.parquet')
+df = pq.read_table('output/allchannels.parquet')
 print(df.to_pandas())
 # df.to_pandas().to_csv('allchannels.csv',index=False,encoding='utf-8',sep=",")
 

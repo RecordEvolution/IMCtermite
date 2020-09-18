@@ -15,13 +15,14 @@ EXE = eatraw
 
 # compiler and its options
 CCC = g++ -std=c++11
-OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
+#OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
+OPT = -O3 -Wall -Werror
 
 #-----------------------------------------------------------------------------#
 # C++
 
 # build executable
-$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp $(LIB)rawmerge.hpp
+$(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp $(LIB)rawmerge.hpp output
 	$(CCC) $(OPT) $< -o $@
 
 # development version
@@ -37,6 +38,7 @@ clean :
 	rm -f $(EXE)
 	rm -f eatall
 	rm -f eatdev
+	rm -rf output/
 
 # check existence of name of executable globally
 chexe:=$(shell command -v $(EXE))
@@ -59,7 +61,8 @@ uninstall :
 
 # build python module
 py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
-     $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp
+     $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp \
+		 output
 	python3 $(CYT)setup_raw_eater.py build_ext --inplace
 	python3 $(CYT)setup_raw_meat.py build_ext --inplace
 	cp raw_eater.cpython-*.so pyt/
@@ -80,5 +83,10 @@ py-clean :
 	rm -f $(CYT)raw_meat.cpp
 	rm -rf build/
 	rm -f *.txt
+	rm -rf output/
+
+# prepare directory for test output
+output :
+	mkdir -pv output/
 
 #-----------------------------------------------------------------------------#

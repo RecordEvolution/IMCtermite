@@ -80,10 +80,16 @@ public:
   raw_eater(std::string rawfile, bool showlog = false) : rawfile_(rawfile)
   {
     // trigger setup and conversion
-    if ( ! rawfile.empty() ) this->setup_and_conversion(showlog);
+    //if ( ! rawfile.empty() ) this->setup_and_conversion(showlog);
   }
 
   raw_eater()
+  {
+
+  }
+
+  // destructor
+  ~raw_eater()
   {
 
   }
@@ -100,11 +106,11 @@ public:
     datmes_.clear();
 
     // do setup and conversion
-    setup_and_conversion(showlog);
+    //setup_and_conversion(showlog);
   }
 
   // set up and conversion
-  void setup_and_conversion(bool showlog)
+  void setup_and_conversion(bool showlog = false)
   {
     // make sure 'raw_file' is already set
     assert ( !rawfile_.empty() );
@@ -123,10 +129,8 @@ public:
 
     if ( showlog )
     {
-      // show raw data
+      // show raw data and display predefined markers
       this->show_buffer();
-
-      // display predefined markers
       this->show_markers();
     }
 
@@ -148,12 +152,6 @@ public:
       // check result
       if ( segments_.size() == 0 || datmes_.size() == 0 ) valid_ = false;
     }
-  }
-
-  // destructor
-  ~raw_eater()
-  {
-
   }
 
   // display buffer/data properties
@@ -239,10 +237,16 @@ public:
     unsigned long int totalmarksize = 0;
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
-      //assert ( datasec_[mrk.first].size() > 0 && "marker segment of length zero" );
       if ( datasec_[mrk.first].size() == 0 )
       {
-        std::cout<<"warning: "<<mrk.first<<" not found in buffer\n";
+        std::string errmess = mrk.first + std::string(" not found in buffer");
+        // std::cerr<<errmess;
+        try {
+          throw std::runtime_error(errmess);
+        } catch( const std::exception& e ) {
+          throw;
+	        //std::cout<<e.what()<<"\n";
+        }
       }
       totalmarksize += datasec_[mrk.first].size();
     }
@@ -250,7 +254,6 @@ public:
     // std::cout<<"\n";
 
     // check validity of format
-    // assert ( totalmarksize > 0 && "didn't find any predefined marker => probably not a valid .raw-file" );
     valid_ = ( totalmarksize < 100 ) ? false : true;
   }
 
@@ -389,7 +392,6 @@ public:
     }
     else
     {
-
       // switch for datatypes
       switch ( dattype )
       {
@@ -414,9 +416,9 @@ public:
           convert_data_as_type<unsigned long int>(datbuf,factor,offset);
           break;
         case 6 :
-          std::cout<<"warning: 'signed long int' datatype with experimental support\n";
           // assert ( sizeof(signed long int)*8 == typesize );
           // convert_data_as_type<signed long int>(datbuf,factor,offset);
+          // throw std::runtime_error("warning: 'signed long int' datatype with experimental support");
           assert ( sizeof(int)*8 == typesize );
           convert_data_as_type<int>(datbuf,factor,offset);
           break;
@@ -429,13 +431,13 @@ public:
           convert_data_as_type<double>(datbuf,factor,offset);
           break;
         case 9 :
-          std::cerr<<"'imc Devices Transitional Recording' datatype not supported\n";
+          throw std::runtime_error("'imc Devices Transitional Recording' datatype not supported");
           break;
         case 10 :
-          std::cerr<<"'Timestamp Ascii' datatype not supported\n";
+          throw std::runtime_error("'Timestamp Ascii' datatype not supported");
           break;
         case 11 :
-          std::cout<<"warning: '2-Byte-Word digital' datatype with experimental support\n";
+          // throw std::runtime_error("warning: '2-Byte-Word digital' datatype with experimental support");
           assert ( sizeof(short int)*8 == typesize );
           convert_data_as_type<short int>(datbuf,factor,offset);
           break;

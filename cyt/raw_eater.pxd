@@ -14,14 +14,18 @@ from libcpp cimport bool
 #
 # for how to overload the constructor see
 # https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
+# and propagating exceptions from C++ to Python
+# http://docs.cython.org/en/latest/src/userguide/wrapping_CPlusPlus.html#exceptions
 
 cdef extern from "../lib/raweat.hpp":
     cdef cppclass raw_eater:
         # constructor(s)
-        raw_eater() except+
+        raw_eater() except +
         raw_eater(string) except +
         # set new file for decoding
         void set_file(string)
+        # perform conversion (pass any C++ exceptions to Python)
+        void setup_and_conversion() except +
         # get validity of data format
         bool get_valid()
         # get channel name and unit
