@@ -71,6 +71,9 @@ private:
   // save all data, i.e. physical values of measured entities as 64bit double
   std::vector<double> datmes_;
 
+  // error message queue
+  std::string error_queue_;
+
   // check format validity
   bool valid_ = true;
 
@@ -104,6 +107,9 @@ public:
     datasec_.clear();
     segments_.clear();
     datmes_.clear();
+
+    // reset error queue
+    error_queue_ = std::string("");
 
     // do setup and conversion
     //setup_and_conversion(showlog);
@@ -152,6 +158,11 @@ public:
       // check result
       if ( segments_.size() == 0 || datmes_.size() == 0 ) valid_ = false;
     }
+    else
+    {
+      // throw error with collected error messages
+      throw std::runtime_error(error_queue_);
+    }
   }
 
   // display buffer/data properties
@@ -167,6 +178,8 @@ public:
     std::cout<<"\n";
     for ( auto el: markers_ )
     {
+      assert( el.second.size() > 0 && "please don't define any empty markers" );
+
       std::cout<<el.first<<"  ";
       for ( unsigned char c: el.second) std::cout<<std::hex<<int(c);
       std::cout<<"\n";
@@ -185,10 +198,8 @@ public:
 
     for (std::pair<std::string,std::vector<unsigned char>> mrk : markers_ )
     {
-      assert( mrk.second.size() > 0 && "please don't define any empty markers" );
-
       // find marker's byte sequence in buffer
-      for ( unsigned long int idx = 0; idx < rawdata_.size(); idx++ )
+      for ( unsigned long int idx = 0; idx < (rawdata_.size() - mrk.second.size()); idx++ )
       {
         // for every byte in buffer, check, if the three subsequent bytes
         // correspond to required predefined marker
@@ -203,26 +214,51 @@ public:
         {
           // array of data associated to marker
           std::vector<unsigned char> markseq;
+          int seqidx = 0;
 
+          // read any marker but the data marker
           if ( mrk.first != "datas marker" )
           {
-            // collect bytes until we find semicolon ";", i.e. 0x3b
-            int seqidx = 0;
+            // collect bytes until we find a semicolon ";", i.e. 0x3b (or until buffer is depleted)
             while ( rawdata_[idx+seqidx] != 0x3b )
             {
               markseq.push_back(rawdata_[idx+seqidx]);
               seqidx++;
+
+              // if buffer is depleted before we find the proper termination of
+              // the markers, the data seems to be corrupted!!
+              if ( idx+seqidx == rawdata_.size()-1 )
+              {
+                std::string errmess = mrk.first + std::string(" is corrupted");
+                // throw std::runtime_error(errmess);
+                error_queue_ += errmess + std::string(" - ");
+                break;
+              }
             }
           }
+          // data marker is supposed to be located at the very end of the buffer
+          // but still be terminated by a semicolon (but may contain any number
+          // of semicolons in between)
           else
           {
-            // marker 'datas' is the data marker and is supposed to be the last
-            // and should extend until end of file
-            for ( unsigned long int didx = idx; didx < rawdata_.size()-1; didx++ )
+            // collect data sequence (ignoring final semicolon)
+            while ( idx+seqidx < rawdata_.size()-1 )
             {
-              markseq.push_back(rawdata_[didx]);
+              markseq.push_back(rawdata_[idx+seqidx]);
+              seqidx++;
             }
 
+            // check for terminating semicolon
+            if ( rawdata_.back() != 0x3b )
+            {
+              std::string errmess = mrk.first + std::string(" is corrupted");
+              error_queue_ += errmess + std::string(" - ");
+            }
+          }
+
+          // find length of data sequence
+          if ( mrk.first == "datas marker" )
+          {
             // obtain length of data segment
             datsize_ = markseq.size();
           }
@@ -240,13 +276,17 @@ public:
       if ( datasec_[mrk.first].size() == 0 )
       {
         std::string errmess = mrk.first + std::string(" not found in buffer");
-        // std::cerr<<errmess;
-        try {
-          throw std::runtime_error(errmess);
-        } catch( const std::exception& e ) {
-          throw;
-	        //std::cout<<e.what()<<"\n";
-        }
+        // // std::cerr<<errmess;
+        // try {
+        //   throw std::runtime_error(errmess);
+        // } catch( const std::exception& e ) {
+        //   throw;
+	      //   //std::cout<<e.what()<<"\n";
+        // }
+        error_queue_ += errmess + std::string(" - ");
+
+        // if any of the required (essential) markers are missing => invalid!
+        valid_ = false;
       }
       totalmarksize += datasec_[mrk.first].size();
     }
@@ -254,7 +294,7 @@ public:
     // std::cout<<"\n";
 
     // check validity of format
-    valid_ = ( totalmarksize < 100 ) ? false : true;
+    // valid_ = ( totalmarksize < 100 ) ? false : true;
   }
 
   // display content of found markers

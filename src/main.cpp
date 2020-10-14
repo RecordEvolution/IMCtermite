@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   // add channels
   eatmea.add_channel(rawfile,false);
-  // eatmea.add_channel("smp/VehicleSpeed_HS.raw",true);
+  eatmea.add_channel("smp/VehicleSpeed_HS.raw",false);
   // eatmea.add_channel("smp/Mercedes_E-Klasse-2019-08-08/Flex_StWhl_AnglSpd.raw",false);
   // eatmea.add_channel("smp/Rangerover_Evoque_F-RR534_2019-05-07/Temp_Disc_FR.raw",false);
 
