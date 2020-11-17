@@ -108,8 +108,9 @@ public:
     segments_.clear();
     datmes_.clear();
 
-    // reset error queue
+    // reset error queue and validity flag
     error_queue_ = std::string("");
+    valid_ = true;
 
     // do setup and conversion
     //setup_and_conversion(showlog);
