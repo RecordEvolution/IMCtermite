@@ -1,5 +1,13 @@
 
-# raw_eater
+<p align="center">
+  <a href="https://record-evolution.de/reswarm">
+    <img
+      alt="raweater.svg"
+      src="assets/raweater.svg"
+      width="400"
+    />
+  </a>
+</p>
 
 The _raw_eater_ package is used to parse files with extension `*.raw`, which
 are usually binary files produced by the labsoftware _Famos_ to dump measurement
