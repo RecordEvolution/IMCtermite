@@ -17,7 +17,9 @@ employed i.a. by the measurement hardware
 to dump and store data and the software packages
 [imc Studio](https://www.imc-tm.de/produkte/messtechnik-software/imc-studio/ueberblick/)
 and [imc FAMOS](https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/)
-for measurement data control and analysis.
+for measurement data control and analysis. The extracted measurement data can
+be stored in various open source file formats like _csv_, _json_, _parquet_ or
+_hdf5_.
 
 ## Overview
 
