@@ -38,8 +38,9 @@ parameters separated by commata `"," = 0x 2c` and terminated by a semicolon
 look like this (in UTF-8 encoding)
 
 ```
-|CF,2,1,1;|CK,1,3,1,1;|NO,1,86,0,78,imc STUDIO 5.0 R10 (04.08.2017)@imc DEVICES 2.9R7 (25.7.2017)@imcDev__15190567,0,;|CG,1,5,1,1,1;
-|CD,2,  63,  5.0000000000000001E-03,1,1,s,0,0,0,  0.0000000000000000E+00,1;
+|CF,2,1,1;|CK,1,3,1,1;
+|NO,1,86,0,78,imc STUDIO 5.0 R10 (04.08.2017)@imc DEVICES 2.9R7 (25.7.2017)@imcDev__15190567,0,;
+|CG,1,5,1,1,1; |CD,2,  63,  5.0000000000000001E-03,1,1,s,0,0,0,  0.0000000000000000E+00,1;
 |NT,1,16,1,1,1980,0,0,0.0;       |CC,1,3,1,1;|CP,1,16,1,4,7,32,0,0,1,0;
 |CR,1,60,0,  1.0000000000000000E+00,  0.0000000000000000E+00,1,4,mbar;|CN,1,27,0,0,0,15,pressure_Vacuum,0,;
 |Cb,1, 117,1,0,    1,         1,         0,      9608,         0,      9608,1,  2.0440300000000000E+03,  1.2416717060000000E+09,;
@@ -75,8 +76,8 @@ are defined
 
 | marker | structure (example)  | description                                                                                                            |
 |--------|----------------------|------------------------------------------------------------------------------------------------------------------------|
-| CF     | `|CF,2,1,1;`         | format version and processor                                                                                           |
-| CK     | `|CK,1,3,1,<closed>` | start of group of keys, length is always 3, <closed> must be 0 or 1 depending correct closure of the measurment series |
+| CF     | CF,2,1,1;            | format version and processor                                                                                           |
+| CK     | CK,1,3,1,<closed>    | start of group of keys, length is always 3, <closed> must be 0 or 1 depending correct closure of the measurment series |
 | CB     |                      |                                                                                                                        |
 | CT     |                      |                                                                                                                        |
 | CG     |                      |                                                                                                                        |
