@@ -76,54 +76,6 @@ and line feeds (`LF = 0x 0a`) between keys, i.e. the block terminating semicolon
 and the vertical bar (pipe) of the next key. The following _critical markers_
 are defined
 
-| marker | structure (example)                                                                           | description                                             |
-|--------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------|
-| CF     | CF,2,1,1;                                                                                     | format version and processor                            |
-| CK     | CK,1,3,1,<closed>;                                                                            | start of group of keys                                  |
-|        |                                                                                               | length is always 3                                      |
-|        |                                                                                               | <closed> must be 0 or 1 depending correct closure of the measurment series |
-| CB     | CB,1,<length>,<groupindex>,<namelength>,<name>,<commentlength>,<comment>;                     | defines a group of cannels                              |
-| CT     | CT,1,<length>,<groupindex>,<namelength>,<name>,<textlength>,<text>,<commentlength>,<comment>; | text definition                                         |
-| CG     | CG,1,<length>,<numberofcompontent>,<fieldtype>,<dimension>;                                   | introduces group of components corresponding to CC keys |
-|        |                                                                                               | field type is one of:  1 = real number                  |
-|        |                                                                                               |                        2 = XY                           |
-|        |                                                                                               |                        3 = 3XY                          |
-|        |                                                                                               |                        4 = complex with Re + Im         |
-|        |                                                                                               |                        5 = complex with Abs + Phase     |
-|        |                                                                                               |                        6 = complex: Abs in dB + Phase   |
-|        |                                                                                               | dimension: 1 for fieldtype 1, 2 for fieldtype 2-6       |
-| CD     | CD,1,<length>,<dx>,<calibration>,<unitlength>,<unit>,0,0,0;                                   | dx = distance between two samples                       |
-|        |                                                                                               | calibration = 1 : calibrated time-basis                 |
-|        |                                                                                               |             = 0 : noncalibrated time-basis              |
-|        |                                                                                               | unit: unit of this axis                                 |
-| CZ     | CZ,1,<length>,<dz>,<dzcalibration>,<z0>,<z0calibration>,<unitlength>,<unit>,<segmentlength>;  | scaling of z-axis for segments                          |
-| CC     | CC,1,<length>,<componentindex>,<analogdigital>;                                               | start of single component:                              |
-|        |                                                                                               |  - componentindex = 1 real, real part, abs              |
-|        |                                                                                               |                   = 2 complex, imaginar part, phase     |
-|        |                                                                                               |  - analogdigital = 1 analog = 2 digital                 |
-| CP     | CP,1,<lenght>,<buffref>,<bytes>,<datatype>,<signbits>,<mask>,<offset>,<numsamples>,<bytedist>;| buffref = int > 0 corresp.to buffer descript. in Cb key |
-|        |                                                                                               | bytes: number of bytes for singel value                 |
-|        |                                                                                               | datatype: 1 = unsigned byte, 2 = signed byte,           |
-|        |                                                                                               |           3 = unsigned short, 4 = signed short          |
-|        |                                                                                               |           5 = unsigned long, 6 = signed long            |
-|        |                                                                                               |           7 = float, 8 = double                         |
-|        |                                                                                               |           9 = imc Devices transitional recording        |
-|        |                                                                                               |           10 = timestamp ascii, 11 = 2byte word digital |
-|        |                                                                                               |           13 = 6byte unsigned long                      |
-|        |                                                                                               | signbits: number of significant bits                    |
-|        |                                                                                               | mask: default = 0                                       |
-|        |                                                                                               | offset: offset of first sample in data block            |
-|        |                                                                                               | numsamples: number of subsequent samples in channel     |
-|        |                                                                                               | bytedist: number of bytes between last sample of channel|
-|        |                                                                                               | to start of next channel                                |
-| Cb     | Cb,1,<lenght>,<numbuff>,<bytesinuserinfo>,<buffref>,<indexsamplekey>,<offsetbuffer>,          |                                                         |
-|        |      <bufferlength>,<offset>,<fillbytes>,0,X0,<addtime>,<userinfo>,<newevent>,[buffref,...];  | buffer description                                      |
-| CR     |                      |                                                                                                                        |
-| CN     |                      |                                                                                                                        |
-| CS     |                      |
-| CI     |                      |                                                                                                                        |
-| Ca     |                      |                                                                                                                        |
-
 ## Installation
 
 ## Usage
