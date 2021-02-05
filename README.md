@@ -79,7 +79,7 @@ are defined
 |--------|-----------------------------------------------------------------------------------------------------|
 | CF     | format version and processor                                                                        |
 | CK     | start of group of keys, no. parameters = 3, indicates (in)correct closure of the measurement series |
-| CB     | defines a group of cannels                                                                          |
+| CB     | defines a group of channels                                                                         |
 | CT     | text definition including group association index                                                   |
 | CG     | introduces group of components corresponding to CC keys                                             |
 | CD1,2  | old/new version of abscissa description                                                             |
