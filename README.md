@@ -2,14 +2,14 @@
 <p align="center">
   <a href="https://record-evolution.de/reswarm">
     <img
-      alt="raweater.svg"
-      src="assets/raweater.svg"
+      alt="imctermite.svg"
+      src="assets/imctermite.svg"
       width="400"
     />
   </a>
 </p>
 
-The _imcRawBuster_ provides access to the proprietary data format
+_IMCtermite_ provides access to the proprietary data format
 _IMC Bus Format_ with file extension _.raw_ introduced and developed by
 [imc Test & Measurement GmbH](https://www.imc-tm.de/). This data format is
 employed i.a. by the measurement hardware
