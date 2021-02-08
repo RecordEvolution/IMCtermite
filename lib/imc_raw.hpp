@@ -10,6 +10,7 @@
 #include "imc_key.hpp"
 #include "imc_block.hpp"
 #include "imc_datatype.hpp"
+#include "imc_meta.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -25,6 +26,11 @@ namespace imc
 
     // list of imc-blocks
     std::vector<block> rawblocks_;
+
+    // collect meta-information, channel definition, etc.
+    imc::info imcinfo_;
+    imc::channel imcchannel_;
+    imc::abscissa xaxis_;
 
   public:
 
@@ -126,6 +132,15 @@ namespace imc
     {
       return rawblocks_;
     }
+
+    // collect meta data
+    void parse_meta()
+    {
+
+
+    }
+
+    // parse channel's raw data
 
   };
 
