@@ -13,6 +13,8 @@
 
 namespace imc
 {
+  // define "magic bytes" announcing critical (=C) non-critical keys (=N)
+  const unsigned char key_crit_ = 0x43, key_non_crit_ = 0x4e;
 
   // define properties of marker/key
   struct key

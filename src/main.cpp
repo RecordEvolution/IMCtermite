@@ -166,13 +166,14 @@ int main(int argc, char* argv[])
     try {
       imcraw.set_file(rawfile);
     } catch (const std::exception& e ) {
-      std::cerr<<"failed to set raw-file: "<<e.what()<<"\n";
+      std::cerr<<"failed to open and parse raw-file: "<<e.what()<<"\n";
       return 1;
     }
 
     // list blocks
     for ( imc::block blk: imcraw.blocks() )
     {
+      std::cout<<blk.get_key().get_info()<<"\n";
       std::cout<<blk.get_info()<<"\n";
     }
   }

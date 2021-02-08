@@ -33,9 +33,40 @@ namespace imc
       }
     }
 
+    // set members
+    void begin(unsigned long int begin)
+    {
+      if ( end_ <= begin )
+      {
+        throw std::logic_error("parameter: offset of first byte larger than last byte's offset");
+      }
+      begin_ = begin;
+    }
+    void end(unsigned long int end)
+    {
+      if ( end <= begin_ )
+      {
+        throw std::logic_error("parameter: offset of first byte larger than last byte's offset");
+      }
+      end_ = end;
+    }
+
     // access members
     unsigned long int& begin() { return begin_; }
     unsigned long int& end() { return end_; }
+
+    // comparison operator
+    bool operator==(const parameter& param)
+    {
+      return ( this->begin_ == param.begin_ && this->end_ == param.end_ );
+    }
+
+    // get info
+    std::string get_info()
+    {
+      return ( std::string("[") + std::to_string(begin_) + std::string(",")
+                                + std::to_string(end_) + std::string("]") );
+    }
   };
 
   // define properties of a raw file block
@@ -72,6 +103,29 @@ namespace imc
       }
       raw_file_ = raw_file;
       buffer_ = buffer;
+
+      parse_parameters();
+    }
+
+    // identify/parse parameters in block
+    void parse_parameters()
+    {
+      // parse entire block and check for separator tokens
+      for ( unsigned long int b = begin_; b < end_; b++ )
+      {
+        if ( buffer_->at(b) == imc::ch_sep_ )
+        {
+          // define range of parameter with first byte = ch_sep_
+          parameters_.push_back(imc::parameter(b,b+1));
+        }
+      }
+
+      // set offset of parameters's last byte
+      for ( unsigned long int p = 0; p < parameters_.size()-1; p++ )
+      {
+        parameters_[p].end( parameters_[p+1].begin() - 1 );
+      }
+      // parameters_.back().end(this->end_-1);
     }
 
     // access members
@@ -95,12 +149,20 @@ namespace imc
     // get info string
     std::string get_info(int width = 20)
     {
+      // summarize parameters in single string
+      std::string prsstr("{");
+      for ( auto par: parameters_ ) prsstr += par.get_info() + std::string(",");
+      prsstr.pop_back();
+      prsstr += std::string("}");
+
+      // construct block info string
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"block-key:"<<thekey_.name_<<"\n"
         <<std::setw(width)<<std::left<<"begin:"<<begin_<<"\n"
         <<std::setw(width)<<std::left<<"end:"<<end_<<"\n"
         <<std::setw(width)<<std::left<<"rawfile:"<<raw_file_<<"\n"
-        <<std::setw(width)<<std::left<<"buffersize:"<<buffer_->size()<<"\n";
+        <<std::setw(width)<<std::left<<"buffersize:"<<buffer_->size()<<"\n"
+        <<std::setw(width)<<std::left<<"parameters:"<<prsstr<<"\n";
       return ss.str();
     }
 

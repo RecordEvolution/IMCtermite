@@ -63,7 +63,7 @@ namespace imc
         if ( *it == ch_bgn_ )
         {
           // check for (non)critical key
-          if ( *(it+1) == 0x43 || *(it+1) == 0x4e )
+          if ( *(it+1) == imc::key_crit_ || *(it+1) == imc::key_non_crit_ )
           {
             // compose entire key
             std::string newkey = { (char)*(it+1), (char)*(it+2) };
@@ -95,10 +95,10 @@ namespace imc
                 unsigned long length = std::stoul(leng);
 
                 // declare corresponding key and block
-                imc::key bkey( (*(it+1)-0x43)==0, newkey,
+                imc::key bkey( *(it+1)==imc::key_crit_ , newkey,
                                imc::keys.at(newkey).description_, version );
                 imc::block blk(bkey,it-buffer_.begin(),
-                                    it-buffer_.begin()+8+length,
+                                    it-buffer_.begin()+pos+1+length,
                                     raw_file_, &buffer_);
 
                 // add block to list
@@ -107,7 +107,7 @@ namespace imc
               else
               {
                 throw std::runtime_error( std::string("invalid block or corrupt buffer at byte: ")
-                                        + std::to_string(it-buffer_.begin()) );
+                                        + std::to_string(it+3-buffer_.begin()) );
               }
             }
             else
