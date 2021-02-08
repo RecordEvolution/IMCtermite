@@ -17,7 +17,7 @@ namespace imc
   typedef float imc_float;
   typedef double imc_double;
 
-  class imcdatatype
+  class datatype
   {
   protected:
     imc_Ubyte ubyte_;     // 0
@@ -30,26 +30,26 @@ namespace imc
     imc_double sdouble_;  // 7
     short int dtidx_;     // \in \{0,...,7\}
   public:
-    imcdatatype(): ubyte_(0), sbyte_(0),
+    datatype(): ubyte_(0), sbyte_(0),
                    ushort_(0), sshort_(0),
                    ulint_(0.0), slint_(0.0),
                    sfloat_(0.0), sdouble_(0.0),
                    dtidx_(0) { };
     // every supported datatype gets its own constructor
-    imcdatatype(imc_Ubyte num): ubyte_(num), dtidx_(0) {};
-    imcdatatype(imc_Sbyte num): sbyte_(num), dtidx_(1) {};
-    imcdatatype(imc_Ushort num): ushort_(num), dtidx_(2) {};
-    imcdatatype(imc_Sshort num): sshort_(num), dtidx_(3) {};
-    imcdatatype(imc_Ulongint num): ulint_(num), dtidx_(4) {};
-    imcdatatype(imc_Slongint num): slint_(num), dtidx_(5) {};
-    imcdatatype(imc_float num): sfloat_(num), dtidx_(6) {};
-    imcdatatype(imc_double num): sdouble_(num), dtidx_(7) {};
+    datatype(imc_Ubyte num): ubyte_(num), dtidx_(0) {};
+    datatype(imc_Sbyte num): sbyte_(num), dtidx_(1) {};
+    datatype(imc_Ushort num): ushort_(num), dtidx_(2) {};
+    datatype(imc_Sshort num): sshort_(num), dtidx_(3) {};
+    datatype(imc_Ulongint num): ulint_(num), dtidx_(4) {};
+    datatype(imc_Slongint num): slint_(num), dtidx_(5) {};
+    datatype(imc_float num): sfloat_(num), dtidx_(6) {};
+    datatype(imc_double num): sdouble_(num), dtidx_(7) {};
 
     // identify type
     short int& dtype() { return dtidx_; }
 
     // overall assignment operator
-    imcdatatype& operator=(const imcdatatype &num)
+    datatype& operator=(const datatype &num)
     {
       if ( this != &num )
       {
@@ -68,49 +68,49 @@ namespace imc
     }
 
     // implement assignment operator for individual datatypes
-    imcdatatype& operator=(const imc_Ubyte &num)
+    datatype& operator=(const imc_Ubyte &num)
     {
       this->ubyte_ = num;
       this->dtidx_ = 0;
       return *this;
     }
-    imcdatatype& operator=(const imc_Sbyte &num)
+    datatype& operator=(const imc_Sbyte &num)
     {
       this->sbyte_ = num;
       this->dtidx_ = 1;
       return *this;
     }
-    imcdatatype& operator=(const imc_Ushort &num)
+    datatype& operator=(const imc_Ushort &num)
     {
       this->ushort_ = num;
       this->dtidx_ = 2;
       return *this;
     }
-    imcdatatype& operator=(const imc_Sshort &num)
+    datatype& operator=(const imc_Sshort &num)
     {
       this->sshort_ = num;
       this->dtidx_ = 3;
       return *this;
     }
-    imcdatatype& operator=(const imc_Ulongint &num)
+    datatype& operator=(const imc_Ulongint &num)
     {
       this->ulint_ = num;
       this->dtidx_ = 4;
       return *this;
     }
-    imcdatatype& operator=(const imc_Slongint &num)
+    datatype& operator=(const imc_Slongint &num)
     {
       this->slint_ = num;
       this->dtidx_ = 5;
       return *this;
     }
-    imcdatatype& operator=(const imc_float &num)
+    datatype& operator=(const imc_float &num)
     {
       this->sfloat_ = num;
       this->dtidx_ = 6;
       return *this;
     }
-    imcdatatype& operator=(const imc_double &num)
+    datatype& operator=(const imc_double &num)
     {
       this->sdouble_ = num;
       this->dtidx_ = 7;
@@ -133,7 +133,7 @@ namespace imc
     }
 
     // define custom stream operator to print the correct type
-    friend std::ostream& operator<<(std::ostream& out, const imcdatatype& num)
+    friend std::ostream& operator<<(std::ostream& out, const datatype& num)
     {
       if ( num.dtidx_ == 0 ) out<<num.ubyte_;
       else if ( num.dtidx_ == 1 ) out<<num.sbyte_;
