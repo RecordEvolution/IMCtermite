@@ -133,7 +133,13 @@ namespace imc
     unsigned long int& get_begin() { return begin_; }
     unsigned long int& get_end() { return end_; }
 
-    // get parameter
+    // get list of parameters
+    std::vector<parameter>& get_parameters()
+    {
+      return parameters_;
+    }
+
+    // get data of single parameter
     std::vector<unsigned char> extract_parameter(parameter& param)
     {
       // check parameter w.r.t. to block

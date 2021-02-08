@@ -175,6 +175,7 @@ int main(int argc, char* argv[])
     {
       std::cout<<blk.get_key().get_info()<<"\n";
       std::cout<<blk.get_info()<<"\n";
+      // for ( auto prm: blk.get_parameters() ) std::cout<<prm.get_info()<<"\n";
     }
   }
 
