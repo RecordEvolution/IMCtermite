@@ -27,7 +27,7 @@ namespace imc
     parameter(unsigned long int begin, unsigned long int end):
       begin_(begin), end_(end)
     {
-      if ( end_ <= begin_ )
+      if ( end_ < begin_ )
       {
         throw std::logic_error("parameter: offset of first byte larger than last byte's offset");
       }
@@ -36,7 +36,7 @@ namespace imc
     // set members
     void begin(unsigned long int begin)
     {
-      if ( end_ <= begin )
+      if ( end_ < begin )
       {
         throw std::logic_error("parameter: offset of first byte larger than last byte's offset");
       }
@@ -44,7 +44,7 @@ namespace imc
     }
     void end(unsigned long int end)
     {
-      if ( end <= begin_ )
+      if ( end < begin_ )
       {
         throw std::logic_error("parameter: offset of first byte larger than last byte's offset");
       }
@@ -116,7 +116,7 @@ namespace imc
         if ( buffer_->at(b) == imc::ch_sep_ )
         {
           // define range of parameter with first byte = ch_sep_
-          parameters_.push_back(imc::parameter(b,b+1));
+          parameters_.push_back(imc::parameter(b,b));
         }
       }
 
@@ -125,7 +125,7 @@ namespace imc
       {
         parameters_[p].end( parameters_[p+1].begin() - 1 );
       }
-      // parameters_.back().end(this->end_-1);
+      parameters_.back().end( this->end_ - 1 );
     }
 
     // access members
