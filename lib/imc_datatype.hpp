@@ -16,6 +16,7 @@ namespace imc
   typedef signed long int imc_Slongint;
   typedef float imc_float;
   typedef double imc_double;
+  // TODO remaining types are not yet supported
 
   class datatype
   {

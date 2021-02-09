@@ -31,9 +31,6 @@ namespace imc
     unsigned long int cplxcnt_;
 
     // collect meta-information, channel definition, etc.
-    imc::info imcinfo_;
-    imc::channel imcchannel_;
-    imc::abscissa xaxis_;
 
   public:
 
