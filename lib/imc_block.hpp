@@ -104,7 +104,20 @@ namespace imc
       raw_file_ = raw_file;
       buffer_ = buffer;
 
-      parse_parameters();
+      // make sure "end_" does not exceed buffer size due to invalid "length" parameter of block
+      if ( end_ > buffer_->size() )
+      {
+        std::cout<<"WARNING: invalid length parameter in "<<thekey_.name_<<"-block "
+                 <<"(block-end:"<<end_<<",buffer-size:"<<buffer_->size()<<")"
+                 <<" => resetting block-end to buffer-size\n";
+        end_ = buffer_->size();
+      }
+
+      try {
+        parse_parameters();
+      } catch (const std::exception& e) {
+        throw std::runtime_error("block: failed to parse parameters");
+      }
     }
 
     // identify/parse parameters in block
@@ -158,7 +171,7 @@ namespace imc
       // summarize parameters in single string
       std::string prsstr("{");
       for ( auto par: parameters_ ) prsstr += par.get_info() + std::string(",");
-      prsstr.pop_back();
+      if ( prsstr.size() > 1 ) prsstr.pop_back();
       prsstr += std::string("}");
 
       // construct block info string

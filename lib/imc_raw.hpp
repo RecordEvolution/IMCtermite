@@ -36,17 +36,17 @@ namespace imc
 
     // constructor
     raw() {};
-    raw(std::string raw_file): raw_file_(raw_file) { this->parse(); };
+    raw(std::string raw_file): raw_file_(raw_file) { this->parse_blocks(); };
 
     // provide new raw-file
     void set_file(std::string raw_file)
     {
       raw_file_ = raw_file;
-      this->parse();
+      this->parse_blocks();
     }
 
     // list all blocks in buffer
-    void parse()
+    void parse_blocks()
     {
       // open file and put data in buffer
       try {
@@ -64,7 +64,7 @@ namespace imc
 
       // start parsing raw-blocks in buffer
       for ( std::vector<unsigned char>::iterator it=buffer_.begin();
-                                                it!=buffer_.end(); ++it )
+                                                 it!=buffer_.end(); ++it )
       {
         // check for "magic byte"
         if ( *it == ch_bgn_ )
@@ -113,8 +113,10 @@ namespace imc
               }
               else
               {
-                throw std::runtime_error( std::string("invalid block or corrupt buffer at byte: ")
-                                        + std::to_string(it+3-buffer_.begin()) );
+                throw std::runtime_error(
+                    std::string("invalid block or corrupt buffer at byte: ")
+                  + std::to_string(it+3-buffer_.begin())
+                );
               }
             }
             else
@@ -125,6 +127,23 @@ namespace imc
         }
       }
 
+      this->check_consistency();
+    }
+
+    // check consistency of blocks
+    void check_consistency()
+    {
+      for ( unsigned long int b = 0; b < this->rawblocks_.size()-1; b++ )
+      {
+        if ( this->rawblocks_[b].get_end() >= this->rawblocks_[b+1].get_begin() )
+        {
+          throw std::runtime_error(
+            std::string("inconsistent subsequent blocks:\n")
+            + std::to_string(b) + std::string("-th block:\n") + this->rawblocks_[b].get_info()
+            + std::string("\n")
+            + std::to_string(b+1) + std::string("-th block:\n") + this->rawblocks_[b+1].get_info() );
+        }
+      }
     }
 
     // get blocks
