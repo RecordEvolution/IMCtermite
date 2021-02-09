@@ -10,7 +10,7 @@
 #include "imc_key.hpp"
 #include "imc_block.hpp"
 #include "imc_datatype.hpp"
-#include "imc_meta.hpp"
+#include "imc_objects.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -27,6 +27,9 @@ namespace imc
     // list of imc-blocks
     std::vector<block> rawblocks_;
 
+    // check computational complexity for parsing blocks
+    unsigned long int cplxcnt_;
+
     // collect meta-information, channel definition, etc.
     imc::info imcinfo_;
     imc::channel imcchannel_;
@@ -36,17 +39,20 @@ namespace imc
 
     // constructor
     raw() {};
-    raw(std::string raw_file): raw_file_(raw_file) { this->parse_blocks(); };
+    raw(std::string raw_file): raw_file_(raw_file) { set_file(raw_file); };
 
     // provide new raw-file
     void set_file(std::string raw_file)
     {
       raw_file_ = raw_file;
+      this->fill_buffer();
       this->parse_blocks();
     }
 
-    // list all blocks in buffer
-    void parse_blocks()
+  private:
+
+    // open file and stream data into buffer
+    void fill_buffer()
     {
       // open file and put data in buffer
       try {
@@ -61,11 +67,20 @@ namespace imc
           std::string("failed to open raw-file and stream data in buffer: ") + e.what()
         );
       }
+    }
+
+    // parse all raw blocks in buffer
+    void parse_blocks()
+    {
+      // reset counter to identify computational complexity
+      cplxcnt_ = 0;
 
       // start parsing raw-blocks in buffer
       for ( std::vector<unsigned char>::iterator it=buffer_.begin();
                                                  it!=buffer_.end(); ++it )
       {
+        cplxcnt_++;
+
         // check for "magic byte"
         if ( *it == ch_bgn_ )
         {
@@ -110,6 +125,12 @@ namespace imc
 
                 // add block to list
                 rawblocks_.push_back(blk);
+
+                // skip the remaining block according to its length
+                if ( it-buffer_.begin()+length < buffer_.size() )
+                {
+                  std::advance(it,length);
+                }
               }
               else
               {
@@ -146,10 +167,24 @@ namespace imc
       }
     }
 
+  public:
+
+    // provide buffer size
+    unsigned long int buffer_size()
+    {
+      return buffer_.size();
+    }
+
     // get blocks
     std::vector<imc::block>& blocks()
     {
       return rawblocks_;
+    }
+
+    // get computational complexity
+    unsigned long int& computational_complexity()
+    {
+      return cplxcnt_;
     }
 
     // collect meta data
