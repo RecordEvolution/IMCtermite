@@ -1,7 +1,9 @@
 //---------------------------------------------------------------------------//
 
-#ifndef IMCOBJECTS
-#define IMCOBJECTS
+#ifndef IMCOBJECT
+#define IMCOBJECT
+
+#include "imc_key.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -13,6 +15,12 @@ namespace imc
     int version_;
     int length_;
     bool closed_;  // corresponds to true = 1 and false = 0 in file
+
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
 
     // get info string
     std::string get_info(int width = 20)
@@ -32,6 +40,12 @@ namespace imc
     std::string name_;
     std::string comment_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -50,6 +64,12 @@ namespace imc
     std::string name_;
     std::string text_;
     std::string comment_;
+
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
 
     // get info string
     std::string get_info(int width = 20)
@@ -79,6 +99,12 @@ namespace imc
     fieldtype fldtype_;
     int dimension_; // corresponding to fieldtype \in {1,}
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -97,6 +123,12 @@ namespace imc
     bool calibration_;
     std::string unit_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -113,6 +145,12 @@ namespace imc
   {
     int component_index_;
     bool analog_digital_;
+
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
 
     // get info string
     std::string get_info(int width = 20)
@@ -151,6 +189,12 @@ namespace imc
     unsigned long int number_subsequent_samples_;
     unsigned long int distance_bytes_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -183,6 +227,12 @@ namespace imc
     bool user_info_;
     bool new_event_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -209,6 +259,12 @@ namespace imc
     bool calibration_;       // 1 = true: calibration, 0 = false: no calibration
     std::string unit_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -230,6 +286,12 @@ namespace imc
     std::string name_;
     std::string comment_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -249,6 +311,12 @@ namespace imc
     // std::vector<unsigned char> rawdata_;
     unsigned long int begin_buffer_, end_buffer_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -267,6 +335,12 @@ namespace imc
     std::string generator_;
     bool comment_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -283,6 +357,12 @@ namespace imc
   {
     std::string timestamp_;
 
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -291,6 +371,95 @@ namespace imc
       return ss.str();
     }
   };
+
+}
+
+
+namespace imc {
+
+  // create wrapper for imc_object types
+  // (not particular memory-efficient but it simplifies the remaining stuff
+  // considerable and the structs are pretty small anyway! )
+  class rawobject
+  {
+    keygroup kyg_;    // 0
+    group grp_;       // 1
+    text txt_;        // 2
+    datafield dtf_;   // 3
+    abscissa abs_;    // 4
+    component cmt_;   // 5
+    packaging pkg_;   // 6
+    buffer bfr_;      // 7
+    range rng_;       // 8
+    channel chn_;     // 9
+    data dat_;        // 10
+    origin_data org_; // 11
+    triggertime trt_; // 12
+
+    void parse(imc::key key, const std::vector<unsigned char>* buffer,
+                             const std::vector<parameter> parameters)
+    {
+      if ( key.name_ == std::string("CK") )
+      {
+        kyg_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CB") )
+      {
+        grp_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CT") )
+      {
+        txt_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CG") )
+      {
+        dtf_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CD") && key.version_ == 1 )
+      {
+        abs_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CC") )
+      {
+        cmt_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CP") )
+      {
+        cmt_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("Cb") )
+      {
+        bfr_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CR") )
+      {
+        rng_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CN") )
+      {
+        chn_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("CS") )
+      {
+        dat_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("NO") )
+      {
+        org_.parse(buffer,parameters);
+      }
+      else if ( key.name_ == std::string("NT") )
+      {
+        trt_.parse(buffer,parameters);
+      }
+    }
+
+    // provide info string
+    std::string get_info(int width = 20)
+    {
+      return kyg_.get_info();
+    }
+  };
+
 
 }
 

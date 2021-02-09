@@ -175,23 +175,11 @@ int main(int argc, char* argv[])
     {
       std::cout<<blk.get_key().get_info()<<"\n";
       std::cout<<blk.get_info()<<"\n";
-      // if ( blk.get_key() == std::string("CR") )
-      // for ( auto prm: blk.get_parameters() ) std::cout<<prm.get_info()<<"\n";
     }
     std::cout<<"number of blocks: "<<imcraw.blocks().size()<<"\n";
     std::cout<<"computational complexity: "<<imcraw.computational_complexity()
                                            <<"/"<<imcraw.buffer_size()<<"\n";
   }
-
-  // for ( std::map<std::string,imc::key>::iterator it = imc::keys.begin();
-  //                                                it != imc::keys.end(); ++it )
-  // {
-  //   std::cout<<it->second.get_info()<<"\n";
-  // }
-  //
-  // std::vector<unsigned char> buff;
-  // imc::block blk(imc::keys.at("CF"),0,100,"data.raw",&buff);
-  // std::cout<<blk.get_info()<<"\n";
 
   return 0;
 }

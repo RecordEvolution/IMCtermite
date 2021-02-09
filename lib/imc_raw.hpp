@@ -10,7 +10,7 @@
 #include "imc_key.hpp"
 #include "imc_block.hpp"
 #include "imc_datatype.hpp"
-#include "imc_objects.hpp"
+#include "imc_object.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -25,12 +25,13 @@ namespace imc
     std::vector<unsigned char> buffer_;
 
     // list of imc-blocks
-    std::vector<block> rawblocks_;
+    std::vector<imc::block> rawblocks_;
 
     // check computational complexity for parsing blocks
     unsigned long int cplxcnt_;
 
     // collect meta-information, channel definition, etc.
+    std::vector<imc::keygroup> keygroups_;
 
   public:
 
@@ -163,6 +164,15 @@ namespace imc
         }
       }
     }
+
+    // // extract imc objects
+    // void list_keygroup()
+    // {
+    //   for ( auto &blk: this->rawblocks_ )
+    //   {
+    //     if ( blk.get_key().name_ == std::string("CK") )
+    //   }
+    // }
 
   public:
 
