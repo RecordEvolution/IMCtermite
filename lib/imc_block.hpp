@@ -37,14 +37,14 @@ namespace imc
     // w.r.t. to first byte of block (=0)
     std::vector<imc::parameter> parameters_;
 
-    // particular imc object
+    // particular imc object represented by this block
     imc::rawobject imc_object_;
 
   public:
 
     // constructor
     block(key thekey, unsigned long int begin, unsigned long int end,
-                      std::string raw_file, std::vector<unsigned char>* buffer):
+                      std::string raw_file, const std::vector<unsigned char>* buffer):
       thekey_(thekey)
     {
       if ( keys.count(thekey.name_) != 1 ) throw std::logic_error("unknown key");
@@ -68,10 +68,13 @@ namespace imc
 
       try {
         parse_parameters();
+        parse_object();
       } catch (const std::exception& e) {
         throw std::runtime_error("block: failed to parse parameters");
       }
     }
+
+  private:
 
     // identify/parse parameters in block
     void parse_parameters()
@@ -93,6 +96,14 @@ namespace imc
       }
       parameters_.back().end( this->end_ - 1 );
     }
+
+    // pass buffer and parameters associated to block to generate corres. object
+    void parse_object()
+    {
+      imc_object_.parse(thekey_,buffer_,parameters_);
+    }
+
+  public:
 
     // access members
     imc::key get_key() { return thekey_; }
@@ -119,7 +130,7 @@ namespace imc
     }
 
     // get info string
-    std::string get_info(int width = 20)
+    std::string get_info(bool include_object = true, int width = 20)
     {
       // summarize parameters in single string
       std::string prsstr("{");
@@ -129,12 +140,22 @@ namespace imc
 
       // construct block info string
       std::stringstream ss;
-      ss<<std::setw(width)<<std::left<<"block-key:"<<thekey_.name_<<"\n"
+      ss<<std::setw(width)<<std::left<<"block:"<<thekey_.name_
+                                     <<" ("<<thekey_.description_<<")"<<"\n"
         <<std::setw(width)<<std::left<<"begin:"<<begin_<<"\n"
         <<std::setw(width)<<std::left<<"end:"<<end_<<"\n"
         <<std::setw(width)<<std::left<<"rawfile:"<<raw_file_<<"\n"
         <<std::setw(width)<<std::left<<"buffersize:"<<buffer_->size()<<"\n"
         <<std::setw(width)<<std::left<<"parameters:"<<prsstr<<"\n";
+
+      // include meta data of specific object
+      if ( include_object )
+      {
+        ss<<std::setfill('-')<<std::left<<std::setw(60)<<""<<std::setfill(' ')<<"\n";
+        // ss<<thekey_.description_<<"\n";
+        ss<<imc_object_.get_info()<<"\n";
+      }
+
       return ss.str();
     }
 

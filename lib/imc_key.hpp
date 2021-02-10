@@ -45,7 +45,7 @@ namespace imc
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"critical:"<<(critical_?"yes":"no")<<"\n"
         <<std::setw(width)<<std::left<<"name:"<<name_<<"\n"
-        <<std::setw(width)<<std::left<<"decription:"<<description_<<"\n"
+        <<std::setw(width)<<std::left<<"description:"<<description_<<"\n"
         <<std::setw(width)<<std::left<<"version:"<<version_<<"\n";
       return ss.str();
     }
@@ -65,7 +65,7 @@ namespace imc
     {"CD", key(true,"CD","abscissa description",2)},
     {"CZ", key(true,"CZ","scaling of z-axis",1)},
     {"CC", key(true,"CC","start of component",1)},
-    {"CP", key(true,"CP","buffer, datatype and samples of component ",1)},
+    {"CP", key(true,"CP","buffer, datatype and samples of component",1)},
     {"Cb", key(true,"Cb","buffer description",1)},
     {"CR", key(true,"CR","permissible range of values in component",1)},
     {"CN", key(true,"CN","name and comment of channel",1)},

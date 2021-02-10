@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     // list blocks
     for ( imc::block blk: imcraw.blocks() )
     {
-      std::cout<<blk.get_key().get_info()<<"\n";
+      // std::cout<<blk.get_key().get_info()<<"\n";
       std::cout<<blk.get_info()<<"\n";
     }
     std::cout<<"number of blocks: "<<imcraw.blocks().size()<<"\n";

@@ -114,7 +114,7 @@ namespace imc
                 }
                 unsigned long length = std::stoul(leng);
 
-                // declare corresponding key and block
+                // declare and initialize corresponding key and block
                 imc::key bkey( *(it+1)==imc::key_crit_ , newkey,
                                imc::keys.at(newkey).description_, version );
                 imc::block blk(bkey,it-buffer_.begin(),
@@ -165,14 +165,7 @@ namespace imc
       }
     }
 
-    // // extract imc objects
-    // void list_keygroup()
-    // {
-    //   for ( auto &blk: this->rawblocks_ )
-    //   {
-    //     if ( blk.get_key().name_ == std::string("CK") )
-    //   }
-    // }
+    // parse channel's raw data
 
   public:
 
@@ -193,15 +186,6 @@ namespace imc
     {
       return cplxcnt_;
     }
-
-    // collect meta data
-    void parse_meta()
-    {
-
-
-    }
-
-    // parse channel's raw data
 
   };
 

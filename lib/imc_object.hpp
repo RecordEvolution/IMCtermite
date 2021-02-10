@@ -9,6 +9,30 @@
 
 namespace imc
 {
+  // format and processor (corresponds to key CF)
+  struct format
+  {
+    int fileformat_;
+    int processor_;
+
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    {
+
+    }
+
+    format(): fileformat_(-1), processor_(-1) {}
+
+    // get info string
+    std::string get_info(int width = 20)
+    {
+      std::stringstream ss;
+      ss<<std::setw(width)<<std::left<<"format:"<<fileformat_<<"\n"
+        <<std::setw(width)<<std::left<<"processor:"<<processor_<<"\n";
+      return ss.str();
+    }
+  };
+
   // start of group of keys (corresponds to key CK)
   struct keygroup
   {
@@ -52,7 +76,7 @@ namespace imc
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"group-index:"<<group_index_<<"\n"
         <<std::setw(width)<<std::left<<"name:"<<name_<<"\n"
-        <<std::setw(width)<<std::left<<"comment_:"<<comment_<<"\n";
+        <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n";
       return ss.str();
     }
   };
@@ -78,7 +102,7 @@ namespace imc
       ss<<std::setw(width)<<std::left<<"group-index:"<<group_index_<<"\n"
         <<std::setw(width)<<std::left<<"name:"<<name_<<"\n"
         <<std::setw(width)<<std::left<<"text:"<<text_<<"\n"
-        <<std::setw(width)<<std::left<<"comment_:"<<comment_<<"\n";
+        <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n";
       return ss.str();
     }
   };
@@ -111,7 +135,7 @@ namespace imc
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"#components:"<<number_components_<<"\n"
         <<std::setw(width)<<std::left<<"fieldtype:"<<fldtype_<<"\n"
-        <<std::setw(width)<<std::left<<"dimension_:"<<dimension_<<"\n";
+        <<std::setw(width)<<std::left<<"dimension:"<<dimension_<<"\n";
       return ss.str();
     }
   };
@@ -347,7 +371,7 @@ namespace imc
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"origin:"<<(origin_?"verrechnet":"Original")<<"\n"
         <<std::setw(width)<<std::left<<"generator:"<<generator_<<"\n"
-        <<std::setw(width)<<std::left<<"comment_:"<<comment_<<"\n";
+        <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n";
       return ss.str();
     }
   };
@@ -378,88 +402,149 @@ namespace imc
 namespace imc {
 
   // create wrapper for imc_object types
-  // (not particular memory-efficient but it simplifies the remaining stuff
-  // considerable and the structs are pretty small anyway! )
+  // (not particularly memory-efficient but it simplifies the remaining stuff
+  // considerably and the structs are pretty small anyway!)
   class rawobject
   {
-    keygroup kyg_;    // 0
-    group grp_;       // 1
-    text txt_;        // 2
-    datafield dtf_;   // 3
-    abscissa abs_;    // 4
-    component cmt_;   // 5
-    packaging pkg_;   // 6
-    buffer bfr_;      // 7
-    range rng_;       // 8
-    channel chn_;     // 9
-    data dat_;        // 10
-    origin_data org_; // 11
-    triggertime trt_; // 12
+    format fmt_;      // 0
+    keygroup kyg_;    // 1
+    group grp_;       // 2
+    text txt_;        // 3
+    datafield dtf_;   // 4
+    abscissa abs_;    // 5
+    component cmt_;   // 6
+    packaging pkg_;   // 7
+    buffer bfr_;      // 8
+    range rng_;       // 9
+    channel chn_;     // 10
+    data dat_;        // 11
+    origin_data org_; // 12
+    triggertime trt_; // 13
+    int objidx_;
+
+  public:
+
+    rawobject(): objidx_(-1) { }
 
     void parse(imc::key key, const std::vector<unsigned char>* buffer,
-                             const std::vector<parameter> parameters)
+                             const std::vector<parameter>& parameters)
     {
-      if ( key.name_ == std::string("CK") )
+      if ( key.name_ == std::string("CF") )
+      {
+        fmt_.parse(buffer,parameters);
+        objidx_ = 0;
+      }
+      else if ( key.name_ == std::string("CK") )
       {
         kyg_.parse(buffer,parameters);
+        objidx_ = 1;
       }
       else if ( key.name_ == std::string("CB") )
       {
         grp_.parse(buffer,parameters);
+        objidx_ = 2;
       }
       else if ( key.name_ == std::string("CT") )
       {
         txt_.parse(buffer,parameters);
+        objidx_ = 3;
       }
       else if ( key.name_ == std::string("CG") )
       {
         dtf_.parse(buffer,parameters);
+        objidx_ = 4;
       }
       else if ( key.name_ == std::string("CD") && key.version_ == 1 )
       {
         abs_.parse(buffer,parameters);
+        objidx_ = 5;
       }
       else if ( key.name_ == std::string("CC") )
       {
         cmt_.parse(buffer,parameters);
+        objidx_ = 6;
       }
       else if ( key.name_ == std::string("CP") )
       {
         cmt_.parse(buffer,parameters);
+        objidx_ = 7;
       }
       else if ( key.name_ == std::string("Cb") )
       {
         bfr_.parse(buffer,parameters);
+        objidx_ = 8;
       }
       else if ( key.name_ == std::string("CR") )
       {
         rng_.parse(buffer,parameters);
+        objidx_ = 9;
       }
       else if ( key.name_ == std::string("CN") )
       {
         chn_.parse(buffer,parameters);
+        objidx_ = 10;
       }
       else if ( key.name_ == std::string("CS") )
       {
         dat_.parse(buffer,parameters);
+        objidx_ = 11;
       }
       else if ( key.name_ == std::string("NO") )
       {
         org_.parse(buffer,parameters);
+        objidx_ = 12;
       }
       else if ( key.name_ == std::string("NT") )
       {
         trt_.parse(buffer,parameters);
+        objidx_ = 13;
+      }
+      else
+      {
+        throw std::logic_error(
+          std::string("unsupported block associated to key ") + key.name_
+        );
       }
     }
 
     // provide info string
     std::string get_info(int width = 20)
     {
-      return kyg_.get_info();
+      switch (objidx_) {
+        case 0:
+          return fmt_.get_info();
+        case 1:
+          return kyg_.get_info();
+        case 2:
+          return grp_.get_info();
+        case 3:
+          return txt_.get_info();
+        case 4:
+          return dtf_.get_info();
+        case 5:
+          return abs_.get_info();
+        case 6:
+          return cmt_.get_info();
+        case 7:
+          return pkg_.get_info();
+        case 8:
+          return bfr_.get_info();
+        case 9:
+          return rng_.get_info();
+        case 10:
+          return chn_.get_info();
+        case 11:
+          return dat_.get_info();
+        case 12:
+          return org_.get_info();
+        case 13:
+          return trt_.get_info();
+        default:
+          return std::string("");
+      }
     }
-  };
 
+  };
 
 }
 
