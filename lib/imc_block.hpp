@@ -82,12 +82,16 @@ namespace imc
     void parse_parameters()
     {
       // parse entire block and check for separator tokens
-      for ( unsigned long int b = begin_; b < end_; b++ )
+      // (consider only first four of any CS block)
+      int count = 0;
+      for ( unsigned long int b = begin_;
+        b < end_ && (!(thekey_==imc::keys.at("CS")) || count < 4 ); b++ )
       {
         if ( buffer_->at(b) == imc::ch_sep_ )
         {
           // define range of parameter with first byte = ch_sep_
           parameters_.push_back(imc::parameter(b,b));
+          count++;
         }
       }
 

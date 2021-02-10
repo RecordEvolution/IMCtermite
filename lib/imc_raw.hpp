@@ -166,6 +166,34 @@ namespace imc
     }
 
     // parse channel's raw data
+    template<typename datatype>
+    void convert_data_to_type(std::vector<unsigned char>& subbuffer,
+                              std::vector<imc::datatype>& channel)
+    {
+      // check number of elements of type "datatype" in buffer
+      if ( subbuffer.size() != channel.size()*sizeof(datatype) )
+      {
+        throw std::runtime_error("size mismatch between subbuffer and datatype");
+      }
+
+      // extract every single number of type "datatype" from buffer
+      for ( unsigned long int i = 0; i < channel.size(); i++ )
+      {
+        // declare number of required type and point it to first byte in buffer
+        // representing the number
+        datatype df;
+        uint8_t* dfcast = reinterpret_cast<uint8_t*>(&df);
+
+        for ( unsigned long int j = 0; j < sizeof(datatype); j++ )
+        {
+          dfcast[j] = (int)subbuffer[i*sizeof(datatype)+j];
+        }
+
+        // save number in channel
+        channel[i] = df;
+      }
+    }
+
 
   public:
 
@@ -185,6 +213,29 @@ namespace imc
     unsigned long int& computational_complexity()
     {
       return cplxcnt_;
+    }
+
+    // list a particular type of block
+    std::vector<imc::block> list_blocks(imc::key mykey)
+    {
+      std::vector<imc::block> myblocks;
+      for ( imc::block blk: this->rawblocks_ )
+      {
+        if ( blk.get_key() == mykey ) myblocks.push_back(blk);
+      }
+      return myblocks;
+    }
+
+    // list all groups (associated to blocks "CB")
+    std::vector<imc::block> list_groups()
+    {
+      return this->list_blocks(imc::keys.at("CB"));
+    }
+
+    // list all channels
+    std::vector<imc::block> list_channels()
+    {
+      return this->list_blocks(imc::keys.at("CN"));
     }
 
   };

@@ -240,14 +240,14 @@ namespace imc
   struct component
   {
     int component_index_;
-    bool analog_digital_;
+    bool analog_digital_; // 1 => false (analog), 2 => true (digital)
 
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
       if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CD2");
       component_index_ = std::stoi(get_parameter(buffer,&parameters[2]));
-      analog_digital_ = std::stoi(get_parameter(buffer,&parameters[3]));
+      analog_digital_ = ( std::stoi(get_parameter(buffer,&parameters[3])) == 2 );
     }
 
     // get info string
@@ -505,12 +505,17 @@ namespace imc
       time(&rawtime);
       ts = localtime(&rawtime);
       ts->tm_mday = day_;
-      ts->tm_mon = month_;
+      ts->tm_mon = month_-1;
       ts->tm_year = year_-1900;
       ts->tm_hour = hour_;
       ts->tm_min = minute_;
       ts->tm_sec = (int)second_;
       timestamp_ = asctime(ts);
+      // timestamp_ = std::to_string(year_) + std::string("-") + std::to_string(month_)
+      //                                    + std::string("-") + std::to_string(day_)
+      //                                    + std::string("T") + std::to_string(hour_)
+      //                                    + std::string(":") + std::to_string(minute_)
+      //                                    + std::string(":") + std::to_string(second_);
     }
 
     // get info string

@@ -39,6 +39,15 @@ namespace imc
       version_ = version;
     }
 
+    // comparison operator
+    bool operator==(const key& akey)
+    {
+      return ( this->critical_ == akey.critical_
+            && this->name_ == akey.name_
+            && this->description_ == akey.description_
+            && this->version_ == akey.version_ );
+    }
+
     // get info string
     std::string get_info(int width = 20)
     {
@@ -52,7 +61,7 @@ namespace imc
 
   };
 
-  // define (non)critial markers/keys
+  // define (non)critical markers/keys
   std::map<std::string,key> keys = {
 
     // critical keys

@@ -178,7 +178,23 @@ int main(int argc, char* argv[])
     }
     std::cout<<"number of blocks: "<<imcraw.blocks().size()<<"\n";
     std::cout<<"computational complexity: "<<imcraw.computational_complexity()
-                                           <<"/"<<imcraw.buffer_size()<<"\n";
+                                           <<"/"<<imcraw.buffer_size()<<"\n\n";
+
+    // list specific blocks
+    // std::vector<imc::block> CBblocks = imcraw.list_blocks(imc::keys.at("CB"));
+    // for ( auto blk: CBblocks ) std::cout<<blk.get_info()<<"\n";
+    // std::vector<imc::block> CGblocks = imcraw.list_blocks(imc::keys.at("CG"));
+    // for ( auto blk: CGblocks ) std::cout<<blk.get_info()<<"\n";
+    // std::vector<imc::block> CCblocks = imcraw.list_blocks(imc::keys.at("CC"));
+    // for ( auto blk: CCblocks ) std::cout<<blk.get_info()<<"\n";
+    // std::vector<imc::block> CNblocks = imcraw.list_blocks(imc::keys.at("CN"));
+    // for ( auto blk: CNblocks ) std::cout<<blk.get_info()<<"\n";
+    // std::vector<imc::block> CSblocks = imcraw.list_blocks(imc::keys.at("CS"));
+    // for ( auto blk: CSblocks ) std::cout<<blk.get_info()<<"\n";
+    // std::vector<imc::block> groups = imcraw.list_groups();
+    // for ( auto blk: groups ) std::cout<<blk.get_info()<<"\n";
+    // std::vector<imc::block> channels = imcraw.list_channels();
+    // for ( auto blk: channels ) std::cout<<blk.get_info()<<"\n";
   }
 
   return 0;
