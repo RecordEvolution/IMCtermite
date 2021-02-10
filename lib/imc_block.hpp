@@ -150,6 +150,7 @@ namespace imc
       // construct block info string
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"block:"<<thekey_.name_
+                                     <<" version "<<thekey_.version_
                                      <<" ("<<thekey_.description_<<")"<<"\n"
         <<std::setw(width)<<std::left<<"begin:"<<begin_<<"\n"
         <<std::setw(width)<<std::left<<"end:"<<end_<<"\n"

@@ -3,6 +3,7 @@
 #ifndef IMCOBJECT
 #define IMCOBJECT
 
+#include <time.h>
 #include "imc_key.hpp"
 
 //---------------------------------------------------------------------------//
@@ -29,6 +30,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 3 ) throw std::runtime_error("invalid number of parameters in CF");
       fileformat_ = std::stoi(get_parameter(buffer,&parameters[0]));
       processor_ = std::stoi(get_parameter(buffer,&parameters[2]));
     }
@@ -55,6 +57,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 2 ) throw std::runtime_error("invalid number of parameters in CK");
       version_ = std::stoi(get_parameter(buffer,&parameters[0]));
       length_ = std::stoi(get_parameter(buffer,&parameters[1]));
       closed_ = ( get_parameter(buffer,&parameters[3])==std::string("1") );
@@ -81,6 +84,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 7 ) throw std::runtime_error("invalid number of parameters in CB");
       group_index_ = std::stoul(get_parameter(buffer,&parameters[2]));
       name_ = get_parameter(buffer,&parameters[4]);
       comment_ = get_parameter(buffer,&parameters[6]);
@@ -108,6 +112,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 9 ) throw std::runtime_error("invalid number of parameters in CT");
       group_index_ = std::stoul(get_parameter(buffer,&parameters[2]));
       name_ = get_parameter(buffer,&parameters[4]);
       text_ = get_parameter(buffer,&parameters[6]);
@@ -145,6 +150,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 5 ) throw std::runtime_error("invalid number of parameters in CG");
       number_components_ = std::stoul(get_parameter(buffer,&parameters[2]));
       fldtype_ = (fieldtype)std::stoi(get_parameter(buffer,&parameters[3]));
       dimension_ = std::stoi(get_parameter(buffer,&parameters[4]));
@@ -171,6 +177,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 6 ) throw std::runtime_error("invalid number of parameters in CD1");
       dx_ = std::stod(get_parameter(buffer,&parameters[2]));
       calibration_ = ( get_parameter(buffer,&parameters[3]) == std::string("1") );
       unit_ = get_parameter(buffer,&parameters[5]);
@@ -181,7 +188,7 @@ namespace imc
     {
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"dx:"<<dx_<<"\n"
-        <<std::setw(width)<<std::left<<"calibration_:"<<(calibration_?"yes":"no")<<"\n"
+        <<std::setw(width)<<std::left<<"calibration:"<<(calibration_?"yes":"no")<<"\n"
         <<std::setw(width)<<std::left<<"unit:"<<unit_<<"\n";
       return ss.str();
     }
@@ -202,6 +209,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 11 ) throw std::runtime_error("invalid number of parameters in CD2");
       dx_ = std::stod(get_parameter(buffer,&parameters[2]));
       calibration_ = ( get_parameter(buffer,&parameters[3]) == std::string("1") );
       unit_ = get_parameter(buffer,&parameters[5]);
@@ -209,7 +217,7 @@ namespace imc
       ismultievent_ = ( get_parameter(buffer,&parameters[7]) == std::string("1") );
       sortbuffer_ = ( get_parameter(buffer,&parameters[8]) == std::string("1") );
       x0_ = std::stod(get_parameter(buffer,&parameters[9]));
-      pretriggerapp_ = std::stoi( get_parameter(buffer,&parameters[11]) );
+      pretriggerapp_ = std::stoi( get_parameter(buffer,&parameters[10]) );
     }
 
     // get info string
@@ -217,7 +225,7 @@ namespace imc
     {
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"dx:"<<dx_<<"\n"
-        <<std::setw(width)<<std::left<<"calibration_:"<<(calibration_?"yes":"no")<<"\n"
+        <<std::setw(width)<<std::left<<"calibration:"<<(calibration_?"yes":"no")<<"\n"
         <<std::setw(width)<<std::left<<"unit:"<<unit_<<"\n"
         <<std::setw(width)<<std::left<<"reduction:"<<reduction_<<"\n"
         <<std::setw(width)<<std::left<<"ismultievent:"<<ismultievent_<<"\n"
@@ -235,9 +243,11 @@ namespace imc
     bool analog_digital_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CD2");
+      component_index_ = std::stoi(get_parameter(buffer,&parameters[2]));
+      analog_digital_ = std::stoi(get_parameter(buffer,&parameters[3]));
     }
 
     // get info string
@@ -245,7 +255,7 @@ namespace imc
     {
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"index:"<<component_index_<<"\n"
-        <<std::setw(width)<<std::left<<"analog/digital_:"<<(analog_digital_?"digital":"analog")<<"\n";
+        <<std::setw(width)<<std::left<<"analog/digital:"<<(analog_digital_?"digital":"analog")<<"\n";
       return ss.str();
     }
   };
@@ -278,9 +288,17 @@ namespace imc
     unsigned long int distance_bytes_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 10 ) throw std::runtime_error("invalid number of parameters in CD2");
+      buffer_reference_ = std::stoi(get_parameter(buffer,&parameters[2]));
+      bytes_ = std::stoi(get_parameter(buffer,&parameters[3]));
+      numeric_type_ = (numtype)std::stoi(get_parameter(buffer,&parameters[4]));
+      signbits_ = std::stoi(get_parameter(buffer,&parameters[5]));
+      mask_ = std::stoi(get_parameter(buffer,&parameters[6]));
+      offset_ = std::stoul(get_parameter(buffer,&parameters[7]));
+      number_subsequent_samples_ = std::stoul(get_parameter(buffer,&parameters[8]));
+      distance_bytes_ = std::stoul(get_parameter(buffer,&parameters[9]));
     }
 
     // get info string
@@ -292,7 +310,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"significant bits:"<<signbits_<<"\n"
         <<std::setw(width)<<std::left<<"mask:"<<mask_<<"\n"
         <<std::setw(width)<<std::left<<"offset:"<<offset_<<"\n"
-        <<std::setw(width)<<std::left<<"#subsequent-samples:"<<number_subsequent_samples_<<"\n"
+        <<std::setw(width)<<std::left<<"#subseq.-samples:"<<number_subsequent_samples_<<"\n"
         <<std::setw(width)<<std::left<<"distance in bytes:"<<distance_bytes_<<"\n";
       return ss.str();
     }
@@ -310,15 +328,25 @@ namespace imc
     unsigned long int number_bytes_;     // number of bytes in buffer
     unsigned long int offset_first_sample_;
     unsigned long int number_filled_bytes_;
-    unsigned long int time_offset_;
-    unsigned long int add_time_;         // start of trigger time = NT + add_time
-    bool user_info_;
-    bool new_event_;
+    double x0_;
+    double add_time_;                    // start of trigger time = NT + add_time
+    // bool user_info_;
+    // bool new_event_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 13 ) throw std::runtime_error("invalid number of parameters in CD2");
+      number_buffers_ = std::stoul(get_parameter(buffer,&parameters[2]));
+      bytes_userinfo_ = std::stoul(get_parameter(buffer,&parameters[3]));
+      buffer_reference_ = std::stoul(get_parameter(buffer,&parameters[4]));
+      sample_index_ = std::stoul(get_parameter(buffer,&parameters[5]));
+      offset_buffer_ = std::stoul(get_parameter(buffer,&parameters[6]));
+      number_bytes_ = std::stoul(get_parameter(buffer,&parameters[7]));
+      offset_first_sample_ = std::stoul(get_parameter(buffer,&parameters[8]));
+      number_filled_bytes_ = std::stoul(get_parameter(buffer,&parameters[9]));
+      x0_ = std::stod(get_parameter(buffer,&parameters[11]));
+      add_time_ = std::stod(get_parameter(buffer,&parameters[12]));
     }
 
     // get info string
@@ -333,7 +361,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"buffer size:"<<number_bytes_<<"\n"
         <<std::setw(width)<<std::left<<"offset sample:"<<offset_first_sample_<<"\n"
         <<std::setw(width)<<std::left<<"#filled bytes:"<<number_filled_bytes_<<"\n"
-        <<std::setw(width)<<std::left<<"time offset:"<<time_offset_<<"\n"
+        <<std::setw(width)<<std::left<<"time offset:"<<x0_<<"\n"
         <<std::setw(width)<<std::left<<"add time:"<<add_time_<<"\n";
       return ss.str();
     }
@@ -348,9 +376,14 @@ namespace imc
     std::string unit_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in CD2");
+      transform_ = (get_parameter(buffer,&parameters[2]) == std::string("1"));
+      factor_ = std::stod(get_parameter(buffer,&parameters[3]));
+      offset_ = std::stod(get_parameter(buffer,&parameters[4]));
+      calibration_ = (get_parameter(buffer,&parameters[5]) == std::string("1"));
+      unit_ = get_parameter(buffer,&parameters[7]);
     }
 
     // get info string
@@ -375,9 +408,13 @@ namespace imc
     std::string comment_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 9 ) throw std::runtime_error("invalid number of parameters in CD2");
+      group_index_ = std::stoul(get_parameter(buffer,&parameters[2]));
+      index_bit_ = (get_parameter(buffer,&parameters[4]) == std::string("1"));
+      name_ = get_parameter(buffer,&parameters[6]);
+      comment_ = get_parameter(buffer,&parameters[8]);
     }
 
     // get info string
@@ -397,21 +434,22 @@ namespace imc
   {
     unsigned long int index_;  // starting from 1 in first CS block in file
     // std::vector<unsigned char> rawdata_;
-    unsigned long int begin_buffer_, end_buffer_;
+    // unsigned long int begin_buffer_, end_buffer_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CD2");
+      index_ = std::stoul(get_parameter(buffer,&parameters[2]));
     }
 
     // get info string
     std::string get_info(int width = 20)
     {
       std::stringstream ss;
-      ss<<std::setw(width)<<std::left<<"index:"<<index_<<"\n"
-        <<std::setw(width)<<std::left<<"(begin,end) buffer:"
-                                     <<"("<<begin_buffer_<<","<<end_buffer_<<")"<<"\n";
+      ss<<std::setw(width)<<std::left<<"index:"<<index_<<"\n";
+        // <<std::setw(width)<<std::left<<"(begin,end) buffer:"
+        //                              <<"("<<begin_buffer_<<","<<end_buffer_<<")"<<"\n";
       return ss.str();
     }
   };
@@ -421,12 +459,15 @@ namespace imc
   {
     bool origin_;  // corresponds to true = 1 ("verrechnet") and false = 0 ("Original")
     std::string generator_;
-    bool comment_;
+    std::string comment_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      if ( parameters.size() < 7 ) throw std::runtime_error("invalid number of parameters in CD2");
+      origin_ = ( get_parameter(buffer,&parameters[2]) == std::string("1") );
+      generator_ = get_parameter(buffer,&parameters[4]);
+      comment_ = get_parameter(buffer,&parameters[6]);
     }
 
     // get info string
@@ -440,15 +481,36 @@ namespace imc
     }
   };
 
-  // trigger timestamp (corresponds to key NT)
+  // trigger timestamp (corresponds to key NT1)
   struct triggertime
   {
+    int day_, month_, year_;
+    int hour_, minute_;
+    double second_;
     std::string timestamp_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
+      if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in CD2");
+      day_ = std::stoi( get_parameter(buffer,&parameters[2]) );
+      month_ = std::stoi( get_parameter(buffer,&parameters[3]) );
+      year_ = std::stoi( get_parameter(buffer,&parameters[4]) );
+      hour_ = std::stoi( get_parameter(buffer,&parameters[5]) );
+      minute_ = std::stoi( get_parameter(buffer,&parameters[6]) );
+      second_ = std::stod( get_parameter(buffer,&parameters[7]) );
 
+      time_t rawtime;
+      struct tm* ts;
+      time(&rawtime);
+      ts = localtime(&rawtime);
+      ts->tm_mday = day_;
+      ts->tm_mon = month_;
+      ts->tm_year = year_-1900;
+      ts->tm_hour = hour_;
+      ts->tm_min = minute_;
+      ts->tm_sec = (int)second_;
+      timestamp_ = asctime(ts);
     }
 
     // get info string
@@ -461,7 +523,6 @@ namespace imc
   };
 
 }
-
 
 namespace imc {
 
@@ -524,11 +585,6 @@ namespace imc {
         abs_.parse(buffer,parameters);
         objidx_ = 5;
       }
-      else if ( key.name_ == std::string("CD") && key.version_ == 2 )
-      {
-        abs_.parse(buffer,parameters);
-        objidx_ = 14;
-      }
       else if ( key.name_ == std::string("CC") )
       {
         cmt_.parse(buffer,parameters);
@@ -536,7 +592,7 @@ namespace imc {
       }
       else if ( key.name_ == std::string("CP") )
       {
-        cmt_.parse(buffer,parameters);
+        pkg_.parse(buffer,parameters);
         objidx_ = 7;
       }
       else if ( key.name_ == std::string("Cb") )
@@ -564,17 +620,30 @@ namespace imc {
         org_.parse(buffer,parameters);
         objidx_ = 12;
       }
-      else if ( key.name_ == std::string("NT") )
+      else if ( key.name_ == std::string("NT") && key.version_ == 1 )
       {
         trt_.parse(buffer,parameters);
         objidx_ = 13;
       }
+      else if ( key.name_ == std::string("CD") && key.version_ == 2 )
+      {
+        abs2_.parse(buffer,parameters);
+        objidx_ = 14;
+      }
       else
       {
-        throw std::logic_error(
-          std::string("unsupported block associated to key ")
-          + key.name_ + std::to_string(key.version_)
-        );
+        if ( key.name_.at(0) == 'C' )
+        {
+          throw std::logic_error(
+            std::string("unsupported block associated to critical key ")
+            + key.name_ + std::to_string(key.version_)
+          );
+        }
+        else
+        {
+          std::cout<<"WARNING: unsupported block associated to noncritical key "
+                   <<key.name_<<key.version_<<"\n";
+        }
       }
     }
 
@@ -594,8 +663,6 @@ namespace imc {
           return dtf_.get_info();
         case 5:
           return abs_.get_info();
-        case 14:
-          return abs2_.get_info();
         case 6:
           return cmt_.get_info();
         case 7:
@@ -612,6 +679,8 @@ namespace imc {
           return org_.get_info();
         case 13:
           return trt_.get_info();
+        case 14:
+          return abs2_.get_info();
         default:
           return std::string("");
       }
