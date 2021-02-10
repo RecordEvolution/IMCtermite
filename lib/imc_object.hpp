@@ -9,6 +9,17 @@
 
 namespace imc
 {
+  // obtain specific parameters as string
+  std::string get_parameter(const std::vector<unsigned char>* buffer, const imc::parameter* param)
+  {
+    std::string prm("");
+    for ( unsigned long int i = param->begin()+1; i <= param->end(); i++ )
+    {
+      prm.push_back((char)(*buffer)[i]);
+    }
+    return prm;
+  }
+
   // format and processor (corresponds to key CF)
   struct format
   {
@@ -16,9 +27,10 @@ namespace imc
     int processor_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      fileformat_ = std::stoi(get_parameter(buffer,&parameters[0]));
+      processor_ = std::stoi(get_parameter(buffer,&parameters[2]));
     }
 
     format(): fileformat_(-1), processor_(-1) {}
@@ -41,9 +53,11 @@ namespace imc
     bool closed_;  // corresponds to true = 1 and false = 0 in file
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      version_ = std::stoi(get_parameter(buffer,&parameters[0]));
+      length_ = std::stoi(get_parameter(buffer,&parameters[1]));
+      closed_ = ( get_parameter(buffer,&parameters[3])==std::string("1") );
     }
 
     // get info string
@@ -65,9 +79,11 @@ namespace imc
     std::string comment_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      group_index_ = std::stoul(get_parameter(buffer,&parameters[2]));
+      name_ = get_parameter(buffer,&parameters[4]);
+      comment_ = get_parameter(buffer,&parameters[6]);
     }
 
     // get info string
@@ -90,9 +106,12 @@ namespace imc
     std::string comment_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      group_index_ = std::stoul(get_parameter(buffer,&parameters[2]));
+      name_ = get_parameter(buffer,&parameters[4]);
+      text_ = get_parameter(buffer,&parameters[6]);
+      comment_ = get_parameter(buffer,&parameters[8]);
     }
 
     // get info string
@@ -124,9 +143,11 @@ namespace imc
     int dimension_; // corresponding to fieldtype \in {1,}
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      number_components_ = std::stoul(get_parameter(buffer,&parameters[2]));
+      fldtype_ = (fieldtype)std::stoi(get_parameter(buffer,&parameters[3]));
+      dimension_ = std::stoi(get_parameter(buffer,&parameters[4]));
     }
 
     // get info string
@@ -148,9 +169,11 @@ namespace imc
     std::string unit_;
 
     // construct members by parsing particular parameters from buffer
-    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter> parameters)
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-
+      dx_ = std::stod(get_parameter(buffer,&parameters[2]));
+      calibration_ = ( get_parameter(buffer,&parameters[3]) == std::string("1") );
+      unit_ = get_parameter(buffer,&parameters[5]);
     }
 
     // get info string
@@ -160,6 +183,47 @@ namespace imc
       ss<<std::setw(width)<<std::left<<"dx:"<<dx_<<"\n"
         <<std::setw(width)<<std::left<<"calibration_:"<<(calibration_?"yes":"no")<<"\n"
         <<std::setw(width)<<std::left<<"unit:"<<unit_<<"\n";
+      return ss.str();
+    }
+  };
+
+  // definition of abscissa (corresponds to key CD2)
+  struct abscissa2
+  {
+    double dx_;
+    bool calibration_;
+    std::string unit_;
+    bool reduction_;
+    bool ismultievent_;
+    bool sortbuffer_;
+    double x0_;
+    int pretriggerapp_;
+
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
+    {
+      dx_ = std::stod(get_parameter(buffer,&parameters[2]));
+      calibration_ = ( get_parameter(buffer,&parameters[3]) == std::string("1") );
+      unit_ = get_parameter(buffer,&parameters[5]);
+      reduction_ = ( get_parameter(buffer,&parameters[6]) == std::string("1") );
+      ismultievent_ = ( get_parameter(buffer,&parameters[7]) == std::string("1") );
+      sortbuffer_ = ( get_parameter(buffer,&parameters[8]) == std::string("1") );
+      x0_ = std::stod(get_parameter(buffer,&parameters[9]));
+      pretriggerapp_ = std::stoi( get_parameter(buffer,&parameters[11]) );
+    }
+
+    // get info string
+    std::string get_info(int width = 20)
+    {
+      std::stringstream ss;
+      ss<<std::setw(width)<<std::left<<"dx:"<<dx_<<"\n"
+        <<std::setw(width)<<std::left<<"calibration_:"<<(calibration_?"yes":"no")<<"\n"
+        <<std::setw(width)<<std::left<<"unit:"<<unit_<<"\n"
+        <<std::setw(width)<<std::left<<"reduction:"<<reduction_<<"\n"
+        <<std::setw(width)<<std::left<<"ismultievent:"<<ismultievent_<<"\n"
+        <<std::setw(width)<<std::left<<"sortbuffer:"<<sortbuffer_<<"\n"
+        <<std::setw(width)<<std::left<<"x0:"<<x0_<<"\n"
+        <<std::setw(width)<<std::left<<"pretriggerapp:"<<pretriggerapp_<<"\n";
       return ss.str();
     }
   };
@@ -420,6 +484,7 @@ namespace imc {
     data dat_;        // 11
     origin_data org_; // 12
     triggertime trt_; // 13
+    abscissa2 abs2_;  // 14
     int objidx_;
 
   public:
@@ -458,6 +523,11 @@ namespace imc {
       {
         abs_.parse(buffer,parameters);
         objidx_ = 5;
+      }
+      else if ( key.name_ == std::string("CD") && key.version_ == 2 )
+      {
+        abs_.parse(buffer,parameters);
+        objidx_ = 14;
       }
       else if ( key.name_ == std::string("CC") )
       {
@@ -502,7 +572,8 @@ namespace imc {
       else
       {
         throw std::logic_error(
-          std::string("unsupported block associated to key ") + key.name_
+          std::string("unsupported block associated to key ")
+          + key.name_ + std::to_string(key.version_)
         );
       }
     }
@@ -523,6 +594,8 @@ namespace imc {
           return dtf_.get_info();
         case 5:
           return abs_.get_info();
+        case 14:
+          return abs2_.get_info();
         case 6:
           return cmt_.get_info();
         case 7:

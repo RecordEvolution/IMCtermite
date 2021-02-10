@@ -70,7 +70,9 @@ namespace imc
         parse_parameters();
         parse_object();
       } catch (const std::exception& e) {
-        throw std::runtime_error("block: failed to parse parameters");
+        throw std::runtime_error(
+          std::string("block: failed to parse parameters/objects: ") + e.what()
+        );
       }
     }
 
@@ -100,7 +102,14 @@ namespace imc
     // pass buffer and parameters associated to block to generate corres. object
     void parse_object()
     {
-      imc_object_.parse(thekey_,buffer_,parameters_);
+      try {
+        imc_object_.parse(thekey_,buffer_,parameters_);
+      } catch (const std::exception& e) {
+        throw std::runtime_error(
+          std::string("failed to parse imc::object for key ")
+          + thekey_.name_ + std::string(": ") + e.what()
+        );
+      }
     }
 
   public:

@@ -49,8 +49,8 @@ namespace imc
     }
 
     // access members
-    const unsigned long int& begin() { return begin_; }
-    const unsigned long int& end() { return end_; }
+    const unsigned long int& begin() const { return begin_; }
+    const unsigned long int& end() const { return end_; }
 
     // comparison operator
     bool operator==(const parameter& param)
@@ -59,7 +59,7 @@ namespace imc
     }
 
     // get info
-    std::string get_info()
+    std::string get_info() const
     {
       return ( std::string("[") + std::to_string(begin_) + std::string(",")
                                 + std::to_string(end_) + std::string("]") );
