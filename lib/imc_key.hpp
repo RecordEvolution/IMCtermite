@@ -71,7 +71,7 @@ namespace imc
     {"CT", key(true,"CT","text definition",1)},
     {"CG", key(true,"CG","group of components",1)},
     {"CD", key(true,"CD","abscissa description",1)},
-    {"CD", key(true,"CD","abscissa description",2)},
+    // {"CD2", key(true,"CD","abscissa description",2)},
     {"CZ", key(true,"CZ","scaling of z-axis",1)},
     {"CC", key(true,"CC","start of component",1)},
     {"CP", key(true,"CP","buffer, datatype and samples of component",1)},

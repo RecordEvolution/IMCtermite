@@ -11,6 +11,7 @@
 #include "imc_block.hpp"
 #include "imc_datatype.hpp"
 #include "imc_object.hpp"
+#include "imc_result.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -233,9 +234,90 @@ namespace imc
     }
 
     // list all channels
-    std::vector<imc::block> list_channels()
+    std::vector<std::string> list_channels()
     {
-      return this->list_blocks(imc::keys.at("CN"));
+      std::vector<std::string> channels;
+      for ( imc::block blk: this->rawblocks_ )
+      {
+        if ( blk.get_key() == imc::keys.at("CN") )
+        {
+          imc::parameter prm = blk.get_parameters()[6];
+          channels.push_back(blk.get_parameter(prm));
+        }
+      }
+
+      return channels;
+    }
+
+    // get specific channel data
+    // TODO generalize and simplify channel extraction!!
+    imc::channel_tab get_channel(std::string channel)
+    {
+      // declare single channel table
+      imc::channel_tab chtab;
+
+      // ordinate parameters
+      std::string yunit = std::string("");
+      unsigned long int num_samples = -1;
+      // imc::datatype dtype;
+      int numbits = -1;
+      double yoffset = -1.0, yfactor = -1.0;
+
+      // abscissa parameters
+      double dx = -1.0;
+      double xoffset = -1.0;
+      std::string xunit = std::string("");
+
+      // search block for required parameters
+      for ( imc::block blk: this->rawblocks_ )
+      {
+        if ( blk.get_key() == imc::keys.at("CR") )
+        {
+          yunit = blk.get_parameter(blk.get_parameters()[7]);
+        }
+
+        if ( blk.get_key() == imc::keys.at("Cb") )
+        {
+          num_samples = std::stoul(blk.get_parameter(blk.get_parameters()[7]));
+          xoffset = std::stod(blk.get_parameter(blk.get_parameters()[11]));
+        }
+
+        if ( blk.get_key() == imc::keys.at("CP") )
+        {
+          numbits = std::stoi(blk.get_parameter(blk.get_parameters()[5]));
+        }
+
+        if ( blk.get_key() == imc::keys.at("CR") )
+        {
+          yfactor = std::stod(blk.get_parameter(blk.get_parameters()[3]));
+          yoffset = std::stod(blk.get_parameter(blk.get_parameters()[4]));
+          yunit = blk.get_parameter(blk.get_parameters()[7]);
+        }
+
+        if ( blk.get_key() == imc::keys.at("CD") )
+        {
+          std::cout<<"got CD\n";
+          dx = std::stod(blk.get_parameter(blk.get_parameters()[2]));
+          xunit = blk.get_parameter(blk.get_parameters()[7]);
+        }
+      }
+
+      std::cout<<"yunit:"<<yunit<<"\n"
+               <<"yoffset:"<<yoffset<<"\n"
+               <<"yfactor:"<<yfactor<<"\n"
+               <<"numbits:"<<numbits<<"\n"
+               <<"num_samples:"<<num_samples<<"\n"
+               <<"dx:"<<dx<<"\n"
+               <<"xoffset:"<<xoffset<<"\n"
+               <<"xunit:"<<xunit<<"\n";
+
+      // generate abscissa data
+
+
+      // generate ordinate data
+
+
+      return chtab;
     }
 
   };

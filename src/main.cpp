@@ -193,8 +193,13 @@ int main(int argc, char* argv[])
     // for ( auto blk: CSblocks ) std::cout<<blk.get_info()<<"\n";
     // std::vector<imc::block> groups = imcraw.list_groups();
     // for ( auto blk: groups ) std::cout<<blk.get_info()<<"\n";
-    // std::vector<imc::block> channels = imcraw.list_channels();
-    // for ( auto blk: channels ) std::cout<<blk.get_info()<<"\n";
+
+    // std::vector<std::string> channels = imcraw.list_channels();
+    // for ( auto chn: channels )
+    // {
+    //   std::cout<<chn<<"\n";
+    //   imc::channel_tab chtab = imcraw.get_channel(chn);
+    // }
   }
 
   return 0;

@@ -142,6 +142,22 @@ namespace imc
       return parambuff;
     }
 
+    // get single parameter as string
+    std::string get_parameter(parameter& param)
+    {
+      // check parameter w.r.t. to block
+      if ( param.begin() < begin_ || param.end() > end_ )
+      {
+        throw std::logic_error("inconsistent parameter offsets");
+      }
+      std::string prm("");
+      for ( unsigned long int i = param.begin()+1; i <= param.end(); i++ )
+      {
+        prm.push_back( (char)((*buffer_)[i]) );
+      }
+      return prm;
+    }
+
     // get info string
     std::string get_info(bool include_object = true, int width = 20)
     {
