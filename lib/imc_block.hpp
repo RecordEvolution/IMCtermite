@@ -22,8 +22,11 @@ namespace imc
   // define properties of a raw file block
   class block
   {
-    // associated key
+    // associated IMC key
     key thekey_;
+
+    // unique identifier for using block in hash maps (e.g. byte-position of block = begin_)
+    std::string uuid_;
 
     // offset (in byte) of first (=ch_bgn_) and last byte (=ch_end_) of block
     // w.r.t. to entire raw file
@@ -38,16 +41,16 @@ namespace imc
     std::vector<imc::parameter> parameters_;
 
     // particular imc object represented by this block
-    imc::rawobject imc_object_;
+    // imc::rawobject imc_object_;
 
   public:
 
     // constructor
     block(key thekey, unsigned long int begin, unsigned long int end,
                       std::string raw_file, const std::vector<unsigned char>* buffer):
-      thekey_(thekey)
+      thekey_(thekey), uuid_(std::to_string(begin))
     {
-      if ( keys.count(thekey.name_) != 1 ) throw std::logic_error("unknown key");
+      if ( !imc::check_key(thekey) ) throw std::logic_error("unknown key");
       begin_ = begin;
       end_ = end;
       if ( end_ <= begin_ )
@@ -68,7 +71,7 @@ namespace imc
 
       try {
         parse_parameters();
-        parse_object();
+        // parse_object();
       } catch (const std::exception& e) {
         throw std::runtime_error(
           std::string("block: failed to parse parameters/objects: ") + e.what()
@@ -85,7 +88,7 @@ namespace imc
       // (consider only first four of any CS block)
       int count = 0;
       for ( unsigned long int b = begin_;
-        b < end_ && (!(thekey_==imc::keys.at("CS")) || count < 4 ); b++ )
+        b < end_ && (!(thekey_.name_==imc::get_key(true,"CS").name_) || count < 4 ); b++ )
       {
         if ( buffer_->at(b) == imc::ch_sep_ )
         {
@@ -104,22 +107,23 @@ namespace imc
     }
 
     // pass buffer and parameters associated to block to generate corres. object
-    void parse_object()
-    {
-      try {
-        imc_object_.parse(thekey_,buffer_,parameters_);
-      } catch (const std::exception& e) {
-        throw std::runtime_error(
-          std::string("failed to parse imc::object for key ")
-          + thekey_.name_ + std::string(": ") + e.what()
-        );
-      }
-    }
+    // void parse_object()
+    // {
+    //   try {
+    //     imc_object_.parse(thekey_,buffer_,parameters_);
+    //   } catch (const std::exception& e) {
+    //     throw std::runtime_error(
+    //       std::string("failed to parse imc::object for key ")
+    //       + thekey_.name_ + std::string(": ") + e.what()
+    //     );
+    //   }
+    // }
 
   public:
 
     // access members
     imc::key get_key() { return thekey_; }
+    std::string get_uuid() { return uuid_; }
     unsigned long int get_begin() { return begin_; }
     unsigned long int get_end() { return end_; }
 
@@ -172,6 +176,7 @@ namespace imc
       ss<<std::setw(width)<<std::left<<"block:"<<thekey_.name_
                                      <<" version "<<thekey_.version_
                                      <<" ("<<thekey_.description_<<")"<<"\n"
+        <<std::setw(width)<<std::left<<"uuid:"<<uuid_<<"\n"
         <<std::setw(width)<<std::left<<"begin:"<<begin_<<"\n"
         <<std::setw(width)<<std::left<<"end:"<<end_<<"\n"
         <<std::setw(width)<<std::left<<"rawfile:"<<raw_file_<<"\n"
@@ -179,12 +184,12 @@ namespace imc
         <<std::setw(width)<<std::left<<"parameters:"<<prsstr<<"\n";
 
       // include meta data of specific object
-      if ( include_object )
-      {
-        ss<<std::setfill('-')<<std::left<<std::setw(60)<<""<<std::setfill(' ')<<"\n";
-        // ss<<thekey_.description_<<"\n";
-        ss<<imc_object_.get_info()<<"\n";
-      }
+      // if ( include_object )
+      // {
+      //   ss<<std::setfill('-')<<std::left<<std::setw(60)<<""<<std::setfill(' ')<<"\n";
+      //   ss<<thekey_.description_<<"\n";
+      //   ss<<imc_object_.get_info()<<"\n";
+      // }
 
       return ss.str();
     }

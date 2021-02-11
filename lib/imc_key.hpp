@@ -30,7 +30,7 @@ namespace imc
 
     // constructor
     key(bool critical, std::string name,
-        std::string description = std::string(""), int version = 1)
+        std::string description = std::string(""), int version = -1)
     {
       critical_ = critical;
       if ( name.size() != 2 ) throw std::logic_error("invalid key name");
@@ -62,35 +62,97 @@ namespace imc
   };
 
   // define (non)critical markers/keys
-  std::map<std::string,key> keys = {
+  // std::map<std::string,key> keys = {
+  //
+  //   // critical keys
+  //   {"CF2", key(true,"CF","format version and processor",1)},
+  //   {"CK1", key(true,"CK","start of group of keys",1)},
+  //   {"CB1", key(true,"CB","group of channels",1)},
+  //   {"CT1", key(true,"CT","text definition",1)},
+  //   {"CG1", key(true,"CG","group of components",1)},
+  //   {"CD1", key(true,"CD","abscissa description",1)},
+  //   {"CD2", key(true,"CD","abscissa description",2)},
+  //   {"CZ1", key(true,"CZ","scaling of z-axis",1)},
+  //   {"CC1", key(true,"CC","start of component",1)},
+  //   {"CP1", key(true,"CP","buffer, datatype and samples of component",1)},
+  //   {"Cb1", key(true,"Cb","buffer description",1)},
+  //   {"CR1", key(true,"CR","permissible range of values in component",1)},
+  //   {"CN1", key(true,"CN","name and comment of channel",1)},
+  //   {"CS1", key(true,"CS","raw binary data",1)},
+  //   {"CI1", key(true,"CI","single numerical value",1)},
+  //   {"Ca1", key(true,"Ca","add reference key",1)},
+  //
+  //   // noncritical keys
+  //   {"NO1", key(false,"NO","origin of data",1)},
+  //   {"NT1", key(false,"NT","timestamp of trigger",1)},
+  //   {"ND1", key(false,"ND","(color) display properties",1)},
+  //   {"NU1", key(false,"NU","user defined key",1)},
+  //   {"Np1", key(false,"Np","property of channel",1)},
+  //   {"NE1", key(false,"NE","extraction rule for BUS channels",1)}
+  //
+  // };
+
+  const std::vector<key> keys = {
 
     // critical keys
-    {"CF", key(true,"CF","format version and processor",1)},
-    {"CK", key(true,"CK","start of group of keys",1)},
-    {"CB", key(true,"CB","group of channels",1)},
-    {"CT", key(true,"CT","text definition",1)},
-    {"CG", key(true,"CG","group of components",1)},
-    {"CD", key(true,"CD","abscissa description",1)},
-    // {"CD2", key(true,"CD","abscissa description",2)},
-    {"CZ", key(true,"CZ","scaling of z-axis",1)},
-    {"CC", key(true,"CC","start of component",1)},
-    {"CP", key(true,"CP","buffer, datatype and samples of component",1)},
-    {"Cb", key(true,"Cb","buffer description",1)},
-    {"CR", key(true,"CR","permissible range of values in component",1)},
-    {"CN", key(true,"CN","name and comment of channel",1)},
-    {"CS", key(true,"CS","raw binary data",1)},
-    {"CI", key(true,"CI","single numerical value",1)},
-    {"Ca", key(true,"Ca","add reference key",1)},
+    key(true,"CF","format version and processor",2),
+    key(true,"CK","start of group of keys",1),
+    key(true,"CB","group of channels",1),
+    key(true,"CT","text definition",1),
+    key(true,"CG","group of components",1),
+    key(true,"CD","abscissa description",1),
+    key(true,"CD","abscissa description",2),
+    key(true,"CZ","scaling of z-axis",1),
+    key(true,"CC","start of component",1),
+    key(true,"CP","buffer, datatype and samples of component",1),
+    key(true,"Cb","buffer description",1),
+    key(true,"CR","permissible range of values in component",1),
+    key(true,"CN","name and comment of channel",1),
+    key(true,"CS","raw binary data",1),
+    key(true,"CI","single numerical value",1),
+    key(true,"Ca","add reference key",1),
 
     // noncritical keys
-    {"NO", key(false,"NO","origin of data",1)},
-    {"NT", key(false,"NT","timestamp of trigger",1)},
-    {"ND", key(false,"ND","(color) display properties",1)},
-    {"NU", key(false,"NU","user defined key",1)},
-    {"Np", key(false,"Np","property of channel",1)},
-    {"NE", key(false,"NE","extraction rule for BUS channels",1)}
+    key(false,"NO","origin of data",1),
+    key(false,"NT","timestamp of trigger",1),
+    key(false,"ND","(color) display properties",1),
+    key(false,"NU","user defined key",1),
+    key(false,"Np","property of channel",1),
+    key(false,"NE","extraction rule for BUS channels",1)
 
   };
+
+  // check for existence of specific key
+  bool check_key(key& mykey)
+  {
+    for ( key ky: keys ) if ( mykey == ky ) return true;
+    return false;
+  }
+
+  // get key (with respect to name and evtl. version)
+  key get_key(bool critical, std::string name, int version = -1)
+  {
+    // check validity of required key name
+    if ( name.size() > 2 || name.size() < 1 )
+    {
+      throw std::runtime_error(std::string("invalid key name: ") + name);
+    }
+
+    // declare new key with available data
+    key mykey(critical,name,std::string(""),version);
+
+    // try to find matching key in list of predefined keys
+    for ( key ky: keys )
+    {
+      if ( critical == ky.critical_ && name == ky.name_
+           && ( version == ky.version_ || version == -1 ) )
+      {
+        mykey = ky;
+      }
+    }
+
+    return mykey;
+  }
 
 
 }

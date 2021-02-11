@@ -12,6 +12,7 @@
 #include "imc_datatype.hpp"
 #include "imc_object.hpp"
 #include "imc_result.hpp"
+#include "imc_channel.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -25,14 +26,15 @@ namespace imc
     // buffer of raw-file
     std::vector<unsigned char> buffer_;
 
-    // list of imc-blocks
+    // list and map of imc-blocks
     std::vector<imc::block> rawblocks_;
+    std::map<std::string,imc::block> mapblocks_;
 
     // check computational complexity for parsing blocks
     unsigned long int cplxcnt_;
 
-    // collect meta-information, channel definition, etc.
-    std::vector<imc::keygroup> keygroups_;
+    // list groups and channels with their affiliate blocks
+    std::map<std::string,imc::channel_env> channel_envs_;
 
   public:
 
@@ -46,6 +48,8 @@ namespace imc
       raw_file_ = raw_file;
       this->fill_buffer();
       this->parse_blocks();
+      this->generate_block_map();
+      this->generate_channel_env();
     }
 
   private:
@@ -86,25 +90,30 @@ namespace imc
           // check for (non)critical key
           if ( *(it+1) == imc::key_crit_ || *(it+1) == imc::key_non_crit_ )
           {
-            // compose entire key
+            // compose (entire) key
             std::string newkey = { (char)*(it+1), (char)*(it+2) };
+            imc::key itkey(*(it+1) == imc::key_crit_,newkey);
 
-            // check for known keys
-            if ( keys.count(newkey) == 1 )
+            // expecting ch_sep_ after key
+            if ( *(it+3) == ch_sep_ )
             {
-              // expecting ch_sep_ after key
-              if ( *(it+3) == ch_sep_ )
+              // extract key version
+              std::string vers("");
+              unsigned long int pos = 4;
+              while ( *(it+pos) != ch_sep_ )
               {
-                // extract key version
-                std::string vers("");
-                unsigned long int pos = 4;
-                while ( *(it+pos) != ch_sep_ )
-                {
-                  vers.push_back((char)*(it+pos));
-                  pos++;
-                }
-                int version = std::stoi(vers);
+                vers.push_back((char)*(it+pos));
+                pos++;
+              }
+              int version = std::stoi(vers);
 
+              // try to retrieve full key
+              itkey.version_ = version;
+              itkey = imc::get_key(itkey.critical_,itkey.name_,itkey.version_);
+
+              // check for known keys (including version)
+              if ( imc::check_key(itkey) )
+              {
                 // get block length
                 std::string leng("");
                 pos++;
@@ -116,11 +125,11 @@ namespace imc
                 unsigned long length = std::stoul(leng);
 
                 // declare and initialize corresponding key and block
-                imc::key bkey( *(it+1)==imc::key_crit_ , newkey,
-                               imc::keys.at(newkey).description_, version );
-                imc::block blk(bkey,it-buffer_.begin(),
-                                    it-buffer_.begin()+pos+1+length,
-                                    raw_file_, &buffer_);
+                // imc::key bkey( *(it+1)==imc::key_crit_ , newkey,
+                //                imc::keys.at(newkey).description_, version );
+                imc::block blk(itkey,it-buffer_.begin(),
+                                     it-buffer_.begin()+pos+1+length,
+                                     raw_file_, &buffer_);
 
                 // add block to list
                 rawblocks_.push_back(blk);
@@ -133,15 +142,26 @@ namespace imc
               }
               else
               {
-                throw std::runtime_error(
-                    std::string("invalid block or corrupt buffer at byte: ")
-                  + std::to_string(it+3-buffer_.begin())
-                );
+                // all critical must be known !! while a noncritical may be ignored
+                if ( *(it+1) == imc::key_crit_ )
+                {
+                  throw std::runtime_error(
+                    std::string("unknown critical key: ") + newkey + std::to_string(version)
+                  );
+                }
+                else
+                {
+                  std::cout<<"WARNING: unknown noncritical key '"
+                           <<newkey<<version<<"' will be ignored\n";
+                }
               }
             }
             else
             {
-              throw std::runtime_error(std::string("unknown IMC key: ") + newkey);
+              throw std::runtime_error(
+                  std::string("invalid block or corrupt buffer at byte: ")
+                + std::to_string(it+3-buffer_.begin())
+              );
             }
           }
         }
@@ -163,6 +183,52 @@ namespace imc
             + std::string("\n")
             + std::to_string(b+1) + std::string("-th block:\n") + this->rawblocks_[b+1].get_info() );
         }
+      }
+    }
+
+    // generate map of blocks using their uuid
+    void generate_block_map()
+    {
+      for ( imc::block blk: rawblocks_ )
+      {
+        mapblocks_.insert( std::pair<std::string,imc::block>(blk.get_uuid(),blk) );
+      }
+    }
+
+    // generate channel "environments"
+    void generate_channel_env()
+    {
+      // collect affiliate blocks for every channel WITH CHANNEL and AFFILIATE
+      // BLOCK CORRESPONDENCE GOVERNED BY BLOCK ORDER IN BUFFER!!
+      for ( imc::block blk: rawblocks_ )
+      {
+        // declare first channel environment
+        imc::channel_env chnenv;
+
+        // if ( blk.get_key() == imc::keys.at("CB") ) chnenv.CBuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CG") ) chnenv.CGuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CC") ) chnenv.CCuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CN") ) chnenv.CNuuid_ = blk.get_uuid();
+        // //
+        // if ( blk.get_key() == imc::keys.at("CD") ) chnenv.CDuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CT") ) chnenv.CTuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("Cb") ) chnenv.Cbuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CP") ) chnenv.CPuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CR") ) chnenv.CRuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("CS") ) chnenv.CSuuid_ = blk.get_uuid();
+        // //
+        // if ( blk.get_key() == imc::keys.at("NT") ) chnenv.NTuuid_ = blk.get_uuid();
+        // if ( blk.get_key() == imc::keys.at("NO") ) chnenv.NOuuid_ = blk.get_uuid();
+        //
+        // // a component is closed by any of {CS, CC, CG, CB}
+        // if ( blk.get_key() == imc::keys.at("CS") || blk.get_key() == imc::keys.at("CC")
+        //   || blk.get_key() == imc::keys.at("CG") || blk.get_key() == imc::keys.at("CB") )
+        // {
+        //   chnenv.uuid_ = chnenv.CNuuid_;
+        //   channel_envs_.insert(
+        //     std::pair<std::string,imc::channel_env>(chnenv.CNuuid_,chnenv)
+        //   );
+        // }
       }
     }
 
@@ -230,7 +296,7 @@ namespace imc
     // list all groups (associated to blocks "CB")
     std::vector<imc::block> list_groups()
     {
-      return this->list_blocks(imc::keys.at("CB"));
+      return this->list_blocks(imc::get_key(true,"CB"));
     }
 
     // list all channels
@@ -239,7 +305,7 @@ namespace imc
       std::vector<std::string> channels;
       for ( imc::block blk: this->rawblocks_ )
       {
-        if ( blk.get_key() == imc::keys.at("CN") )
+        if ( blk.get_key() == imc::get_key(true,"CN") )
         {
           imc::parameter prm = blk.get_parameters()[6];
           channels.push_back(blk.get_parameter(prm));
@@ -251,74 +317,74 @@ namespace imc
 
     // get specific channel data
     // TODO generalize and simplify channel extraction!!
-    imc::channel_tab get_channel(std::string channel)
-    {
-      // declare single channel table
-      imc::channel_tab chtab;
-
-      // ordinate parameters
-      std::string yunit = std::string("");
-      unsigned long int num_samples = -1;
-      // imc::datatype dtype;
-      int numbits = -1;
-      double yoffset = -1.0, yfactor = -1.0;
-
-      // abscissa parameters
-      double dx = -1.0;
-      double xoffset = -1.0;
-      std::string xunit = std::string("");
-
-      // search block for required parameters
-      for ( imc::block blk: this->rawblocks_ )
-      {
-        if ( blk.get_key() == imc::keys.at("CR") )
-        {
-          yunit = blk.get_parameter(blk.get_parameters()[7]);
-        }
-
-        if ( blk.get_key() == imc::keys.at("Cb") )
-        {
-          num_samples = std::stoul(blk.get_parameter(blk.get_parameters()[7]));
-          xoffset = std::stod(blk.get_parameter(blk.get_parameters()[11]));
-        }
-
-        if ( blk.get_key() == imc::keys.at("CP") )
-        {
-          numbits = std::stoi(blk.get_parameter(blk.get_parameters()[5]));
-        }
-
-        if ( blk.get_key() == imc::keys.at("CR") )
-        {
-          yfactor = std::stod(blk.get_parameter(blk.get_parameters()[3]));
-          yoffset = std::stod(blk.get_parameter(blk.get_parameters()[4]));
-          yunit = blk.get_parameter(blk.get_parameters()[7]);
-        }
-
-        if ( blk.get_key() == imc::keys.at("CD") )
-        {
-          std::cout<<"got CD\n";
-          dx = std::stod(blk.get_parameter(blk.get_parameters()[2]));
-          xunit = blk.get_parameter(blk.get_parameters()[7]);
-        }
-      }
-
-      std::cout<<"yunit:"<<yunit<<"\n"
-               <<"yoffset:"<<yoffset<<"\n"
-               <<"yfactor:"<<yfactor<<"\n"
-               <<"numbits:"<<numbits<<"\n"
-               <<"num_samples:"<<num_samples<<"\n"
-               <<"dx:"<<dx<<"\n"
-               <<"xoffset:"<<xoffset<<"\n"
-               <<"xunit:"<<xunit<<"\n";
-
-      // generate abscissa data
-
-
-      // generate ordinate data
-
-
-      return chtab;
-    }
+    // imc::channel_tab get_channel(std::string channel)
+    // {
+    //   // declare single channel table
+    //   imc::channel_tab chtab;
+    //
+    //   // ordinate parameters
+    //   std::string yunit = std::string("");
+    //   unsigned long int num_samples = -1;
+    //   // imc::datatype dtype;
+    //   int numbits = -1;
+    //   double yoffset = -1.0, yfactor = -1.0;
+    //
+    //   // abscissa parameters
+    //   double dx = -1.0;
+    //   double xoffset = -1.0;
+    //   std::string xunit = std::string("");
+    //
+    //   // search block for required parameters
+    //   for ( imc::block blk: this->rawblocks_ )
+    //   {
+    //     if ( blk.get_key() == imc::keys.at("CR") )
+    //     {
+    //       yunit = blk.get_parameter(blk.get_parameters()[7]);
+    //     }
+    //
+    //     if ( blk.get_key() == imc::keys.at("Cb") )
+    //     {
+    //       num_samples = std::stoul(blk.get_parameter(blk.get_parameters()[7]));
+    //       xoffset = std::stod(blk.get_parameter(blk.get_parameters()[11]));
+    //     }
+    //
+    //     if ( blk.get_key() == imc::keys.at("CP") )
+    //     {
+    //       numbits = std::stoi(blk.get_parameter(blk.get_parameters()[5]));
+    //     }
+    //
+    //     if ( blk.get_key() == imc::keys.at("CR") )
+    //     {
+    //       yfactor = std::stod(blk.get_parameter(blk.get_parameters()[3]));
+    //       yoffset = std::stod(blk.get_parameter(blk.get_parameters()[4]));
+    //       yunit = blk.get_parameter(blk.get_parameters()[7]);
+    //     }
+    //
+    //     if ( blk.get_key() == imc::keys.at("CD") )
+    //     {
+    //       std::cout<<"got CD\n";
+    //       dx = std::stod(blk.get_parameter(blk.get_parameters()[2]));
+    //       xunit = blk.get_parameter(blk.get_parameters()[7]);
+    //     }
+    //   }
+    //
+    //   std::cout<<"yunit:"<<yunit<<"\n"
+    //            <<"yoffset:"<<yoffset<<"\n"
+    //            <<"yfactor:"<<yfactor<<"\n"
+    //            <<"numbits:"<<numbits<<"\n"
+    //            <<"num_samples:"<<num_samples<<"\n"
+    //            <<"dx:"<<dx<<"\n"
+    //            <<"xoffset:"<<xoffset<<"\n"
+    //            <<"xunit:"<<xunit<<"\n";
+    //
+    //   // generate abscissa data
+    //
+    //
+    //   // generate ordinate data
+    //
+    //
+    //   return chtab;
+    // }
 
   };
 
