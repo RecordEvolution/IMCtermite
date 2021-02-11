@@ -36,11 +36,11 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
     {
       prsdkeys.insert(std::pair<std::string,std::string>("showmeta",argv[i]));
     }
-    else if ( std::string(argv[i]) == std::string("--listgroups")
-           || std::string(argv[i]) == std::string("-g") )
-    {
-      prsdkeys.insert(std::pair<std::string,std::string>("listgroups",argv[i]));
-    }
+    // else if ( std::string(argv[i]) == std::string("--listgroups")
+    //        || std::string(argv[i]) == std::string("-g") )
+    // {
+    //   prsdkeys.insert(std::pair<std::string,std::string>("listgroups",argv[i]));
+    // }
     else if ( std::string(argv[i]) == std::string("--listchannels")
            || std::string(argv[i]) == std::string("-c") )
     {
@@ -51,17 +51,17 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
     {
       prsdkeys.insert(std::pair<std::string,std::string>("listblocks",argv[i]));
     }
-    else if ( std::string(argv[i]) == std::string("--filename")
-           || std::string(argv[i]) == std::string("-f") )
+    else if ( std::string(argv[i]) == std::string("--output")
+           || std::string(argv[i]) == std::string("-d") )
     {
       if ( i+1 == argc || argv[i+1][0] == '-' )
       {
-        std::cerr<<"invalid or missing --filename argument\n";
-        prsdkeys.insert(std::pair<std::string,std::string>("invalid","filename"));
+        std::cerr<<"invalid or missing --output argument\n";
+        prsdkeys.insert(std::pair<std::string,std::string>("invalid","output"));
       }
       else
       {
-        prsdkeys.insert(std::pair<std::string,std::string>("filename",argv[i+1]));
+        prsdkeys.insert(std::pair<std::string,std::string>("output",argv[i+1]));
         i = i + 1;
       }
     }
@@ -116,10 +116,10 @@ void show_usage()
            <<"Options:"
            <<"\n\n"
            <<" -m, --showmeta          show meta information about IMC dataset\n"
-           <<" -g, --listgroups        list channelgroups\n"
+           // <<" -g, --listgroups        list channelgroups\n"
            <<" -c, --listchannels      list channels\n"
            <<" -b, --listblocks        list IMC key-blocks\n"
-           <<" -f, --filename          filename for csv output\n"
+           <<" -d, --output            output directory\n"
            <<" -h, --help              show this help message \n"
            <<" -v, --version           display version\n"
            <<"\n";
@@ -146,12 +146,19 @@ int main(int argc, char* argv[])
   else
   {
     // check for at least one file argument
-    if ( cfgopts.size() == (unsigned int)argc-1 )
+    if ( argc == 1 )
     {
       std::cerr<<"no .raw file given => check --help for usage\n";
       return 1;
     }
     std::string rawfile(argv[1]);
+
+    // one further argument to do something useful with the file
+    if ( argc == 2 )
+    {
+      std::cerr<<"provide any option => check --help for usage\n";
+      return 1;
+    }
 
     // check existence of file
     std::filesystem::path rawpath = rawfile;
@@ -170,20 +177,31 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    // // list blocks
-    // for ( imc::block blk: imcraw.blocks() )
-    // {
-    //   std::cout<<blk.get_key().get_info()<<"\n";
-    //   std::cout<<blk.get_info()<<"\n";
-    // }
-    std::cout<<"number of blocks: "<<imcraw.blocks().size()<<"\n";
-    std::cout<<"computational complexity: "<<imcraw.computational_complexity()
-                                           <<"/"<<imcraw.buffer_size()<<"\n\n";
+    // list blocks
+    if ( cfgopts.count("listblocks") == 1 )
+    {
+      for ( imc::block blk: imcraw.blocks() )
+      {
+        // std::cout<<blk.get_key().get_info()<<"\n";
+        std::cout<<blk.get_info()<<"\n";
+      }
+      std::cout<<"number of blocks: "<<imcraw.blocks().size()<<"\n";
+      // std::cout<<"computational complexity: "<<imcraw.computational_complexity()
+                                             // <<"/"<<imcraw.buffer_size()<<"\n\n";
+    }
 
     // list channels
-    std::cout<<"list of channels:\n";
-    std::vector<std::string> channels = imcraw.get_channels();
-    for ( auto el: channels ) std::cout<<el<<"\n";
+    if ( cfgopts.count("listchannels") == 1 )
+    {
+      std::vector<std::string> channels = imcraw.get_channels();
+      for ( auto el: channels ) std::cout<<el<<"\n";
+    }
+
+    // print channel(s) to certain directory
+    if ( cfgopts.count("directory") == 1 )
+    {
+      std::cout<<cfgopts.at("directory")<<"\n";
+    }
 
   }
 

@@ -32,10 +32,10 @@ namespace imc
     short int dtidx_;     // \in \{0,...,7\}
   public:
     datatype(): ubyte_(0), sbyte_(0),
-                   ushort_(0), sshort_(0),
-                   ulint_(0.0), slint_(0.0),
-                   sfloat_(0.0), sdouble_(0.0),
-                   dtidx_(0) { };
+                ushort_(0), sshort_(0),
+                ulint_(0.0), slint_(0.0),
+                sfloat_(0.0), sdouble_(0.0),
+                dtidx_(0) { };
     // every supported datatype gets its own constructor
     datatype(imc_Ubyte num): ubyte_(num), dtidx_(0) {};
     datatype(imc_Sbyte num): sbyte_(num), dtidx_(1) {};
@@ -44,7 +44,9 @@ namespace imc
     datatype(imc_Ulongint num): ulint_(num), dtidx_(4) {};
     datatype(imc_Slongint num): slint_(num), dtidx_(5) {};
     datatype(imc_float num): sfloat_(num), dtidx_(6) {};
-    datatype(imc_double num): sdouble_(num), dtidx_(7) {};
+    datatype(imc_double num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
+                              ulint_(0.0), slint_(0.0), sfloat_(0.0), sdouble_(num),
+                              dtidx_(7) {};
 
     // identify type
     short int& dtype() { return dtidx_; }
@@ -142,8 +144,8 @@ namespace imc
       else if ( num.dtidx_ == 3 ) out<<num.sshort_;
       else if ( num.dtidx_ == 4 ) out<<num.ulint_;
       else if ( num.dtidx_ == 5 ) out<<num.slint_;
-      else if ( num.dtidx_ == 5 ) out<<num.sfloat_;
-      else if ( num.dtidx_ == 6 ) out<<num.sdouble_;
+      else if ( num.dtidx_ == 6 ) out<<num.sfloat_;
+      else if ( num.dtidx_ == 7 ) out<<num.sdouble_;
       return out;
     }
 

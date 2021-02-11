@@ -229,7 +229,7 @@ namespace imc
 
             // create channel object and add it to the map of channels
             channels_.insert( std::pair<std::string,imc::channel>
-              (chnenv.CNuuid_,imc::channel(chnenv,&mapblocks_))
+              (chnenv.CNuuid_,imc::channel(chnenv,&mapblocks_,&buffer_))
             );
 
             // reset channel uuid
@@ -242,35 +242,6 @@ namespace imc
         if ( blk.get_key().name_ == "CB" ) chnenv.CBuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "CG" ) chnenv.CGuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "CC" ) chnenv.CCuuid_ = blk.get_uuid();
-      }
-    }
-
-    // parse channel's raw data
-    template<typename datatype>
-    void convert_data_to_type(std::vector<unsigned char>& subbuffer,
-                              std::vector<imc::datatype>& channel)
-    {
-      // check number of elements of type "datatype" in buffer
-      if ( subbuffer.size() != channel.size()*sizeof(datatype) )
-      {
-        throw std::runtime_error("size mismatch between subbuffer and datatype");
-      }
-
-      // extract every single number of type "datatype" from buffer
-      for ( unsigned long int i = 0; i < channel.size(); i++ )
-      {
-        // declare number of required type and point it to first byte in buffer
-        // representing the number
-        datatype df;
-        uint8_t* dfcast = reinterpret_cast<uint8_t*>(&df);
-
-        for ( unsigned long int j = 0; j < sizeof(datatype); j++ )
-        {
-          dfcast[j] = (int)subbuffer[i*sizeof(datatype)+j];
-        }
-
-        // save number in channel
-        channel[i] = df;
       }
     }
 

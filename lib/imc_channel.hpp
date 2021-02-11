@@ -5,6 +5,7 @@
 
 #include <sstream>
 #include "imc_datatype.hpp"
+#include "imc_conversion.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -114,7 +115,8 @@ namespace imc
   {
     // associated environment of blocks and map of blocks
     channel_env chnenv_;
-    const std::map<std::string,imc::block>* blocks_;
+    std::map<std::string,imc::block>* blocks_;
+    std::vector<unsigned char>* buffer_;
 
     // collect meta-data of channels according to env,
     //  just everything valueable in here
@@ -123,7 +125,7 @@ namespace imc
     std::string origin_, origin_comment_, text_;
     std::string yname_, yunit_;
     std::string xname_, xunit_;
-    double xstepwidth_;
+    double xstepwidth_, xoffset_;
 
     // buffer and data
     int signbits_, num_bytes_;
@@ -132,7 +134,7 @@ namespace imc
     int datatp_;
     imc::datatype dattyp_;
     std::vector<imc::datatype> ydata_;
-    std::vector<imc::datatype> xdata_;
+    std::vector<double> xdata_;
 
     // range, factor and offset
     double factor_, offset_;
@@ -142,8 +144,9 @@ namespace imc
     std::string group_uuid_, group_name_, group_comment_;
 
     // constructor takes channel's block environment
-    channel(channel_env chnenv, std::map<std::string,imc::block>* blocks):
-      chnenv_(chnenv), blocks_(blocks), group_index_(-1)
+    channel(channel_env chnenv, std::map<std::string,imc::block>* blocks,
+                                std::vector<unsigned char>* buffer):
+      chnenv_(chnenv), blocks_(blocks), buffer_(buffer), group_index_(-1)
     {
       // declare list of block parameters
       std::vector<imc::parameter> prms;
@@ -152,76 +155,159 @@ namespace imc
       uuid_ = chnenv_.CNuuid_;
 
       // extract associated CB data
-      if ( blocks->count(chnenv_.CBuuid_) == 1 )
+      if ( blocks_->count(chnenv_.CBuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.CBuuid_).get_parameters();
-        group_index_ = std::stoi(blocks->at(chnenv_.CBuuid_).get_parameter(prms[2]));
-        group_name_ = blocks->at(chnenv_.CBuuid_).get_parameter(prms[4]);
-        group_comment_ = blocks->at(chnenv_.CBuuid_).get_parameter(prms[6]);
+        prms = blocks_->at(chnenv_.CBuuid_).get_parameters();
+        group_index_ = std::stoi(blocks_->at(chnenv_.CBuuid_).get_parameter(prms[2]));
+        group_name_ = blocks_->at(chnenv_.CBuuid_).get_parameter(prms[4]);
+        group_comment_ = blocks_->at(chnenv_.CBuuid_).get_parameter(prms[6]);
       }
 
       // extract associated CT data
-      if ( blocks->count(chnenv_.CTuuid_) == 1 )
+      if ( blocks_->count(chnenv_.CTuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.CTuuid_).get_parameters();
-        text_ = blocks->at(chnenv_.CTuuid_).get_parameter(prms[4]) + std::string(" - ")
-              + blocks->at(chnenv_.CTuuid_).get_parameter(prms[6]) + std::string(" - ")
-              + blocks->at(chnenv_.CTuuid_).get_parameter(prms[8]);
+        prms = blocks_->at(chnenv_.CTuuid_).get_parameters();
+        text_ = blocks_->at(chnenv_.CTuuid_).get_parameter(prms[4]) + std::string(" - ")
+              + blocks_->at(chnenv_.CTuuid_).get_parameter(prms[6]) + std::string(" - ")
+              + blocks_->at(chnenv_.CTuuid_).get_parameter(prms[8]);
       }
 
       // extract associated CD data
-      if ( blocks->count(chnenv_.CDuuid_) == 1 )
+      if ( blocks_->count(chnenv_.CDuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.CDuuid_).get_parameters();
-        xstepwidth_ = std::stod(blocks->at(chnenv_.CDuuid_).get_parameter(prms[2]));
-        xunit_ = blocks->at(chnenv_.CDuuid_).get_parameter(prms[5]);
+        prms = blocks_->at(chnenv_.CDuuid_).get_parameters();
+        xstepwidth_ = std::stod(blocks_->at(chnenv_.CDuuid_).get_parameter(prms[2]));
+        xunit_ = blocks_->at(chnenv_.CDuuid_).get_parameter(prms[5]);
         // TODO
-        xname_ = std::string("time");
+        // xname_ = std::string("time");
       }
 
       // extract associated CP data
-      if ( blocks->count(chnenv_.CPuuid_) == 1 )
+      if ( blocks_->count(chnenv_.CPuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.CPuuid_).get_parameters();
-        datatp_ = std::stoi(blocks->at(chnenv_.CPuuid_).get_parameter(prms[3]));
-        num_bytes_ = std::stoi(blocks->at(chnenv_.CPuuid_).get_parameter(prms[4]));
-        signbits_ = std::stoi(blocks->at(chnenv_.CPuuid_).get_parameter(prms[5]));
-        // byte_offset_ = std::stoul(blocks->at(chnenv_.CPuuid_).get_parameter(prms[7]));
+        prms = blocks_->at(chnenv_.CPuuid_).get_parameters();
+        num_bytes_ = std::stoi(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[3]));
+        datatp_ = std::stoi(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[4]));
+        signbits_ = std::stoi(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[5]));
+        // byte_offset_ = std::stoul(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[7]));
       }
 
       // extract associated Cb data
-      if ( blocks->count(chnenv_.Cbuuid_) == 1 )
+      if ( blocks_->count(chnenv_.Cbuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.Cbuuid_).get_parameters();
-        buffer_offset_ = std::stoul(blocks->at(chnenv_.Cbuuid_).get_parameter(prms[6]));
-        buffer_size_ = std::stoul(blocks->at(chnenv_.Cbuuid_).get_parameter(prms[7]));
+        prms = blocks_->at(chnenv_.Cbuuid_).get_parameters();
+        buffer_offset_ = std::stoul(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[6]));
+        buffer_size_ = std::stoul(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[7]));
+        xoffset_ = std::stod(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[11]));
       }
 
       // extract associated CR data
-      if ( blocks->count(chnenv_.CRuuid_) == 1 )
+      if ( blocks_->count(chnenv_.CRuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.CRuuid_).get_parameters();
-        factor_ = std::stod(blocks->at(chnenv_.CRuuid_).get_parameter(prms[3]));
-        offset_ = std::stod(blocks->at(chnenv_.CRuuid_).get_parameter(prms[4]));
-        yunit_ = blocks->at(chnenv_.CRuuid_).get_parameter(prms[7]);
+        prms = blocks_->at(chnenv_.CRuuid_).get_parameters();
+        factor_ = std::stod(blocks_->at(chnenv_.CRuuid_).get_parameter(prms[3]));
+        offset_ = std::stod(blocks_->at(chnenv_.CRuuid_).get_parameter(prms[4]));
+        yunit_ = blocks_->at(chnenv_.CRuuid_).get_parameter(prms[7]);
       }
 
       // extract associated CN data
-      if ( blocks->count(chnenv_.CNuuid_) == 1 )
+      if ( blocks_->count(chnenv_.CNuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.CNuuid_).get_parameters();
-        name_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[6]);
+        prms = blocks_->at(chnenv_.CNuuid_).get_parameters();
+        name_ = blocks_->at(chnenv_.CNuuid_).get_parameter(prms[6]);
         yname_ = name_;
-        comment_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[8]);
-        // group_index_ = std::stoi(blocks->at(chnenv_.CNuuid_).get_parameter(prms[2]));
+        comment_ = blocks_->at(chnenv_.CNuuid_).get_parameter(prms[8]);
+        // group_index_ = std::stoi(blocks_->at(chnenv_.CNuuid_).get_parameter(prms[2]));
       }
 
       // extract associated NO data
-      if ( blocks->count(chnenv_.NOuuid_) == 1 )
+      if ( blocks_->count(chnenv_.NOuuid_) == 1 )
       {
-        prms = blocks->at(chnenv_.NOuuid_).get_parameters();
-        origin_ = blocks->at(chnenv_.NOuuid_).get_parameter(prms[4]);
-        origin_comment_ = blocks->at(chnenv_.NOuuid_).get_parameter(prms[6]);
+        prms = blocks_->at(chnenv_.NOuuid_).get_parameters();
+        origin_ = blocks_->at(chnenv_.NOuuid_).get_parameter(prms[4]);
+        origin_comment_ = blocks_->at(chnenv_.NOuuid_).get_parameter(prms[6]);
+      }
+
+      // start converting binary buffer to imc::datatype
+      if ( !chnenv_.CSuuid_.empty() ) convert_buffer();
+    }
+
+    // convert buffer to actual datatype
+    void convert_buffer()
+    {
+      // TODO no clue how/if/when to handle buffer offset/mask/subsequent_bytes
+      // etc. and whatever that shit is!
+      std::vector<imc::parameter> prms = blocks_->at(chnenv_.CSuuid_).get_parameters();
+      if ( prms.size() < 4)
+      {
+        throw std::runtime_error("CS block is invalid and features to few parameters");
+      }
+      unsigned long int buffstrt = prms[3].begin();
+      std::vector<unsigned char> CSbuffer( buffer_->begin()+buffstrt+1,
+                                           buffer_->begin()+buffstrt+buffer_size_+1 );
+
+      // determine number of values in buffer
+      unsigned long int num_values = CSbuffer.size()/(signbits_/8);
+      if ( num_values*(signbits_/8) != CSbuffer.size() )
+      {
+        throw std::runtime_error("CSbuffer and significant bits of datatype don't match");
+      }
+
+      // adjust size of ydata
+      ydata_.resize(num_values);
+
+      // distinguish numeric datatypes included in "imc_datatype"
+      if ( datatp_ == 1 )
+      {
+        imc::convert_data_to_type<imc_Ubyte>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 2 )
+      {
+        imc::convert_data_to_type<imc_Sbyte>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 3 )
+      {
+        imc::convert_data_to_type<imc_Ushort>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 4 )
+      {
+        imc::convert_data_to_type<imc_Sshort>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 5 )
+      {
+        imc::convert_data_to_type<imc_Ulongint>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 6 )
+      {
+        imc::convert_data_to_type<imc_Slongint>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 7 )
+      {
+        imc::convert_data_to_type<imc_float>(CSbuffer,ydata_);
+      }
+      else if ( datatp_ == 8 )
+      {
+        imc::convert_data_to_type<imc_double>(CSbuffer,ydata_);
+      }
+      else
+      {
+        throw std::runtime_error(std::string("unsupported/unknown datatype") + std::to_string(datatp_));
+      }
+
+      // fill xdata_
+      for ( unsigned long int i = 0; i < num_values; i++ )
+      {
+        xdata_.push_back(xoffset_+i*xstepwidth_);
+      }
+
+      // employ data transformation
+      if ( factor_ != 1.0 || offset_ != 0.0 )
+      {
+        for ( imc::datatype& el: ydata_ )
+        {
+          // std::cout<<"value:"<<el.as_double()<<"\n";
+          el = imc::datatype(el.as_double()*factor_ + offset_);
+        }
       }
     }
 
@@ -243,13 +329,14 @@ namespace imc
         <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
         <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
         <<std::setw(width)<<std::left<<"xstepwidth:"<<xstepwidth_<<"\n"
+        <<std::setw(width)<<std::left<<"xoffset:"<<xoffset_<<"\n"
         <<std::setw(width)<<std::left<<"factor:"<<factor_<<"\n"
         <<std::setw(width)<<std::left<<"offset:"<<offset_<<"\n"
         <<std::setw(width)<<std::left<<"group:"<<"("<<group_index_<<","<<group_name_
                                                     <<","<<group_comment_<<")"<<"\n"
         <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_)<<"\n"
-        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<imc::datatype>(xdata_)<<"\n"
-        <<std::setw(width)<<std::left<<"aff. blocks:"<<chnenv_.get_json()<<"\n";
+        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<double>(xdata_)<<"\n";
+        // <<std::setw(width)<<std::left<<"aff. blocks:"<<chnenv_.get_json()<<"\n";
       return ss.str();
     }
 
@@ -268,11 +355,12 @@ namespace imc
              <<"\",\"xname\":\""<<xname_
              <<"\",\"xunit\":\""<<xunit_
              <<"\",\"xstepwidth\":\""<<xstepwidth_
+             <<"\",\"xoffset\":\""<<xoffset_
              <<"\",\"group\":{"<<"\"index\":\""<<group_index_
                                <<"\",\"name\":\""<<group_name_
                                <<"\",\"comment\":\""<<group_comment_<<"\""<<"}"
              <<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_)
-             <<"\",\"xdata\":\""<<imc::joinvec<imc::datatype>(xdata_)
+             <<"\",\"xdata\":\""<<imc::joinvec<double>(xdata_)
              <<"\",\"aff. blocks\":\""<<chnenv_.get_json()
              <<"\"}";
       return ss.str();
