@@ -375,9 +375,9 @@ namespace imc
       if ( sep == ' ' )
       {
         fou<<std::setw(width)<<std::left<<xname_
-          <<std::setw(width)<<std::left<<yname_<<"\n"
-          <<std::setw(width)<<std::left<<xunit_
-          <<std::setw(width)<<std::left<<yunit_<<"\n";
+           <<std::setw(width)<<std::left<<yname_<<"\n"
+           <<std::setw(width)<<std::left<<xunit_
+           <<std::setw(width)<<std::left<<yunit_<<"\n";
       }
       else
       {
@@ -388,7 +388,8 @@ namespace imc
       {
         if ( sep == ' ' )
         {
-          fou<<std::setw(width)<<std::left<<xdata_[i]
+          fou<<std::setprecision(9)<<std::fixed
+             <<std::setw(width)<<std::left<<xdata_[i]
              <<std::setw(width)<<std::left<<ydata_[i]<<"\n";
         }
         else

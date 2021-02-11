@@ -329,7 +329,7 @@ namespace imc
     {
       // check for given directory
       std::filesystem::path pd = output;
-      if ( std::filesystem::is_directory(pd) )
+      if ( !std::filesystem::is_directory(pd) )
       {
         throw std::runtime_error("given directory does not exist");
       }
@@ -338,7 +338,9 @@ namespace imc
                                                          it != channels_.end(); ++it)
       {
         // construct filename
-        std::string filenam = std::string("channel_") + it->first + std::string(".csv");
+        std::string chid = std::string("channel_") + it->first;
+        std::string filenam = it->second.name_.empty() ? chid + std::string(".csv")
+                                           : it->second.name_ + std::string(".csv");
         std::filesystem::path pf = pd / filenam;
 
         // and print the channel

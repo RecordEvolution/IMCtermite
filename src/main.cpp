@@ -119,7 +119,7 @@ void show_usage()
            // <<" -g, --listgroups        list channelgroups\n"
            <<" -c, --listchannels      list channels\n"
            <<" -b, --listblocks        list IMC key-blocks\n"
-           <<" -d, --output            output directory\n"
+           <<" -d, --output            output directory to print channels\n"
            <<" -h, --help              show this help message \n"
            <<" -v, --version           display version\n"
            <<"\n";
@@ -198,9 +198,13 @@ int main(int argc, char* argv[])
     }
 
     // print channel(s) to certain directory
-    if ( cfgopts.count("directory") == 1 )
+    if ( cfgopts.count("output") == 1 )
     {
-      std::cout<<cfgopts.at("directory")<<"\n";
+      try {
+        imcraw.print_channels(cfgopts.at("output"));
+      } catch (const std::exception& e) {
+        std::cerr<<"failed to print channels for "<<rawfile<<": "<<e.what()<<"\n";
+      }
     }
 
   }
