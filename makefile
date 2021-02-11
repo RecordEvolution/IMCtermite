@@ -49,6 +49,15 @@ clean :
 	rm -vf $(EXE)
 	rm -vf *.o
 
+#-----------------------------------------------------------------------------#
+# Docker
+
+docker-build :
+	docker build ./ --tag imctermite:0.1
+
+docker-run:
+	docker run -it --rm imctermite:0.1 /bin/bash
+
 # # build CLI executable
 # $(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp $(LIB)rawmerge.hpp output
 # 	$(CCC) $(OPT) $< -o $@
