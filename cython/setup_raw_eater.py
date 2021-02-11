@@ -4,7 +4,7 @@ from Cython.Build import cythonize
 
 extensions = Extension(
     name="raw_eater",
-    sources=["cyt/raw_eater.pyx"],
+    sources=["cython/raw_eater.pyx"],
     # libraries=[""],
     library_dirs=["src"],
     include_dirs=["src"],

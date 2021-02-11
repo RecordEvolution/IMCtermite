@@ -4,7 +4,7 @@ from Cython.Build import cythonize
 
 extensions = Extension(
     name="raw_meat",
-    sources=["cyt/raw_meat.pyx"],
+    sources=["cython/raw_meat.pyx"],
     # libraries=[""],
     library_dirs=["src"],
     include_dirs=["src"],

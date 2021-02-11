@@ -6,7 +6,7 @@ EXE = imctermite
 # directory names
 SRC = src/
 LIB = lib/
-CYT = cyt/
+CYT = cython/
 
 # list headers
 HPP = $(wildcard $(LIB)/*.hpp)
@@ -78,35 +78,35 @@ clean :
 
 #-----------------------------------------------------------------------------#
 # Python
-#
-# # build python module
-# py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
-#      $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp \
-# 		 output
-# 	python3 $(CYT)setup_raw_eater.py build_ext --inplace
-# 	python3 $(CYT)setup_raw_meat.py build_ext --inplace
-# 	cp raw_eater.cpython-*.so pyt/
-# 	cp raw_meat.cpython-*.so pyt/
-# 	rm *.so
-#
-# py-install: $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
-#             $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp
-# 	python3 $(CYT)setup_raw_eater.py install --record files_raw_eater.txt
-# 	python3 $(CYT)setup_raw_meat.py install --record files_raw_meat.txt
-#
-# py-clean :
-# 	rm -f raw_eater.cpython-*.so
-# 	rm -f pyt/raw_eater.cpython-*.so
-# 	rm -f $(CYT)raw_eater.cpp
-# 	rm -f raw_meat.cpython-*.so
-# 	rm -f pyt/raw_meat.cpython-*.so
-# 	rm -f $(CYT)raw_meat.cpp
-# 	rm -rf build/
-# 	rm -f *.txt
-# 	rm -rf output/
-#
-# # prepare directory for test output
-# output :
-# 	mkdir -pv output/
+
+# build python module
+py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
+     $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp \
+		 output
+	python3 $(CYT)setup_raw_eater.py build_ext --inplace
+	python3 $(CYT)setup_raw_meat.py build_ext --inplace
+	cp raw_eater.cpython-*.so python/
+	cp raw_meat.cpython-*.so python/
+	rm *.so
+
+py-install: $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
+            $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp
+	python3 $(CYT)setup_raw_eater.py install --record files_raw_eater.txt
+	python3 $(CYT)setup_raw_meat.py install --record files_raw_meat.txt
+
+py-clean :
+	rm -f raw_eater.cpython-*.so
+	rm -f pyt/raw_eater.cpython-*.so
+	rm -f $(CYT)raw_eater.cpp
+	rm -f raw_meat.cpython-*.so
+	rm -f pyt/raw_meat.cpython-*.so
+	rm -f $(CYT)raw_meat.cpp
+	rm -rf build/
+	rm -f *.txt
+	rm -rf output/
+
+# prepare directory for test output
+output :
+	mkdir -pv output/
 
 #-----------------------------------------------------------------------------#
