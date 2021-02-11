@@ -119,7 +119,7 @@ namespace imc
     // collect meta-data of channels according to env,
     //  just everything valueable in here
     std::string uuid_;
-    std::string name_;
+    std::string name_, comment_;
     std::string yname_, yunit_;
     imc::datatype dattyp_;
     std::string xname_, xunit_;
@@ -127,14 +127,21 @@ namespace imc
     std::vector<imc::datatype> xdata_;
 
     // group reference the channel belongs to
+    int group_index_;
     std::string group_uuid_, group_name_;
+
+    //
 
     // constructor takes channel's block environment
     channel(channel_env chnenv, std::map<std::string,imc::block>* blocks):
       chnenv_(chnenv), blocks_(blocks)
     {
+      // extract info from corresponding blocks in environment
+      uuid_ = chnenv_.CNuuid_;
       std::vector<imc::parameter> prms = blocks->at(chnenv_.CNuuid_).get_parameters();
       name_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[6]);
+      comment_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[8]);
+      group_index_ = std::stoi(blocks->at(chnenv_.CNuuid_).get_parameter(prms[2]));
     }
 
     // get info string
@@ -143,11 +150,12 @@ namespace imc
       std::stringstream ss;
       ss<<"uuid:"<<std::setw(width)<<std::left<<uuid_<<"\n"
         <<"name:"<<std::setw(width)<<std::left<<name_<<"\n"
+        <<"comment:"<<std::setw(width)<<std::left<<comment_<<"\n"
         <<"yname:"<<std::setw(width)<<std::left<<yname_<<"\n"
         <<"yunit:"<<std::setw(width)<<std::left<<yunit_<<"\n"
         <<"xname:"<<std::setw(width)<<std::left<<xname_<<"\n"
         <<"xunit:"<<std::setw(width)<<std::left<<xunit_<<"\n"
-        <<"group:"<<std::setw(width)<<std::left<<group_name_<<"\n"
+        <<"group:"<<std::setw(width)<<std::left<<"("<<group_index_<<","<<group_name_<<")"<<"\n"
         <<"aff. blocks:"<<std::setw(width)<<std::left<<chnenv_.get_json()<<"\n";
       return ss.str();
     }
@@ -158,11 +166,12 @@ namespace imc
       std::stringstream ss;
       ss<<"{"<<"\"uuid\":\""<<uuid_
              <<"\",\"name\":\""<<name_
+             <<"\",\"comment\":\""<<comment_
              <<"\",\"yname\":\""<<yname_
              <<"\",\"yunit\":\""<<yunit_
              <<"\",\"xname\":\""<<xname_
              <<"\",\"xunit\":\""<<xunit_
-             <<"\",\"group\":\""<<group_name_
+             <<"\",\"group\":\""<<"("<<group_index_<<","<<group_name_<<")"
              <<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_)
              <<"\",\"xdata\":\""<<imc::joinvec<imc::datatype>(xdata_)
              <<"\",\"aff. blocks\":\""<<chnenv_.get_json()
