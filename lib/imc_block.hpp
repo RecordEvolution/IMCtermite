@@ -40,9 +40,6 @@ namespace imc
     // w.r.t. to first byte of block (=0)
     std::vector<imc::parameter> parameters_;
 
-    // particular imc object represented by this block
-    // imc::rawobject imc_object_;
-
   public:
 
     // constructor
@@ -71,7 +68,6 @@ namespace imc
 
       try {
         parse_parameters();
-        // parse_object();
       } catch (const std::exception& e) {
         throw std::runtime_error(
           std::string("block: failed to parse parameters/objects: ") + e.what()
@@ -105,19 +101,6 @@ namespace imc
       }
       parameters_.back().end( this->end_ - 1 );
     }
-
-    // pass buffer and parameters associated to block to generate corres. object
-    // void parse_object()
-    // {
-    //   try {
-    //     imc_object_.parse(thekey_,buffer_,parameters_);
-    //   } catch (const std::exception& e) {
-    //     throw std::runtime_error(
-    //       std::string("failed to parse imc::object for key ")
-    //       + thekey_.name_ + std::string(": ") + e.what()
-    //     );
-    //   }
-    // }
 
   public:
 
@@ -163,7 +146,7 @@ namespace imc
     }
 
     // get info string
-    std::string get_info(bool include_object = true, int width = 20)
+    std::string get_info(int width = 20)
     {
       // summarize parameters in single string
       std::string prsstr("{");
@@ -182,14 +165,6 @@ namespace imc
         <<std::setw(width)<<std::left<<"rawfile:"<<raw_file_<<"\n"
         <<std::setw(width)<<std::left<<"buffersize:"<<buffer_->size()<<"\n"
         <<std::setw(width)<<std::left<<"parameters:"<<prsstr<<"\n";
-
-      // include meta data of specific object
-      // if ( include_object )
-      // {
-      //   ss<<std::setfill('-')<<std::left<<std::setw(60)<<""<<std::setfill(' ')<<"\n";
-      //   ss<<thekey_.description_<<"\n";
-      //   ss<<imc_object_.get_info()<<"\n";
-      // }
 
       return ss.str();
     }
