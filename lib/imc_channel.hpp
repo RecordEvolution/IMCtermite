@@ -20,6 +20,24 @@ namespace imc
     std::string CDuuid_, CTuuid_, Cbuuid_, CPuuid_, CRuuid_, CSuuid_;
     std::string NTuuid_, NOuuid_;
 
+    // reset all members
+    void reset()
+    {
+      uuid_.clear();
+      CBuuid_.clear();
+      CGuuid_.clear();
+      CCuuid_.clear();
+      CNuuid_.clear();
+      CDuuid_.clear();
+      CTuuid_.clear();
+      Cbuuid_.clear();
+      CPuuid_.clear();
+      CRuuid_.clear();
+      CSuuid_.clear();
+      NTuuid_.clear();
+      NOuuid_.clear();
+    }
+
     // get info
     std::string get_info(int width = 20)
     {

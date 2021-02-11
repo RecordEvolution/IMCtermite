@@ -84,7 +84,7 @@ namespace imc
       // (consider only first four of any CS block)
       int count = 0;
       for ( unsigned long int b = begin_;
-        b < end_ && (!(thekey_.name_==imc::get_key(true,"CS").name_) || count < 4 ); b++ )
+        b < end_ && ( ! (thekey_.name_== "CS") || count < 4 ); b++ )
       {
         if ( buffer_->at(b) == imc::ch_sep_ )
         {

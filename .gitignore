@@ -18,3 +18,5 @@ cyt/*.cpp
 *.o
 *.csv
 *.parquet
+
+src/*.cpp.cpp

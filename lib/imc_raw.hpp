@@ -198,37 +198,48 @@ namespace imc
     // generate channel "environments"
     void generate_channel_env()
     {
+      // declare single channel environment
+      imc::channel_env chnenv;
+      chnenv.reset();
+
       // collect affiliate blocks for every channel WITH CHANNEL and AFFILIATE
       // BLOCK CORRESPONDENCE GOVERNED BY BLOCK ORDER IN BUFFER!!
       for ( imc::block blk: rawblocks_ )
       {
-        // declare first channel environment
-        imc::channel_env chnenv;
 
-        // if ( blk.get_key() == imc::keys.at("CB") ) chnenv.CBuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CG") ) chnenv.CGuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CC") ) chnenv.CCuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CN") ) chnenv.CNuuid_ = blk.get_uuid();
-        // //
-        // if ( blk.get_key() == imc::keys.at("CD") ) chnenv.CDuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CT") ) chnenv.CTuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("Cb") ) chnenv.Cbuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CP") ) chnenv.CPuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CR") ) chnenv.CRuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("CS") ) chnenv.CSuuid_ = blk.get_uuid();
-        // //
-        // if ( blk.get_key() == imc::keys.at("NT") ) chnenv.NTuuid_ = blk.get_uuid();
-        // if ( blk.get_key() == imc::keys.at("NO") ) chnenv.NOuuid_ = blk.get_uuid();
-        //
-        // // a component is closed by any of {CS, CC, CG, CB}
-        // if ( blk.get_key() == imc::keys.at("CS") || blk.get_key() == imc::keys.at("CC")
-        //   || blk.get_key() == imc::keys.at("CG") || blk.get_key() == imc::keys.at("CB") )
-        // {
-        //   chnenv.uuid_ = chnenv.CNuuid_;
-        //   channel_envs_.insert(
-        //     std::pair<std::string,imc::channel_env>(chnenv.CNuuid_,chnenv)
-        //   );
-        // }
+        if ( blk.get_key().name_ == "CN" ) chnenv.CNuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CD" ) chnenv.CDuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CT" ) chnenv.CTuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "Cb" ) chnenv.Cbuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CP" ) chnenv.CPuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CR" ) chnenv.CRuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CS" ) chnenv.CSuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "NT" ) chnenv.NTuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "NO" ) chnenv.NOuuid_ = blk.get_uuid();
+
+        // check for currently associated channel
+        if ( !chnenv.CNuuid_.empty() )
+        {
+          // any component/channel is closed by any of {CS, CC, CG, CB}
+          if ( blk.get_key().name_ == "CS" || blk.get_key().name_ == "CC"
+            || blk.get_key().name_ == "CG" || blk.get_key().name_ == "CB" )
+          {
+            chnenv.uuid_ = chnenv.CNuuid_;
+            channel_envs_.insert(
+              std::pair<std::string,imc::channel_env>(chnenv.CNuuid_,chnenv)
+            );
+            std::cout<<chnenv.get_info()<<"\n";
+
+            // reset channel uuid
+            chnenv.CNuuid_.clear();
+          }
+        }
+
+        // in contrast to component closed by CS block the blocks CB, CG, CC
+        // already belong to NEXT component
+        if ( blk.get_key().name_ == "CB" ) chnenv.CBuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CG" ) chnenv.CGuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CC" ) chnenv.CCuuid_ = blk.get_uuid();
       }
     }
 

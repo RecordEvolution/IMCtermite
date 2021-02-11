@@ -117,6 +117,9 @@ namespace imc
            && ( version == ky.version_ || version == -1 ) )
       {
         mykey = ky;
+
+        // provide first match
+        return mykey;
       }
     }
 
