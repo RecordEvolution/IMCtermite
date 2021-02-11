@@ -365,6 +365,40 @@ namespace imc
              <<"\"}";
       return ss.str();
     }
+
+    // print channel
+    void print(std::string filename, const char sep = ' ', int width = 25)
+    {
+      std::ofstream fou(filename);
+
+      // header
+      if ( sep == ' ' )
+      {
+        fou<<std::setw(width)<<std::left<<xname_
+          <<std::setw(width)<<std::left<<yname_<<"\n"
+          <<std::setw(width)<<std::left<<xunit_
+          <<std::setw(width)<<std::left<<yunit_<<"\n";
+      }
+      else
+      {
+        fou<<xname_<<sep<<yname_<<"\n"<<xunit_<<sep<<yunit_<<"\n";
+      }
+
+      for ( unsigned long int i = 0; i < xdata_.size(); i++ )
+      {
+        if ( sep == ' ' )
+        {
+          fou<<std::setw(width)<<std::left<<xdata_[i]
+             <<std::setw(width)<<std::left<<ydata_[i]<<"\n";
+        }
+        else
+        {
+          fou<<xdata_[i]<<sep<<ydata_[i]<<"\n";
+        }
+      }
+
+      fou.close();
+    }
   };
 
 }

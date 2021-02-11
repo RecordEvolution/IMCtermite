@@ -4,7 +4,7 @@
 #define IMCRAW
 
 #include <fstream>
-// #include <filesystem>
+#include <filesystem>
 
 #include "hexshow.hpp"
 #include "imc_key.hpp"
@@ -322,6 +322,28 @@ namespace imc
       }
 
       return channels;
+    }
+
+    // print all channels in directory
+    void print_channels(std::string output)
+    {
+      // check for given directory
+      std::filesystem::path pd = output;
+      if ( std::filesystem::is_directory(pd) )
+      {
+        throw std::runtime_error("given directory does not exist");
+      }
+
+      for ( std::map<std::string,imc::channel>::iterator it = channels_.begin();
+                                                         it != channels_.end(); ++it)
+      {
+        // construct filename
+        std::string filenam = std::string("channel_") + it->first + std::string(".csv");
+        std::filesystem::path pf = pd / filenam;
+
+        // and print the channel
+        it->second.print(pf);
+      }
     }
 
   };
