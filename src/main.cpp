@@ -170,12 +170,12 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    // list blocks
-    for ( imc::block blk: imcraw.blocks() )
-    {
-      // std::cout<<blk.get_key().get_info()<<"\n";
-      std::cout<<blk.get_info()<<"\n";
-    }
+    // // list blocks
+    // for ( imc::block blk: imcraw.blocks() )
+    // {
+    //   std::cout<<blk.get_key().get_info()<<"\n";
+    //   std::cout<<blk.get_info()<<"\n";
+    // }
     std::cout<<"number of blocks: "<<imcraw.blocks().size()<<"\n";
     std::cout<<"computational complexity: "<<imcraw.computational_complexity()
                                            <<"/"<<imcraw.buffer_size()<<"\n\n";

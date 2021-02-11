@@ -119,7 +119,8 @@ namespace imc
     // collect meta-data of channels according to env,
     //  just everything valueable in here
     std::string uuid_;
-    std::string name_, comment_, origin_, text_;
+    std::string name_, comment_;
+    std::string origin_, origin_comment_, text_;
     std::string yname_, yunit_;
     std::string xname_, xunit_;
     double xstepwidth_;
@@ -213,6 +214,14 @@ namespace imc
         yname_ = name_;
         comment_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[8]);
         // group_index_ = std::stoi(blocks->at(chnenv_.CNuuid_).get_parameter(prms[2]));
+      }
+
+      // extract associated NO data
+      if ( blocks->count(chnenv_.NOuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.NOuuid_).get_parameters();
+        origin_ = blocks->at(chnenv_.NOuuid_).get_parameter(prms[4]);
+        origin_comment_ = blocks->at(chnenv_.NOuuid_).get_parameter(prms[6]);
       }
     }
 
