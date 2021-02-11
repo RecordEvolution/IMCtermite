@@ -7,6 +7,7 @@ EXE = imctermite
 SRC = src/
 LIB = lib/
 CYT = cython/
+PYT = python/
 
 # list headers
 HPP = $(wildcard $(LIB)/*.hpp)
@@ -85,8 +86,8 @@ py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)rawe
 		 output
 	python3 $(CYT)setup_raw_eater.py build_ext --inplace
 	python3 $(CYT)setup_raw_meat.py build_ext --inplace
-	cp raw_eater.cpython-*.so python/
-	cp raw_meat.cpython-*.so python/
+	cp raw_eater.cpython-*.so $(PYT)
+	cp raw_meat.cpython-*.so $(PYT)
 	rm *.so
 
 py-install: $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
@@ -96,10 +97,10 @@ py-install: $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(L
 
 py-clean :
 	rm -f raw_eater.cpython-*.so
-	rm -f pyt/raw_eater.cpython-*.so
+	rm -f $(PYT)raw_eater.cpython-*.so
 	rm -f $(CYT)raw_eater.cpp
 	rm -f raw_meat.cpython-*.so
-	rm -f pyt/raw_meat.cpython-*.so
+	rm -f $(PYT)raw_meat.cpython-*.so
 	rm -f $(CYT)raw_meat.cpp
 	rm -rf build/
 	rm -f *.txt
