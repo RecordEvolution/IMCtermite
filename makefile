@@ -47,7 +47,7 @@ uninstall : $(INST)/$(EXE)
 
 clean :
 	rm -vf $(EXE)
-	rm -v *.o
+	rm -vf *.o
 
 # # build CLI executable
 # $(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp $(LIB)rawmerge.hpp output
