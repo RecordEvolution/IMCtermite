@@ -290,10 +290,10 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 10 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 10 ) throw std::runtime_error("invalid number of parameters in CP");
       buffer_reference_ = std::stoi(get_parameter(buffer,&parameters[2]));
-      bytes_ = std::stoi(get_parameter(buffer,&parameters[3]));
-      numeric_type_ = (numtype)std::stoi(get_parameter(buffer,&parameters[4]));
+      numeric_type_ = (numtype)std::stoi(get_parameter(buffer,&parameters[3]));
+      bytes_ = std::stoi(get_parameter(buffer,&parameters[4]));
       signbits_ = std::stoi(get_parameter(buffer,&parameters[5]));
       mask_ = std::stoi(get_parameter(buffer,&parameters[6]));
       offset_ = std::stoul(get_parameter(buffer,&parameters[7]));

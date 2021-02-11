@@ -119,44 +119,128 @@ namespace imc
     // collect meta-data of channels according to env,
     //  just everything valueable in here
     std::string uuid_;
-    std::string name_, comment_;
+    std::string name_, comment_, origin_, text_;
     std::string yname_, yunit_;
-    imc::datatype dattyp_;
     std::string xname_, xunit_;
+    double xstepwidth_;
+
+    // buffer and data
+    int signbits_, num_bytes_;
+    // unsigned long int byte_offset_;
+    unsigned long int buffer_offset_, buffer_size_;
+    int datatp_;
+    imc::datatype dattyp_;
     std::vector<imc::datatype> ydata_;
     std::vector<imc::datatype> xdata_;
 
+    // range, factor and offset
+    double factor_, offset_;
+
     // group reference the channel belongs to
     int group_index_;
-    std::string group_uuid_, group_name_;
-
-    //
+    std::string group_uuid_, group_name_, group_comment_;
 
     // constructor takes channel's block environment
     channel(channel_env chnenv, std::map<std::string,imc::block>* blocks):
-      chnenv_(chnenv), blocks_(blocks)
+      chnenv_(chnenv), blocks_(blocks), group_index_(-1)
     {
-      // extract info from corresponding blocks in environment
+      // declare list of block parameters
+      std::vector<imc::parameter> prms;
+
+      // use uuid from CN block
       uuid_ = chnenv_.CNuuid_;
-      std::vector<imc::parameter> prms = blocks->at(chnenv_.CNuuid_).get_parameters();
-      name_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[6]);
-      comment_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[8]);
-      group_index_ = std::stoi(blocks->at(chnenv_.CNuuid_).get_parameter(prms[2]));
+
+      // extract associated CB data
+      if ( blocks->count(chnenv_.CBuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.CBuuid_).get_parameters();
+        group_index_ = std::stoi(blocks->at(chnenv_.CBuuid_).get_parameter(prms[2]));
+        group_name_ = blocks->at(chnenv_.CBuuid_).get_parameter(prms[4]);
+        group_comment_ = blocks->at(chnenv_.CBuuid_).get_parameter(prms[6]);
+      }
+
+      // extract associated CT data
+      if ( blocks->count(chnenv_.CTuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.CTuuid_).get_parameters();
+        text_ = blocks->at(chnenv_.CTuuid_).get_parameter(prms[4]) + std::string(" - ")
+              + blocks->at(chnenv_.CTuuid_).get_parameter(prms[6]) + std::string(" - ")
+              + blocks->at(chnenv_.CTuuid_).get_parameter(prms[8]);
+      }
+
+      // extract associated CD data
+      if ( blocks->count(chnenv_.CDuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.CDuuid_).get_parameters();
+        xstepwidth_ = std::stod(blocks->at(chnenv_.CDuuid_).get_parameter(prms[2]));
+        xunit_ = blocks->at(chnenv_.CDuuid_).get_parameter(prms[5]);
+        // TODO
+        xname_ = std::string("time");
+      }
+
+      // extract associated CP data
+      if ( blocks->count(chnenv_.CPuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.CPuuid_).get_parameters();
+        datatp_ = std::stoi(blocks->at(chnenv_.CPuuid_).get_parameter(prms[3]));
+        num_bytes_ = std::stoi(blocks->at(chnenv_.CPuuid_).get_parameter(prms[4]));
+        signbits_ = std::stoi(blocks->at(chnenv_.CPuuid_).get_parameter(prms[5]));
+        // byte_offset_ = std::stoul(blocks->at(chnenv_.CPuuid_).get_parameter(prms[7]));
+      }
+
+      // extract associated Cb data
+      if ( blocks->count(chnenv_.Cbuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.Cbuuid_).get_parameters();
+        buffer_offset_ = std::stoul(blocks->at(chnenv_.Cbuuid_).get_parameter(prms[6]));
+        buffer_size_ = std::stoul(blocks->at(chnenv_.Cbuuid_).get_parameter(prms[7]));
+      }
+
+      // extract associated CR data
+      if ( blocks->count(chnenv_.CRuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.CRuuid_).get_parameters();
+        factor_ = std::stod(blocks->at(chnenv_.CRuuid_).get_parameter(prms[3]));
+        offset_ = std::stod(blocks->at(chnenv_.CRuuid_).get_parameter(prms[4]));
+        yunit_ = blocks->at(chnenv_.CRuuid_).get_parameter(prms[7]);
+      }
+
+      // extract associated CN data
+      if ( blocks->count(chnenv_.CNuuid_) == 1 )
+      {
+        prms = blocks->at(chnenv_.CNuuid_).get_parameters();
+        name_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[6]);
+        yname_ = name_;
+        comment_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[8]);
+        // group_index_ = std::stoi(blocks->at(chnenv_.CNuuid_).get_parameter(prms[2]));
+      }
     }
 
     // get info string
     std::string get_info(int width = 20)
     {
       std::stringstream ss;
-      ss<<"uuid:"<<std::setw(width)<<std::left<<uuid_<<"\n"
-        <<"name:"<<std::setw(width)<<std::left<<name_<<"\n"
-        <<"comment:"<<std::setw(width)<<std::left<<comment_<<"\n"
-        <<"yname:"<<std::setw(width)<<std::left<<yname_<<"\n"
-        <<"yunit:"<<std::setw(width)<<std::left<<yunit_<<"\n"
-        <<"xname:"<<std::setw(width)<<std::left<<xname_<<"\n"
-        <<"xunit:"<<std::setw(width)<<std::left<<xunit_<<"\n"
-        <<"group:"<<std::setw(width)<<std::left<<"("<<group_index_<<","<<group_name_<<")"<<"\n"
-        <<"aff. blocks:"<<std::setw(width)<<std::left<<chnenv_.get_json()<<"\n";
+      ss<<std::setw(width)<<std::left<<"uuid:"<<uuid_<<"\n"
+        <<std::setw(width)<<std::left<<"name:"<<name_<<"\n"
+        <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n"
+        <<std::setw(width)<<std::left<<"origin:"<<origin_<<"\n"
+        <<std::setw(width)<<std::left<<"description:"<<text_<<"\n"
+        <<std::setw(width)<<std::left<<"yname:"<<yname_<<"\n"
+        <<std::setw(width)<<std::left<<"yunit:"<<yunit_<<"\n"
+        <<std::setw(width)<<std::left<<"datatype:"<<datatp_<<"\n"
+        <<std::setw(width)<<std::left<<"significant bits:"<<signbits_<<"\n"
+        <<std::setw(width)<<std::left<<"buffer-offset:"<<buffer_offset_<<"\n"
+        <<std::setw(width)<<std::left<<"buffer-size:"<<buffer_size_<<"\n"
+        <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
+        <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
+        <<std::setw(width)<<std::left<<"xstepwidth:"<<xstepwidth_<<"\n"
+        <<std::setw(width)<<std::left<<"factor:"<<factor_<<"\n"
+        <<std::setw(width)<<std::left<<"offset:"<<offset_<<"\n"
+        <<std::setw(width)<<std::left<<"group:"<<"("<<group_index_<<","<<group_name_
+                                                    <<","<<group_comment_<<")"<<"\n"
+        <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_)<<"\n"
+        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<imc::datatype>(xdata_)<<"\n"
+        <<std::setw(width)<<std::left<<"aff. blocks:"<<chnenv_.get_json()<<"\n";
       return ss.str();
     }
 
@@ -167,20 +251,25 @@ namespace imc
       ss<<"{"<<"\"uuid\":\""<<uuid_
              <<"\",\"name\":\""<<name_
              <<"\",\"comment\":\""<<comment_
+             <<"\",\"origin\":\""<<origin_
+             <<"\",\"description\":\""<<text_
              <<"\",\"yname\":\""<<yname_
              <<"\",\"yunit\":\""<<yunit_
+             <<"\",\"significantbits\":\""<<signbits_
              <<"\",\"xname\":\""<<xname_
              <<"\",\"xunit\":\""<<xunit_
-             <<"\",\"group\":\""<<"("<<group_index_<<","<<group_name_<<")"
+             <<"\",\"xstepwidth\":\""<<xstepwidth_
+             <<"\",\"group\":{"<<"\"index\":\""<<group_index_
+                               <<"\",\"name\":\""<<group_name_
+                               <<"\",\"comment\":\""<<group_comment_<<"\""<<"}"
              <<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_)
              <<"\",\"xdata\":\""<<imc::joinvec<imc::datatype>(xdata_)
              <<"\",\"aff. blocks\":\""<<chnenv_.get_json()
              <<"\"}";
       return ss.str();
     }
-
-
   };
+
 }
 
 #endif

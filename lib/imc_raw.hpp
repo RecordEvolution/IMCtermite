@@ -302,7 +302,7 @@ namespace imc
       for ( std::map<std::string,imc::channel>::iterator it = channels_.begin();
                                                          it != channels_.end(); ++it)
       {
-        chns.push_back(it->second.get_json());
+        chns.push_back(it->second.get_info());
       }
       return chns;
     }
