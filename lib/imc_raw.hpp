@@ -33,8 +33,8 @@ namespace imc
     // check computational complexity for parsing blocks
     unsigned long int cplxcnt_;
 
-    // list groups and channels with their affiliate blocks
-    std::map<std::string,imc::channel_env> channel_envs_;
+    // list groups and channels (including their affiliate blocks)
+    std::map<std::string,imc::channel> channels_;
 
   public:
 
@@ -224,11 +224,13 @@ namespace imc
           if ( blk.get_key().name_ == "CS" || blk.get_key().name_ == "CC"
             || blk.get_key().name_ == "CG" || blk.get_key().name_ == "CB" )
           {
+            // provide UUID for channel
             chnenv.uuid_ = chnenv.CNuuid_;
-            channel_envs_.insert(
-              std::pair<std::string,imc::channel_env>(chnenv.CNuuid_,chnenv)
+
+            // create channel object and add it to the map of channels
+            channels_.insert( std::pair<std::string,imc::channel>
+              (chnenv.CNuuid_,imc::channel(chnenv,&mapblocks_))
             );
-            std::cout<<chnenv.get_info()<<"\n";
 
             // reset channel uuid
             chnenv.CNuuid_.clear();
@@ -291,6 +293,31 @@ namespace imc
     unsigned long int& computational_complexity()
     {
       return cplxcnt_;
+    }
+
+    // get list of channels with metadata
+    std::vector<std::string> get_channels()
+    {
+      std::vector<std::string> chns;
+      for ( std::map<std::string,imc::channel>::iterator it = channels_.begin();
+                                                         it != channels_.end(); ++it)
+      {
+        chns.push_back(it->second.get_json());
+      }
+      return chns;
+    }
+
+    // get particular channel including data by its uuid
+    imc::channel get_channel(std::string uuid)
+    {
+      if ( channels_.count(uuid) )
+      {
+        return channels_.at(uuid);
+      }
+      else
+      {
+        throw std::runtime_error(std::string("channel does not exist:") + uuid);
+      }
     }
 
     // list a particular type of block

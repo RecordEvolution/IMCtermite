@@ -4,6 +4,7 @@
 #define IMCCHANNEL
 
 #include <sstream>
+#include "imc_datatype.hpp"
 
 //---------------------------------------------------------------------------//
 
@@ -59,25 +60,113 @@ namespace imc
         <<std::setw(width)<<std::left<<"NOuuid:"<<NOuuid_<<"\n";
       return ss.str();
     }
+
+    // get JSON info string
+    std::string get_json()
+    {
+      std::stringstream ss;
+      ss<<"{"<<"\"uuid\":\""<<uuid_
+             <<"\",\"CBuuid\":\""<<CBuuid_
+             <<"\",\"CGuuid\":\""<<CGuuid_
+             <<"\",\"CCuuid\":\""<<CCuuid_
+             <<"\",\"CNuuid\":\""<<CNuuid_
+             <<"\",\"CDuuid\":\""<<CDuuid_
+             <<"\",\"CTuuid\":\""<<CTuuid_
+             <<"\",\"Cbuuid\":\""<<Cbuuid_
+             <<"\",\"CPuuid\":\""<<CPuuid_
+             <<"\",\"CRuuid\":\""<<CRuuid_
+             <<"\",\"CSuuid\":\""<<CSuuid_
+             <<"\",\"NTuuid\":\""<<NTuuid_
+             <<"\",\"NOuuid\":\""<<NOuuid_
+             <<"\"}";
+      return ss.str();
+    }
   };
 
-  // actual result and (meta)data of channel
-  struct channel_data
+  // given a list of numeric objects, join it into a string
+  template<typename dt>
+  std::string joinvec(std::vector<dt> myvec, unsigned long int limit = 10)
   {
+    std::stringstream ss;
+    ss<<"[";
+    if ( myvec.size() <= limit )
+    {
+      for ( dt el: myvec ) ss<<el<<",";
+    }
+    else
+    {
+      unsigned long int heals = (unsigned long int)(limit/2.);
+      for ( unsigned long int i = 0; i < heals; i++ ) ss<<myvec[i]<<",";
+      ss<<"...";
+      for ( unsigned long int i = myvec.size()-heals; i < myvec.size(); i++ )
+      {
+        ss<<myvec[i]<<",";
+      }
+    }
+    std::string sumstr = ss.str();
+    if ( sumstr.size() > 1 ) sumstr.pop_back();
+    sumstr += std::string("]");
+    return sumstr;
+  }
+
+  // channel
+  struct channel
+  {
+    // associated environment of blocks and map of blocks
+    channel_env chnenv_;
+    const std::map<std::string,imc::block>* blocks_;
+
     // collect meta-data of channels according to env,
     //  just everything valueable in here
     std::string uuid_;
     std::string name_;
-    std::string yunit_;
-    std::string xunit_;
+    std::string yname_, yunit_;
+    imc::datatype dattyp_;
+    std::string xname_, xunit_;
     std::vector<imc::datatype> ydata_;
     std::vector<imc::datatype> xdata_;
 
-    // provide JSON sttring of metadata
+    // group reference the channel belongs to
+    std::string group_uuid_, group_name_;
+
+    // constructor takes channel's block environment
+    channel(channel_env chnenv, std::map<std::string,imc::block>* blocks):
+      chnenv_(chnenv), blocks_(blocks)
+    {
+      std::vector<imc::parameter> prms = blocks->at(chnenv_.CNuuid_).get_parameters();
+      name_ = blocks->at(chnenv_.CNuuid_).get_parameter(prms[6]);
+    }
+
+    // get info string
+    std::string get_info(int width = 20)
+    {
+      std::stringstream ss;
+      ss<<"uuid:"<<std::setw(width)<<std::left<<uuid_<<"\n"
+        <<"name:"<<std::setw(width)<<std::left<<name_<<"\n"
+        <<"yname:"<<std::setw(width)<<std::left<<yname_<<"\n"
+        <<"yunit:"<<std::setw(width)<<std::left<<yunit_<<"\n"
+        <<"xname:"<<std::setw(width)<<std::left<<xname_<<"\n"
+        <<"xunit:"<<std::setw(width)<<std::left<<xunit_<<"\n"
+        <<"group:"<<std::setw(width)<<std::left<<group_name_<<"\n"
+        <<"aff. blocks:"<<std::setw(width)<<std::left<<chnenv_.get_json()<<"\n";
+      return ss.str();
+    }
+
+    // provide JSON string of metadata
     std::string get_json()
     {
       std::stringstream ss;
-      ss<<""<<"\n";
+      ss<<"{"<<"\"uuid\":\""<<uuid_
+             <<"\",\"name\":\""<<name_
+             <<"\",\"yname\":\""<<yname_
+             <<"\",\"yunit\":\""<<yunit_
+             <<"\",\"xname\":\""<<xname_
+             <<"\",\"xunit\":\""<<xunit_
+             <<"\",\"group\":\""<<group_name_
+             <<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_)
+             <<"\",\"xdata\":\""<<imc::joinvec<imc::datatype>(xdata_)
+             <<"\",\"aff. blocks\":\""<<chnenv_.get_json()
+             <<"\"}";
       return ss.str();
     }
 

@@ -75,7 +75,7 @@ namespace imc
   };
 
   // group definition (corresponds to key CB)
-  struct group
+  struct groupobj
   {
     unsigned long int group_index_;
     std::string name_;
@@ -400,7 +400,7 @@ namespace imc
   };
 
   // channel (corresponds to key CN)
-  struct channel
+  struct channelobj
   {
     unsigned long int group_index_;  // corresponds to group-index in CB key
     bool index_bit_;                 // true =  1: digital, false = 0: analog
@@ -538,7 +538,7 @@ namespace imc {
   {
     format fmt_;      // 0
     keygroup kyg_;    // 1
-    group grp_;       // 2
+    groupobj grp_;       // 2
     text txt_;        // 3
     datafield dtf_;   // 4
     abscissa abs_;    // 5
@@ -546,7 +546,7 @@ namespace imc {
     packaging pkg_;   // 7
     buffer bfr_;      // 8
     range rng_;       // 9
-    channel chn_;     // 10
+    channelobj chn_;     // 10
     data dat_;        // 11
     origin_data org_; // 12
     triggertime trt_; // 13
