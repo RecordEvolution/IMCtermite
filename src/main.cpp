@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
   else
   {
     // check for at least one file argument
-    if ( argc == 1 )
+    if ( cfgopts.size() == (unsigned int)argc-1 )
     {
       std::cerr<<"no .raw file given => check --help for usage\n";
       return 1;
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     std::string rawfile(argv[1]);
 
     // one further argument to do something useful with the file
-    if ( argc == 2 )
+    if ( cfgopts.size() == 0 )
     {
       std::cerr<<"provide any option => check --help for usage\n";
       return 1;
