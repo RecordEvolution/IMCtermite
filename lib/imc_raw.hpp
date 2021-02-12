@@ -267,13 +267,20 @@ namespace imc
     }
 
     // get list of channels with metadata
-    std::vector<std::string> get_channels()
+    std::vector<std::string> get_channels(bool json = false, bool include_data = false)
     {
       std::vector<std::string> chns;
       for ( std::map<std::string,imc::channel>::iterator it = channels_.begin();
                                                          it != channels_.end(); ++it)
       {
-        chns.push_back(it->second.get_info());
+        if ( !json )
+        {
+          chns.push_back(it->second.get_info());
+        }
+        else
+        {
+          chns.push_back(it->second.get_json(include_data));
+        }
       }
       return chns;
     }

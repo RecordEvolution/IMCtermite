@@ -88,6 +88,9 @@ namespace imc
   template<typename dt>
   std::string joinvec(std::vector<dt> myvec, unsigned long int limit = 10)
   {
+    // include entire list for limit = - 1
+    limit = (limit == 0) ? myvec.size() : limit;
+
     std::stringstream ss;
     ss<<"[";
     if ( myvec.size() <= limit )
@@ -341,7 +344,7 @@ namespace imc
     }
 
     // provide JSON string of metadata
-    std::string get_json()
+    std::string get_json(bool include_data = false)
     {
       std::stringstream ss;
       ss<<"{"<<"\"uuid\":\""<<uuid_
@@ -358,11 +361,15 @@ namespace imc
              <<"\",\"xoffset\":\""<<xoffset_
              <<"\",\"group\":{"<<"\"index\":\""<<group_index_
                                <<"\",\"name\":\""<<group_name_
-                               <<"\",\"comment\":\""<<group_comment_<<"\""<<"}"
-             <<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_)
-             <<"\",\"xdata\":\""<<imc::joinvec<double>(xdata_)
-             <<"\",\"aff. blocks\":\""<<chnenv_.get_json()
-             <<"\"}";
+                               <<"\",\"comment\":\""<<group_comment_<<"\""<<"}";
+      if ( include_data )
+      {
+        ss<<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_,0)
+          <<"\",\"xdata\":\""<<imc::joinvec<double>(xdata_,0);
+      }
+      // ss<<"\",\"aff. blocks\":\""<<chnenv_.get_json()
+      ss<<"\"}";
+
       return ss.str();
     }
 
