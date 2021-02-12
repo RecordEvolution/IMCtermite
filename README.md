@@ -195,7 +195,7 @@ channels = imcraw.get_channels(False)
 print(channels)
 ```
 
-A more complete [example[(python/usage.py) including the methods for obtaining the 
+A more complete [example](python/usage.py) including the methods for obtaining the 
 channels including their data and or directly printing them to files can be found 
 in the python folder.
 
