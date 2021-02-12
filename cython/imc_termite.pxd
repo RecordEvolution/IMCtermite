@@ -11,8 +11,8 @@ cdef extern from "imc_raw.hpp" namespace "imc":
     imc_termite() except +
     imc_termite(string rawfile) except +
     # provide raw file
-    void submit_file(string rawfile) except+
+    void set_file(string rawfile) except +
     # get JSON list of channels
-    vector[string] get_channels() except+
+    vector[string] get_channels(bool json, bool data) except +
     # print all channels
-    void print_channels(string outputdir) except+
+    void print_channels(string outputdir) except +

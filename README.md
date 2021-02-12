@@ -113,12 +113,14 @@ component, text field or buffer.
 
 ## Installation
 
+The _IMCtermite_ library may be employed both as a _CLI_ tool and a _python_
+module.
+
 ### CLI tool
 
-The _IMCtermite_ library may be employed both as a _CLI_ tool and a _python_
-module. To build the CLI tool locally use the default target `make`  resulting
-in the binary `imctermite` while the installation of it in the location
-`/usr/local/bin` is done via
+To build the CLI tool locally use the default target `make`  resulting
+in the binary `imctermite`. To ensure system-wide availability the installation
+of the tool (in the default location `/usr/local/bin`) is done via
 
 ```
 make install
@@ -167,5 +169,34 @@ written but only when an existing (!) directory is provided as argument to
 the `--output` option.
 
 ### Python
+
+Given the `imctermite` module is available we can import it and declare an instance
+of it by passing a _raw_ file to the constructor
+
+```Python
+import imc_termite
+
+imcraw = imc_termite.imctermite(b"sample/sampleA.raw")
+```
+
+An example of how to create an instance and obtain the list of channels is:
+
+```Python
+import imc_termite
+
+# declare and initialize instance of "imctermite" by passing a raw-file
+try :
+    imcraw = imc_termite.imctermite(b"samples/sampleA.raw")
+except RuntimeError as e :
+    print("failed to load/parse raw-file: " + str(e))
+
+# obtain list of channels as list of dictionaries (without data)
+channels = imcraw.get_channels(False)
+print(channels)
+```
+
+A more complete example including the methods for obtaining the channels including
+their data and or directly printing them to files can be found at
+[Usage](python/usage.py).
 
 ## References

@@ -20,5 +20,5 @@ setup(
     author_email='mario.fink@record-evolution.de',
     url='https://github.com/RecordEvolution/IMCtermite.git',
     name="imc_termite",
-    ext_modules=cythonize(extensions)
+    ext_modules=cythonize(extensions,force=True)
 )

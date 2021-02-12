@@ -16,12 +16,14 @@ cdef class imctermite:
 
   # provide raw file
   def submit_file(self,string rawfile):
-    self.cpp_tdm.set_file(rawfile)
+    self.cpp_imc.set_file(rawfile)
 
   # get JSON list of channels
   def get_channels(self, bool data):
-    return self.cpp_imc.get_channels()
+    chnlst = self.cpp_imc.get_channels(True,data)
+    chnlstjn = [jn.loads(chn.decode()) for chn in chnlst]
+    return chnlstjn
 
   # print a channels
-  def print_channel(self, string outputdir):
-    self.cpp_tdm.print_channels(outputdir)
+  def print_channels(self, string outputdir):
+    self.cpp_imc.print_channels(outputdir)

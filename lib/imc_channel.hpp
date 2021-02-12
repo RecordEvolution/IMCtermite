@@ -364,11 +364,11 @@ namespace imc
                                <<"\",\"comment\":\""<<group_comment_<<"\""<<"}";
       if ( include_data )
       {
-        ss<<"\",\"ydata\":\""<<imc::joinvec<imc::datatype>(ydata_,0)
-          <<"\",\"xdata\":\""<<imc::joinvec<double>(xdata_,0);
+        ss<<",\"ydata\":"<<imc::joinvec<imc::datatype>(ydata_,0)
+          <<",\"xdata\":"<<imc::joinvec<double>(xdata_,0);
       }
       // ss<<"\",\"aff. blocks\":\""<<chnenv_.get_json()
-      ss<<"\"}";
+      ss<<"}";
 
       return ss.str();
     }

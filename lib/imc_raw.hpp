@@ -40,7 +40,7 @@ namespace imc
   public:
 
     // constructor
-    raw() {};
+    raw() { };
     raw(std::string raw_file): raw_file_(raw_file) { set_file(raw_file); };
 
     // provide new raw-file
