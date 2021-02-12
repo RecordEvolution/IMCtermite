@@ -113,6 +113,59 @@ component, text field or buffer.
 
 ## Installation
 
+### CLI tool
+
+The _IMCtermite_ library may be employed both as a _CLI_ tool and a _python_
+module. To build the CLI tool locally use the default target `make`  resulting
+in the binary `imctermite` while the installation of it in the location
+`/usr/local/bin` is done via
+
+```
+make install
+````
+
+which may require root permissions.
+
+### Python
+
+To integrate the library into a customized ETL toolchain several cython targets
+are available. For a local build that enables you to run the examples use:
+
+```
+make cython-build
+```
+
+However, in a production environment a proper installation of the module with
+`make cython-install` is recommended for system-wide availability of the module.
+
 ## Usage
+
+### CLI
+
+The usage of the `imctermite` binary looks like this
+
+```
+imctermite <raw-file> [options]
+```
+
+since you have to provide a single _raw_ files and any option to specify what
+to do with the data. All available options can be listed with `imctermite --help`:
+
+```
+Options:
+
+ -c, --listchannels      list channels
+ -b, --listblocks        list IMC key-blocks
+ -d, --output            output directory to print channels
+ -h, --help              show this help message
+ -v, --version           display version
+```
+
+For instance, to show a list of all channels included in `sample-data.raw`, you
+do `imctermite sample-data.raw --listchannels`. By default, no output files are
+written but only when an existing (!) directory is provided as argument to
+the `--output` option.
+
+### Python
 
 ## References

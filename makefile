@@ -63,6 +63,14 @@ docker-run:
 
 cython-build : $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
 	python3 $< build_ext --inplace
+	cp -v imc_termite_cpython-*.so $(PYT)
+
+cython-install : $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
+	python3 $< install --record files_imctermite.txt
+
+cython-clean :
+	rm -vf imc_termite_cpython-*.so
+	rm -vf $(PYT)imc_termite_cpython-*.so
 
 #-----------------------------------------------------------------------------#
 # Python (to be removed)

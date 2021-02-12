@@ -116,7 +116,7 @@ void show_usage()
            <<"\n\n"
            <<"Options:"
            <<"\n\n"
-           <<" -m, --showmeta          show meta information about IMC dataset\n"
+           // <<" -m, --showmeta          show meta information about IMC dataset\n"
            // <<" -g, --listgroups        list channelgroups\n"
            <<" -c, --listchannels      list channels\n"
            <<" -b, --listblocks        list IMC key-blocks\n"
