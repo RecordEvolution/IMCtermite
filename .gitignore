@@ -10,7 +10,7 @@ nohup.out
 raw_eater.cpp
 raw_meat.cpp
 
-cyt/*.cpp
+cython/*.cpp
 /build
 
 *.log

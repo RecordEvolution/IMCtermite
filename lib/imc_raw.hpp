@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include <iostream>
 
 #include "hexshow.hpp"
 #include "imc_key.hpp"

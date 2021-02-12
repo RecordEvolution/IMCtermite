@@ -58,36 +58,14 @@ docker-build :
 docker-run:
 	docker run -it --rm imctermite:0.1 /bin/bash
 
-# # build CLI executable
-# $(EXE) : $(SRC)main.cpp $(LIB)raweat.hpp $(LIB)hexshow.hpp $(LIB)rawmerge.hpp output
-# 	$(CCC) $(OPT) $< -o $@
+#-----------------------------------------------------------------------------#
+# python
 
-# # development version
-# eatdev : $(SRC)main_dev.cpp $(LIB)raweat.hpp
-# 	$(CCC) $(OPT) $< -o $@
-#
-# # build target for conversion set of .raw files
-# eatall : $(SRC)eatall.cpp $(LIB)raweat.hpp
-# 	$(CCC) $(OPT) $< -o $@
-
-# check existence of name of executable globally
-# chexe:=$(shell command -v $(EXE))
-#
-# # install executable if name does not exist yet
-# install : $(EXE)
-# ifeq ($(chexe),)
-# 	cp $(EXE) /usr/local/bin/
-# else
-# 	@echo "executable with name already exists! choose different name!"
-# 	@exit 1
-# endif
-
-# # uninstall
-# uninstall :
-# 	rm /usr/local/bin/$(EXE)
+cython-build : $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
+	python3 $< build_ext --inplace
 
 #-----------------------------------------------------------------------------#
-# Python
+# Python (to be removed)
 
 # build python module
 py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
