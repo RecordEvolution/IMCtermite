@@ -10,15 +10,15 @@
 </p>
 
 _IMCtermite_ provides access to the proprietary data format
-_IMC Bus Format_ with file extension _.raw_ introduced and developed by
+_IMC Bus Format_ with the file extension _.raw_ introduced and developed by
 [imc Test & Measurement GmbH](https://www.imc-tm.de/). This data format is
 employed i.a. by the measurement hardware
 [imc CRONOSflex](https://www.imc-tm.de/produkte/messtechnik-hardware/imc-cronosflex/ueberblick/)
 to dump and store data and the software packages
 [imc Studio](https://www.imc-tm.de/produkte/messtechnik-software/imc-studio/ueberblick/)
-and [imc FAMOS](https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/)
+& [imc FAMOS](https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/)
 for measurement data control and analysis. The extracted measurement data can
-be stored in various open source file formats like _csv_, _json_, _parquet_ or
+be stored in various open-source file formats like _csv_, _json_, _parquet_ or
 _hdf5_.
 
 ## Overview
@@ -28,16 +28,15 @@ _hdf5_.
 * [Usage and Examples](#Usage)
 * [References](#References)
 
-## Fileformat
+## File format
 
-A data file of _IMC Bus Format_ type with extension _.raw_ is a _mixed text/binary
+A data file of the _IMC Bus Format_ type with the extension _.raw_ is a _mixed text/binary
 file_ featuring a set of markers (keys) that indicate the start of various blocks
-of data providing meta information and the actual measurement data. Every single
-marker is introduced by character `"|" = 0x 7c` followed by two uppercase letters,
-which characterize the type of marker. Each block is further divided into several
+of data that provide meta information and the actual measurement data. Every single
+marker is introduced by the character `"|" = 0x 7c` followed by two uppercase letters that characterize the type of marker. Each block is further divided into several
 parameters separated by commata `"," = 0x 2c` and terminated by a semicolon
 `";" = 0x 3b`. For instance, the header - first 600 bytes - of a raw file may
-look like this (in UTF-8 encoding)
+look like this (in UTF-8 encoding):
 
 ```
 |CF,2,1,1;|CK,1,3,1,1;
@@ -49,8 +48,8 @@ look like this (in UTF-8 encoding)
 |CS,1,      9619,         1,�oD	�nD6�nD)�nD�
 ```
 
-where line breaks where introduced for readability. Most of the markers introduce
-blocks of text, while only the last one identified by `|CS` contains binary data.
+Line breaks are introduced for readability. Most of the markers introduce
+blocks of text, while only the last block identified by `|CS` contains binary data.
 The format supports the storage of _multiple data sets (channels)_ in a single
 file. The channels may be ordered in _multiplex_ mode (ordering w.r.t. time) or
 _block_ mode (ordering w.r.t. to channels).
@@ -61,7 +60,7 @@ letters. There are _two types_ of markers distinguished by the first letter:
 1. _critical_ markers: introduced by `|C` featuring uppercase `C`
 1. _noncritical_ markers: introduced by `|N` featuring uppercase `N`  
 
-The second letter represents further details of the specific key. Note, that
+The second letter represents further details of the specific key. Note that
 while the _noncritical_ keys are optional, any _.raw_ file _cannot be_ correctly
 decoded if any of the _critical_ markers are misinterpreted, invalid or damaged.
 The second uppercase letter is followed by the first comma and the _version_
@@ -70,9 +69,9 @@ representation) specifies the length of the entire block, i.e. the number of
 bytes between the following comma and the block-terminating semicolon. The further
 structure of a block is not defined and may feature different numbers of additional
 parameters. The format allows for any number of carriage returns (`CR = 0x0d`)
-and line feeds (`LF = 0x 0a`) between keys, i.e. the block terminating semicolon
+and line feeds (`LF = 0x 0a`) between keys, i.e. the block-terminating semicolon
 and the vertical bar (pipe) of the next key. The following _critical markers_
-are defined
+are defined:
 
 
 | marker | description                                                                                         |
@@ -118,8 +117,8 @@ module.
 
 ### CLI tool
 
-To build the CLI tool locally use the default target `make`  resulting
-in the binary `imctermite`. To ensure system-wide availability the installation
+To build the CLI tool locally, use the default target `make` resulting
+in the binary `imctermite`. To ensure system-wide availability, the installation
 of the tool (in the default location `/usr/local/bin`) is done via
 
 ```
@@ -130,27 +129,27 @@ which may require root permissions.
 
 ### Python
 
-To integrate the library into a customized ETL toolchain several cython targets
-are available. For a local build that enables you to run the examples use:
+To integrate the library into a customized ETL toolchain, several cython targets
+are available. For a local build that enables you to run the examples, use:
 
 ```
 make cython-build
 ```
 
-However, in a production environment a proper installation of the module with
+However, in a production environment, a proper installation of the module with
 `make cython-install` is recommended for system-wide availability of the module.
 
 ## Usage
 
 ### CLI
 
-The usage of the `imctermite` binary looks like this
+The usage of the `imctermite` binary looks like this:
 
 ```
 imctermite <raw-file> [options]
 ```
 
-since you have to provide a single _raw_ files and any option to specify what
+You have to provide a single _raw_ file and any option to specify what
 to do with the data. All available options can be listed with `imctermite --help`:
 
 ```
@@ -164,14 +163,14 @@ Options:
 ```
 
 For instance, to show a list of all channels included in `sample-data.raw`, you
-do `imctermite sample-data.raw --listchannels`. By default, no output files are
-written but only when an existing (!) directory is provided as argument to
+do `imctermite sample-data.raw --listchannels`. No output files are
+written by default. Output files are written only when an existing (!) directory is provided as argument to
 the `--output` option.
 
 ### Python
 
-Given the `imctermite` module is available we can import it and declare an instance
-of it by passing a _raw_ file to the constructor
+Given the `imctermite` module is available, we can import it and declare an instance
+of it by passing a _raw_ file to the constructor:
 
 ```Python
 import imc_termite
@@ -195,9 +194,9 @@ channels = imcraw.get_channels(False)
 print(channels)
 ```
 
-A more complete [example](python/usage.py) including the methods for obtaining the 
-channels including their data and or directly printing them to files can be found 
-in the python folder.
+A more complete [example](python/usage.py), including the methods for obtaining the 
+channels, i.a. their data and/or directly printing them to files, can be found 
+in the Python folder.
 
 ## References
 
