@@ -17,9 +17,9 @@ employed i.a. by the measurement hardware
 to dump and store data and the software packages
 [imc Studio](https://www.imc-tm.de/produkte/messtechnik-software/imc-studio/ueberblick/)
 & [imc FAMOS](https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/)
-for measurement data control and analysis. The extracted measurement data can
-be stored in various open-source file formats like _csv_, _json_, _parquet_ or
-_hdf5_.
+for measurement data control and analysis. Thanks to the integrated Python module
+the extracted measurement data can be stored in any open-source file format
+accessible by Python like i.a. _csv_, _json_ or _parquet_.
 
 ## Overview
 
@@ -194,8 +194,8 @@ channels = imcraw.get_channels(False)
 print(channels)
 ```
 
-A more complete [example](python/usage.py), including the methods for obtaining the 
-channels, i.a. their data and/or directly printing them to files, can be found 
+A more complete [example](python/usage.py), including the methods for obtaining the
+channels, i.a. their data and/or directly printing them to files, can be found
 in the Python folder.
 
 ## References
@@ -204,4 +204,3 @@ in the Python folder.
 - https://www.imc-tm.de/produkte/messtechnik-hardware/imc-cronosflex/ueberblick/
 - https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
 - https://github.com/Apollo3zehn/ImcFamosFile
-
