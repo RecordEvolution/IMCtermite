@@ -17,9 +17,11 @@ employed i.a. by the measurement hardware
 to dump and store data and the software packages
 [imc Studio](https://www.imc-tm.de/produkte/messtechnik-software/imc-studio/ueberblick/)
 & [imc FAMOS](https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/)
-for measurement data control and analysis. Thanks to the integrated Python module
+for measurement data control and analysis. Thanks to the integrated Python module,
 the extracted measurement data can be stored in any open-source file format
 accessible by Python like i.a. _csv_, _json_ or _parquet_.
+
+On the [Record Evolution Platform](https://www.record-evolution.de/en/home-en/), the library can be used both as a command line tool for interactive usage and as a Python module to integrate the _.raw_  format into any ETL workflow.   
 
 ## Overview
 
