@@ -20,3 +20,12 @@ cython/*.cpp
 *.parquet
 
 src/*.cpp.cpp
+
+pip/*.cpp
+pip/*.hpp
+pip/*.pyx
+pip/*.pxd
+pip/README.md
+pip/LICENSE
+pip/*egg-info
+pip/dist/

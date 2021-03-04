@@ -7,7 +7,7 @@ publish: sdist upload
 sdist: ../cython/py_imc_termite.pyx ../cython/imc_termite.pxd ../cython/py_imc_termite.cpp
 	cp -v $? ./
 	cp -v $(shell ls ../lib/imc_*.hpp) ./
-	tail -n $(($(cat README.md | wc -l)-10)) README.md > ./README.md
+	tail -n 212 ../README.md > ./README.md
 	cp -v ../LICENSE ./
 	python3 setup.py sdist
 
