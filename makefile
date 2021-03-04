@@ -1,5 +1,7 @@
 #-----------------------------------------------------------------------------#
 
+SHELL := /bin/bash
+
 # name of executable and CLI tool
 EXE = imctermite
 
@@ -17,9 +19,11 @@ CC = g++ -std=c++17
 #OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 OPT = -O3 -Wall -Werror -Wunused-variable -Wsign-compare
 
-# determine git version/commit tag
+# determine git version/commit and release tag
 GTAG := $(shell git tag | tail -n1)
 GHSH := $(shell git rev-parse HEAD | head -c8)
+RTAG := v$(shell cat pip/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]")
+CTAG := v$(shell cat cython/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]")
 
 # define install location
 INST := /usr/local/bin
@@ -28,8 +32,8 @@ INST := /usr/local/bin
 # C++ and CLI tool
 
 # build exectuable
-$(EXE) : main.o
-	$(CC) $(OPT) $^ -o $@
+$(EXE) : check-vtag $(RTAG) main.o
+	$(CC) $(OPT) main.o -o $@
 
 # build main.cpp and include git version/commit tag
 main.o : src/main.cpp $(HPP)
@@ -45,9 +49,21 @@ install : $(EXE)
 uninstall : $(INST)/$(EXE)
 	rm $<
 
-clean :
+cpp-clean :
 	rm -vf $(EXE)
 	rm -vf *.o
+
+#-----------------------------------------------------------------------------#
+# check version consistency of git tags and version string in package.json
+
+$(GTAG) :
+	@echo "consistent versions check successful: building $(GTAG)"
+
+check-vtag:
+	@echo "git tag version:  "$(GTAG)
+	@echo "git commit hash:  "$(GHSH)
+	@echo "release version:  "$(RTAG)
+	@echo "module version:   "$(CTAG)
 
 #-----------------------------------------------------------------------------#
 # Docker
@@ -61,48 +77,27 @@ docker-run:
 #-----------------------------------------------------------------------------#
 # python
 
-cython-build : $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
-	python3 $< build_ext --inplace
+cython-build : check-vtag $(CTAG) $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
+	python3 $(CYT)setup.py build_ext --inplace
 	cp -v imc_termite.cpython-*.so $(PYT)
 
-cython-install : $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
-	python3 $< install --record files_imctermite.txt
+cython-install : check-vtag $(CTAG) $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
+	python3 $(CYT)setup.py install --record files_imctermite.txt
 
 cython-clean :
 	rm -vf imc_termite.cpython-*.so
 	rm -vf $(PYT)imc_termite.cpython-*.so
 
 #-----------------------------------------------------------------------------#
-# Python (to be removed)
+# pip
 
-# build python module
-py : $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
-     $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp \
-		 output
-	python3 $(CYT)setup_raw_eater.py build_ext --inplace
-	python3 $(CYT)setup_raw_meat.py build_ext --inplace
-	cp raw_eater.cpython-*.so $(PYT)
-	cp raw_meat.cpython-*.so $(PYT)
-	rm *.so
+pip-release: check-vtag $(RTAG) cython-build
+	cd ./pip/ && make publish
 
-py-install: $(CYT)setup_raw_eater.py $(CYT)raw_eater.pyx $(CYT)raw_eater.pxd $(LIB)raweat.hpp \
-            $(CYT)setup_raw_meat.py $(CYT)raw_meat.pyx $(CYT)raw_meat.pxd $(LIB)rawmerge.hpp
-	python3 $(CYT)setup_raw_eater.py install --record files_raw_eater.txt
-	python3 $(CYT)setup_raw_meat.py install --record files_raw_meat.txt
+#-----------------------------------------------------------------------------#
+# clean
 
-py-clean :
-	rm -f raw_eater.cpython-*.so
-	rm -f $(PYT)raw_eater.cpython-*.so
-	rm -f $(CYT)raw_eater.cpp
-	rm -f raw_meat.cpython-*.so
-	rm -f $(PYT)raw_meat.cpython-*.so
-	rm -f $(CYT)raw_meat.cpp
-	rm -rf build/
-	rm -f *.txt
-	rm -rf output/
-
-# prepare directory for test output
-output :
-	mkdir -pv output/
+clean: cpp-clean cython-clean
+	cd ./pip/ && make clean
 
 #-----------------------------------------------------------------------------#

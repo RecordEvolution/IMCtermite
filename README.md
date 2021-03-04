@@ -141,6 +141,19 @@ make cython-build
 However, in a production environment, a proper installation of the module with
 `make cython-install` is recommended for system-wide availability of the module.
 
+#### Installation with pip
+
+The package is also available in the [Python Package Index](https://pypi.org)
+at [IMCtermite](https://pypi.org/project/IMCtermite/).
+To install the latest version simply do
+
+```Shell
+python3 -m pip install IMCtermite
+```
+
+Note, that _python3_setuptools_ and _gcc version >= 10.2.0_ are required to
+successfully install and use it.
+
 ## Usage
 
 ### CLI
