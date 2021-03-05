@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="IMCtermite",
-    version="1.2.2",
+    version="1.2.3",
     author="Record Evolution GmbH",
     author_email="mario.fink@record-evolution.de",
     maintainer="Record Evolution GmbH",

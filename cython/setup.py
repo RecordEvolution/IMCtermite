@@ -14,11 +14,11 @@ extensions = Extension(
 )
 
 setup(
-    version='1.2.2',
+    name="imc_termite",
+    version='1.2.3',
     description='IMCtermite cython extension',
     author='Record Evolution GmbH',
     author_email='mario.fink@record-evolution.de',
     url='https://github.com/RecordEvolution/IMCtermite.git',
-    name="imc_termite",
     ext_modules=cythonize(extensions,force=True)
 )
