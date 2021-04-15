@@ -32,10 +32,10 @@ cdef class imctermite:
   def print_table(self, string outputfile):
     chnlst = self.cpp_imc.get_channels(True,True)
     chnlstjn = [jn.loads(chn.decode()) for chn in chnlst]
-    with open(outputfile,'w') as fout:
+    with open(outputfile.decode(),'w') as fout:
       for chn in chnlstjn:
         fout.write(str(chn['yname']).rjust(20)+str(chn['xname']).rjust(20)+'\n')
         fout.write(str(chn['yunit']).rjust(20)+str(chn['xunit']).rjust(20)+'\n')
         for n in range(0,len(chn['ydata'])):
           fout.write(str(chn['ydata'][n]).rjust(20)+
-                     str(chn['ydata'][n]).rjust(20)+'\n')
+                     str(chn['xdata'][n]).rjust(20)+'\n')
