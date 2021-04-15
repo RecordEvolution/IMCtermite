@@ -16,3 +16,4 @@ cdef extern from "imc_raw.hpp" namespace "imc":
     vector[string] get_channels(bool json, bool data) except +
     # print all channels
     void print_channels(string outputdir) except +
+    void print_table(string outputfile) except +
