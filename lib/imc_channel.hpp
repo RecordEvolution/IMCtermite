@@ -95,7 +95,7 @@ namespace imc
     ss<<"[";
     if ( myvec.size() <= limit )
     {
-      for ( dt el: myvec ) ss<<el<<",";
+      for ( dt el: myvec ) ss<<std::setprecision(10)<<el<<",";
     }
     else
     {
@@ -104,7 +104,7 @@ namespace imc
       ss<<"...";
       for ( unsigned long int i = myvec.size()-heals; i < myvec.size(); i++ )
       {
-        ss<<myvec[i]<<",";
+        ss<<std::setprecision(10)<<myvec[i]<<",";
       }
     }
     std::string sumstr = ss.str();

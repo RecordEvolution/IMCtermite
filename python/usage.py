@@ -25,4 +25,4 @@ print(len(chnxdata))
 imcraw.print_channels(b"./")
 
 # print all channels in single file
-# imcraw.print_table(b"./allchannels.csv")
+imcraw.print_table(b"./allchannels.csv")
