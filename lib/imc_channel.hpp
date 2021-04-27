@@ -149,7 +149,9 @@ namespace imc
     // constructor takes channel's block environment
     channel(channel_env chnenv, std::map<std::string,imc::block>* blocks,
                                 std::vector<unsigned char>* buffer):
-      chnenv_(chnenv), blocks_(blocks), buffer_(buffer), group_index_(-1)
+      chnenv_(chnenv), blocks_(blocks), buffer_(buffer),
+      factor_(1.), offset_(0.),
+      group_index_(-1)
     {
       // declare list of block parameters
       std::vector<imc::parameter> prms;
@@ -291,6 +293,11 @@ namespace imc
       else if ( datatp_ == 8 )
       {
         imc::convert_data_to_type<imc_double>(CSbuffer,ydata_);
+      }
+      // ...
+      else if ( datatp_ == 11 )
+      {
+        imc::convert_data_to_type<imc_digital>(CSbuffer,ydata_);
       }
       else
       {

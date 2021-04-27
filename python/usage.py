@@ -6,7 +6,7 @@ import json
 try :
     imcraw = imc_termite.imctermite(b"samples/sampleA.raw")
 except RuntimeError as e :
-    print("failed to load/parse raw-file: " + str(e))
+    raise Exception("failed to load/parse raw-file: " + str(e))
 
 # obtain list of channels as list of dictionaries (without data)
 channels = imcraw.get_channels(False)

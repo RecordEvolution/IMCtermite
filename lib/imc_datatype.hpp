@@ -16,25 +16,31 @@ namespace imc
   typedef signed long int imc_Slongint;
   typedef float imc_float;
   typedef double imc_double;
-  // TODO remaining types are not yet supported
+  // TODO not all remaining types are supported yet
+  // typedef <whatever that is ->... > "imc Devices Transitional Recording"
+  // typedf <sometimestamptype>  "Timestamp Ascii"
+  typedef char16_t imc_digital;
+  // typedef <  > imc_sixbyte "6byte unsigned long"
 
   class datatype
   {
   protected:
-    imc_Ubyte ubyte_;     // 0
-    imc_Sbyte sbyte_;     // 1
-    imc_Ushort ushort_;   // 2
-    imc_Sshort sshort_;   // 3
-    imc_Ulongint ulint_;  // 4
-    imc_Slongint slint_;  // 5
-    imc_float sfloat_;    // 6
-    imc_double sdouble_;  // 7
-    short int dtidx_;     // \in \{0,...,7\}
+    imc_Ubyte ubyte_;      // 0
+    imc_Sbyte sbyte_;      // 1
+    imc_Ushort ushort_;    // 2
+    imc_Sshort sshort_;    // 3
+    imc_Ulongint ulint_;   // 4
+    imc_Slongint slint_;   // 5
+    imc_float sfloat_;     // 6
+    imc_double sdouble_;   // 7
+    imc_digital sdigital_; // 10
+    short int dtidx_;      // \in \{0,...,7,10\}
   public:
     datatype(): ubyte_(0), sbyte_(0),
                 ushort_(0), sshort_(0),
                 ulint_(0.0), slint_(0.0),
                 sfloat_(0.0), sdouble_(0.0),
+                sdigital_(0),
                 dtidx_(0) { };
     // every supported datatype gets its own constructor
     datatype(imc_Ubyte num): ubyte_(num), dtidx_(0) {};
@@ -46,7 +52,10 @@ namespace imc
     datatype(imc_float num): sfloat_(num), dtidx_(6) {};
     datatype(imc_double num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
                               ulint_(0.0), slint_(0.0), sfloat_(0.0), sdouble_(num),
-                              dtidx_(7) {};
+                              sdigital_(0), dtidx_(7) {};
+    datatype(imc_digital num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
+                               ulint_(0.0), slint_(0.0), sfloat_(0.0), sdouble_(num),
+                               sdigital_(num), dtidx_(10) {};
 
     // identify type
     short int& dtype() { return dtidx_; }
@@ -64,6 +73,7 @@ namespace imc
         this->slint_ = num.slint_;
         this->sfloat_ = num.sfloat_;
         this->sdouble_ = num.sdouble_;
+        this->sdigital_ = num.sdigital_;
         this->dtidx_ = num.dtidx_;
       }
 
@@ -119,6 +129,12 @@ namespace imc
       this->dtidx_ = 7;
       return *this;
     }
+    datatype& operator=(const imc_digital &num)
+    {
+      this->sdigital_ = num;
+      this->dtidx_ = 10;
+      return *this;
+    }
 
     // obtain number as double
     double as_double()
@@ -132,6 +148,7 @@ namespace imc
       else if ( dtidx_ == 5 ) num = (double)slint_;
       else if ( dtidx_ == 6 ) num = (double)sfloat_;
       else if ( dtidx_ == 7 ) num = (double)sdouble_;
+      else if ( dtidx_ == 10 ) num = static_cast<double>(sdigital_);
       return num;
     }
 
@@ -146,6 +163,7 @@ namespace imc
       else if ( num.dtidx_ == 5 ) out<<num.slint_;
       else if ( num.dtidx_ == 6 ) out<<num.sfloat_;
       else if ( num.dtidx_ == 7 ) out<<num.sdouble_;
+      else if ( num.dtidx_ == 10 ) out<<static_cast<double>(num.sdigital_);
       return out;
     }
 

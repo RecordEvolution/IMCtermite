@@ -8,7 +8,7 @@ from pathlib import Path
 # list files in sample directory
 # fileobj1 = Path("samples/").rglob("*.raw")
 # rawlist1 = [str(fl) for fl in fileobj1]
-rawlist1 = ["samples/datasetB/datasetB_32.raw"]
+rawlist1 = ["samples/datasetB/datasetB_29.raw"]
 print(rawlist1)
 
 for fl in rawlist1:
