@@ -10,12 +10,22 @@ namespace imc
   // map datatype to machine's datatypes
   typedef unsigned char imc_Ubyte;
   typedef signed char imc_Sbyte;
+  //
   typedef unsigned short imc_Ushort;
   typedef signed short imc_Sshort;
+  //
+  // e.g. ARM Cortex-A72 armv7l gcc version 10.2.0 (Ubuntu 10.2.0-13ubuntu1)
+  // #ifdef __arm__
   typedef unsigned long int imc_Ulongint;
   typedef signed long int imc_Slongint;
+  // e.g. Intel(R) Core(TM) i7-3520M CPU @ 2.90GHz x86_64 gcc version 10.2.0 (Ubuntu 10.2.0-13ubuntu1)
+  // #ifdef i386 __i386 __i386__
+  // typedef unsigned int imc_Ulongint;
+  // typedef signed int imc_Slongint;
+  //
   typedef float imc_float;
   typedef double imc_double;
+  //
   // TODO not all remaining types are supported yet
   // typedef <whatever that is ->... > "imc Devices Transitional Recording"
   // typedf <sometimestamptype>  "Timestamp Ascii"

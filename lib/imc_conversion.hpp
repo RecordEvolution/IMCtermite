@@ -17,7 +17,11 @@ namespace imc
     // check number of elements of type "datatype" in buffer
     if ( subbuffer.size() != channel.size()*sizeof(datatype) )
     {
-      throw std::runtime_error("size mismatch between subbuffer and datatype");
+      throw std::runtime_error( std::string("size mismatch between subbuffer (")
+                              + std::to_string(subbuffer.size())
+                              + std::string(") and datatype (")
+                              + std::to_string(channel.size()) + std::string("*")
+                              + std::to_string(sizeof(datatype)) + std::string(")") );
     }
 
     // extract every single number of type "datatype" from buffer
@@ -36,6 +40,8 @@ namespace imc
       // save number in channel
       channel[i] = df;
     }
+
+    // for ( auto el: channel ) std::cout<<el<<"\n";
   }
 
 }
