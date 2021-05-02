@@ -11,6 +11,9 @@ sdist: ../cython/py_imc_termite.pyx ../cython/imc_termite.pxd ../cython/py_imc_t
 	cp -v ../LICENSE ./
 	python3 setup.py sdist
 
+# authentication:
+# - username: __token__
+# - password: <token value including pypi-prefix>
 upload:
 	python3 -m twine upload dist/$(shell ls -t dist/ | head -n1)
 

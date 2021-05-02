@@ -219,3 +219,5 @@ in the Python folder.
 - https://www.imc-tm.de/produkte/messtechnik-hardware/imc-cronosflex/ueberblick/
 - https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
 - https://github.com/Apollo3zehn/ImcFamosFile
+- https://pypi.org/help/#apitoken
+
