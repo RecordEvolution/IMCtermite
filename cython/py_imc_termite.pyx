@@ -22,7 +22,7 @@ cdef class imctermite:
   # get JSON list of channels
   def get_channels(self, bool data):
     chnlst = self.cpp_imc.get_channels(True,data)
-    chnlstjn = [jn.loads(chn.decode(errors="ignore"),parse_float=decimal.Decimal) for chn in chnlst]
+    chnlstjn = [jn.loads(chn.decode(errors="ignore")) for chn in chnlst]
     return chnlstjn
 
   # print channels
@@ -32,7 +32,7 @@ cdef class imctermite:
   # print table including channels
   def print_table(self, string outputfile):
     chnlst = self.cpp_imc.get_channels(True,True)
-    chnlstjn = [jn.loads(chn.decode(errors="ignore"),parse_float=decimal.Decimal) for chn in chnlst]
+    chnlstjn = [jn.loads(chn.decode(errors="ignore")) for chn in chnlst]
     with open(outputfile.decode(),'w') as fout:
       for chn in chnlstjn:
         fout.write('#' +str(chn['xname']).rjust(19)+str(chn['yname']).rjust(20)+'\n')

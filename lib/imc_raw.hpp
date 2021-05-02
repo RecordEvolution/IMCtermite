@@ -174,7 +174,7 @@ namespace imc
     // check consistency of blocks
     void check_consistency()
     {
-      for ( unsigned long int b = 0; b < this->rawblocks_.size()-1; b++ )
+      for ( unsigned long int b = 0; b < this->rawblocks_.size()-1 && this->rawblocks_.size() > 0; b++ )
       {
         if ( this->rawblocks_[b].get_end() >= this->rawblocks_[b+1].get_begin() )
         {

@@ -178,6 +178,13 @@ int main(int argc, char* argv[])
       return 1;
     }
 
+    // catch invalid or empty ".raw" file
+    if ( imcraw.blocks().size() == 0 )
+    {
+      std::cerr<<"this appears to be an empty/invalid '.raw' file since no blocks were found"<<"\n";
+      return 1;
+    }
+
     // list blocks
     if ( cfgopts.count("listblocks") == 1 )
     {
