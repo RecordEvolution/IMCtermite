@@ -54,6 +54,12 @@ cpp-clean :
 	rm -vf *.o
 
 #-----------------------------------------------------------------------------#
+# linter and code check
+
+check-code:
+	cppcheck --enable=all -I lib/ src/main.cpp
+
+#-----------------------------------------------------------------------------#
 # check version consistency of git tags and version string in package.json
 
 $(GTAG) :
