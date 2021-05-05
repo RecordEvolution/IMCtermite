@@ -147,8 +147,8 @@ namespace imc
     std::string group_uuid_, group_name_, group_comment_;
 
     // constructor takes channel's block environment
-    channel(channel_env chnenv, std::map<std::string,imc::block>* blocks,
-                                std::vector<unsigned char>* buffer):
+    channel(channel_env &chnenv, std::map<std::string,imc::block>* blocks,
+                                 std::vector<unsigned char>* buffer):
       chnenv_(chnenv), blocks_(blocks), buffer_(buffer),
       factor_(1.), offset_(0.),
       group_index_(-1)

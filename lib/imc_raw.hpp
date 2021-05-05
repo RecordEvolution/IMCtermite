@@ -300,7 +300,7 @@ namespace imc
     }
 
     // list a particular type of block
-    std::vector<imc::block> list_blocks(imc::key mykey)
+    std::vector<imc::block> list_blocks(const imc::key &mykey)
     {
       std::vector<imc::block> myblocks;
       for ( imc::block blk: this->rawblocks_ )

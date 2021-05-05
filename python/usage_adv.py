@@ -1,9 +1,7 @@
 
 import imc_termite
 import json
-import glob
 import os
-from pathlib import Path
 
 # list files in sample directory
 # fileobj1 = Path("samples/").rglob("*.raw")

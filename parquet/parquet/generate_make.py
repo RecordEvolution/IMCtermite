@@ -1,6 +1,5 @@
 #-----------------------------------------------------------------------------#
 
-import glob
 from pathlib import Path
 
 # find source files

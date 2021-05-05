@@ -5,7 +5,6 @@ import raw_eater
 import raw_meat
 import pyarrow as pa
 import pyarrow.parquet as pq
-import glob
 from pathlib import Path
 
 fileobj1 = Path("smp/Rangerover_Evoque_F-RR534_2019-05-07/").rglob("*.raw")

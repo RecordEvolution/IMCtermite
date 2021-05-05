@@ -70,6 +70,21 @@ namespace imc
     // identify type
     short int& dtype() { return dtidx_; }
 
+    // copy constructor
+    datatype(const datatype &num)
+    {
+      this->ubyte_ = num.ubyte_;
+      this->sbyte_ = num.sbyte_;
+      this->ushort_ = num.ushort_;
+      this->sshort_ = num.sshort_;
+      this->ulint_ = num.ulint_;
+      this->slint_ = num.slint_;
+      this->sfloat_ = num.sfloat_;
+      this->sdouble_ = num.sdouble_;
+      this->sdigital_ = num.sdigital_;
+      this->dtidx_ = num.dtidx_;
+    }
+
     // overall assignment operator
     datatype& operator=(const datatype &num)
     {
