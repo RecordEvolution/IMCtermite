@@ -1,19 +1,9 @@
 
-<p align="center">
-  <a href="https://record-evolution.de/reswarm">
-    <img
-      alt="imctermite.svg"
-      src="assets/imctermite.svg"
-      width="400"
-    />
-  </a>
-</p>
+# IMCtermite
 
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/RecordEvolution/IMCtermite.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RecordEvolution/IMCtermite/alerts/)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/RecordEvolution/IMCtermite.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RecordEvolution/IMCtermite/context:cpp)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/RecordEvolution/IMCtermite.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RecordEvolution/IMCtermite/context:python)
-
-# IMCtermite
 
 _IMCtermite_ provides access to the proprietary data format
 _IMC Bus Format_ with the file extension _.raw_ introduced and developed by
