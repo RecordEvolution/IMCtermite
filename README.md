@@ -181,7 +181,7 @@ do `imctermite sample-data.raw --listchannels`. No output files are
 written by default. Output files are written only when an existing (!) directory
 is provided as argument to the `--output` option. By default, every output file
 is written using a `,` delimiter. You may provide any custom separator with the
-option `--delimiter`. For example, in order to use `|`, the binary is call with
+option `--delimiter`. For example, in order to use `|`, the binary is called with
 options `imctermite sample-data.raw -b -c -s '|'`.
 
 ### Python
