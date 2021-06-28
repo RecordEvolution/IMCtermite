@@ -171,14 +171,18 @@ Options:
  -c, --listchannels      list channels
  -b, --listblocks        list IMC key-blocks
  -d, --output            output directory to print channels
+ -s, --delimiter         csv delimiter/separator char for output
  -h, --help              show this help message
  -v, --version           display version
 ```
 
 For instance, to show a list of all channels included in `sample-data.raw`, you
 do `imctermite sample-data.raw --listchannels`. No output files are
-written by default. Output files are written only when an existing (!) directory is provided as argument to
-the `--output` option.
+written by default. Output files are written only when an existing (!) directory
+is provided as argument to the `--output` option. By default, every output file
+is written using a `,` delimiter. You may provide any custom separator with the
+option `--delimiter`. For example, in order to use `|`, the binary is call with
+options `imctermite sample-data.raw -b -c -s '|'`.
 
 ### Python
 
@@ -218,4 +222,3 @@ in the Python folder.
 - https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
 - https://github.com/Apollo3zehn/ImcFamosFile
 - https://pypi.org/help/#apitoken
-
