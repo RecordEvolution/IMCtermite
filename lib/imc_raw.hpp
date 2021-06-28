@@ -333,7 +333,7 @@ namespace imc
     }
 
     // print all channels in directory
-    void print_channels(std::string output)
+    void print_channels(std::string output, const char sep)
     {
       // check for given directory
       std::filesystem::path pd = output;
@@ -352,7 +352,7 @@ namespace imc
         std::filesystem::path pf = pd / filenam;
 
         // and print the channel
-        it->second.print(pf);
+        it->second.print(pf,sep);
       }
     }
 

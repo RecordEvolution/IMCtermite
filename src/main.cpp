@@ -66,6 +66,20 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
         i = i + 1;
       }
     }
+    else if ( std::string(argv[i]) == std::string("--delimiter")
+           || std::string(argv[i]) == std::string("-s") )
+    {
+      if ( i+1 == argc || argv[i+1][0] == '-' )
+      {
+        std::cerr<<"invalid or missing --output argument\n";
+        prsdkeys.insert(std::pair<std::string,std::string>("invalid","delimiter"));
+      }
+      else
+      {
+        prsdkeys.insert(std::pair<std::string,std::string>("delimiter",argv[i+1]));
+        i = i + 1;
+      }
+    }
     else if ( std::string(argv[i]) == std::string("--help")
            || std::string(argv[i]) == std::string("-h") )
     {
@@ -121,9 +135,13 @@ void show_usage()
            <<" -c, --listchannels      list channels\n"
            <<" -b, --listblocks        list IMC key-blocks\n"
            <<" -d, --output            output directory to print channels\n"
+           <<" -s, --delimiter         csv delimiter/separator char for output\n"
            <<" -h, --help              show this help message \n"
            <<" -v, --version           display version\n"
-           <<"\n";
+           <<"\n"
+           <<"Example:"
+           <<" $ ./imctermite sample/data_A.raw -c -b -d ./data -s ','"
+           <<"\n\n";
 }
 
 //---------------------------------------------------------------------------//
@@ -209,7 +227,11 @@ int main(int argc, char* argv[])
     if ( cfgopts.count("output") == 1 )
     {
       try {
-        imcraw.print_channels(cfgopts.at("output"));
+        if ( cfgopts.at("delimiter").size() > 1 )
+        {
+          throw std::runtime_error("invalid delimiter comprised of more than a single char");
+        }
+        imcraw.print_channels(cfgopts.at("output"),cfgopts.at("delimiter")[0]);
       } catch (const std::exception& e) {
         std::cerr<<"failed to print channels for "<<rawfile<<": "<<e.what()<<"\n";
       }

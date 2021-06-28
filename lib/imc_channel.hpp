@@ -381,7 +381,7 @@ namespace imc
     }
 
     // print channel
-    void print(std::string filename, const char sep = ' ', int width = 25)
+    void print(std::string filename, const char sep = ',', int width = 25)
     {
       std::ofstream fou(filename);
 

@@ -93,7 +93,7 @@ cython-install : check-vtag $(CTAG) $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)p
 cython-clean :
 	rm -vf imc_termite.cpython-*.so
 	rm -vf $(PYT)imc_termite.cpython-*.so
-	rm -rv build/
+	rm -rvf build/
 
 #-----------------------------------------------------------------------------#
 # pip
