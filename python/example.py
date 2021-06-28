@@ -7,16 +7,16 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from pathlib import Path
 
-fileobj1 = Path("smp/Rangerover_Evoque_F-RR534_2019-05-07/").rglob("*.raw")
+fileobj1 = Path("samples/datasetA/").rglob("*.raw")
 rawlist1 = [str(fl) for fl in fileobj1]
 
-fileobj2 = Path("smp/Mercedes_E-Klasse-2019-08-08/").rglob("*.raw")
+fileobj2 = Path("samples/datasetB/").rglob("*.raw")
 rawlist2 = [str(fl) for fl in fileobj2]
 
 rawlist = rawlist1 #[rawlist1[0],rawlist1[4],rawlist2[0],rawlist2[6]]
 for fil in rawlist2 :
     rawlist.append(fil)
-rawlist.append("smp/pressure_Vacuum.asc")
+rawlist.append("./README.md")
 
 print("")
 print(rawlist)

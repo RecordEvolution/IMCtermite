@@ -25,9 +25,11 @@ cdef class imctermite:
     chnlstjn = [jn.loads(chn.decode(errors="ignore")) for chn in chnlst]
     return chnlstjn
 
-  # print channels
-  def print_channels(self, string outputdir):
-    self.cpp_imc.print_channels(outputdir)
+  # print single channel/all channels
+  def print_channel(self, string channeluuid, string outputfile, char delimiter):
+    self.cpp_imc.print_channel(channeluuid,outputfile,delimiter)
+  def print_channels(self, string outputdir, char delimiter):
+    self.cpp_imc.print_channels(outputdir,delimiter)
 
   # print table including channels
   def print_table(self, string outputfile):

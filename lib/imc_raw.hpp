@@ -332,14 +332,38 @@ namespace imc
       return channels;
     }
 
-    // print all channels in directory
+    // print single specific channel
+    void print_channel(std::string channeluuid, std::string outputfile, const char sep)
+    {
+      // check for given parent directory of output file
+      std::filesystem::path pdf = outputfile;
+      if ( !std::filesystem::is_directory(pdf.parent_path()) )
+      {
+        throw std::runtime_error(std::string("required directory does not exist: ")
+                                 + pdf.parent_path().u8string() );
+      }
+
+      // find channel with given name
+      if ( channels_.count(channeluuid) == 1 )
+      {
+        channels_.at(channeluuid).print(outputfile,sep);
+      }
+      else
+      {
+        throw std::runtime_error(std::string("channel does not exist:")
+                                 + channeluuid);
+      }
+    }
+
+    // print all channels into given directory
     void print_channels(std::string output, const char sep)
     {
       // check for given directory
       std::filesystem::path pd = output;
       if ( !std::filesystem::is_directory(pd) )
       {
-        throw std::runtime_error("given directory does not exist");
+        throw std::runtime_error(std::string("given directory does not exist: ")
+                                 + output);
       }
 
       for ( std::map<std::string,imc::channel>::iterator it = channels_.begin();

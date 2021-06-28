@@ -1,10 +1,11 @@
 
 import imc_termite
 import json
+import os
 
 # declare and initialize instance of "imctermite" by passing a raw-file
 try :
-    imcraw = imc_termite.imctermite(b"samples/sampleA.raw")
+    imcraw = imc_termite.imctermite(b"samples/exampleB.raw")
 except RuntimeError as e :
     raise Exception("failed to load/parse raw-file: " + str(e))
 
@@ -22,7 +23,16 @@ print(len(chnydata))
 print(len(chnxdata))
 
 # print the channels into a specific directory
-imcraw.print_channels(b"./")
+imcraw.print_channels(b"./data",ord(','))
+
+# print all channels separately
+idx = 0
+for chn in channels :
+    print(str(idx)+" : "+chn['name']+" : "+chn['uuid'])
+    filname = os.path.join("./data",str(idx) + "_" + chn['name']+".csv")
+    print(filname)
+    imcraw.print_channel(chn['uuid'].encode(),filname.encode(),ord(','))
+    idx = idx + 1
 
 # print all channels in single file
-imcraw.print_table(b"./allchannels.csv")
+# imcraw.print_table(b"./data/allchannels.csv")

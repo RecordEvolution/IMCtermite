@@ -32,25 +32,37 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
   // parse all CLI arguments
   for ( int i = 1; i < argc; i++ )
   {
-    if ( std::string(argv[i]) == std::string("--showmeta")
-      || std::string(argv[i]) == std::string("-m") )
-    {
-      prsdkeys.insert(std::pair<std::string,std::string>("showmeta",argv[i]));
-    }
+    // if ( std::string(argv[i]) == std::string("--showmeta")
+    //   || std::string(argv[i]) == std::string("-m") )
+    // {
+    //   prsdkeys.insert(std::pair<std::string,std::string>("showmeta",argv[i]));
+    // }
     // else if ( std::string(argv[i]) == std::string("--listgroups")
     //        || std::string(argv[i]) == std::string("-g") )
     // {
     //   prsdkeys.insert(std::pair<std::string,std::string>("listgroups",argv[i]));
     // }
-    else if ( std::string(argv[i]) == std::string("--listchannels")
+    if ( std::string(argv[i]) == std::string("--listchannels")
            || std::string(argv[i]) == std::string("-c") )
     {
       prsdkeys.insert(std::pair<std::string,std::string>("listchannels",argv[i]));
+      if ( i+1 < argc ) {
+        if ( argv[i+1][0] != '-' ) {
+          std::cerr<<"option --list-channels does not take any argument\n";
+          prsdkeys.insert(std::pair<std::string,std::string>("invalid","channels"));
+        }
+      }
     }
     else if ( std::string(argv[i]) == std::string("--listblocks")
            || std::string(argv[i]) == std::string("-b") )
     {
       prsdkeys.insert(std::pair<std::string,std::string>("listblocks",argv[i]));
+      if ( i+1 < argc ) {
+        if ( argv[i+1][0] != '-' ) {
+          std::cerr<<"option --list-blocks does not take any argument\n";
+          prsdkeys.insert(std::pair<std::string,std::string>("invalid","listblocks"));
+        }
+      }
     }
     else if ( std::string(argv[i]) == std::string("--output")
            || std::string(argv[i]) == std::string("-d") )
@@ -71,7 +83,7 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
     {
       if ( i+1 == argc || argv[i+1][0] == '-' )
       {
-        std::cerr<<"invalid or missing --output argument\n";
+        std::cerr<<"invalid or missing --delimiter argument\n";
         prsdkeys.insert(std::pair<std::string,std::string>("invalid","delimiter"));
       }
       else
@@ -98,13 +110,13 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
         std::cerr<<"invalid or unkown argument: "<<argv[i]<<"\n";
         prsdkeys.insert(std::pair<std::string,std::string>("invalid",argv[i]));
       }
-      // or missing filenames
-      else if ( std::string(argv[i]).find(".raw") == std::string::npos )
-      {
-        std::cerr<<"doesn't look like a .raw file (make sure to include extension in filename!): "
-                 <<argv[i]<<"\n";
-        prsdkeys.insert(std::pair<std::string,std::string>("invalid",argv[i]));
-      }
+      // // or missing filenames
+      // else if ( std::string(argv[i]).find(".raw") == std::string::npos )
+      // {
+      //   std::cerr<<"doesn't look like a .raw file (make sure to include extension in filename!): "
+      //            <<argv[i]<<"\n";
+      //   prsdkeys.insert(std::pair<std::string,std::string>("invalid",argv[i]));
+      // }
     }
   }
 
@@ -227,11 +239,22 @@ int main(int argc, char* argv[])
     if ( cfgopts.count("output") == 1 )
     {
       try {
-        if ( cfgopts.at("delimiter").size() > 1 )
+        // check and use desired delimiter
+        char delim;
+        if ( cfgopts.count("delimiter") == 1 )
         {
-          throw std::runtime_error("invalid delimiter comprised of more than a single char");
+          if ( cfgopts.at("delimiter").size() > 1 )
+          {
+            throw std::runtime_error("invalid delimiter comprised of more than a single char");
+          }
+          delim = cfgopts.at("delimiter")[0];
         }
-        imcraw.print_channels(cfgopts.at("output"),cfgopts.at("delimiter")[0]);
+        // use comma by default
+        else
+        {
+          delim = ',';
+        }
+        imcraw.print_channels(cfgopts.at("output"),delim);
       } catch (const std::exception& e) {
         std::cerr<<"failed to print channels for "<<rawfile<<": "<<e.what()<<"\n";
       }
