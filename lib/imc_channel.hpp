@@ -20,7 +20,7 @@ namespace imc
     // collect affiliate blocks for a single channel
     std::string CBuuid_, CGuuid_, CCuuid_, CNuuid_;
     std::string CDuuid_, CTuuid_, Cbuuid_, CPuuid_, CRuuid_, CSuuid_;
-    std::string NTuuid_, NOuuid_;
+    std::string NTuuid_, NOuuid_, NLuuid_;
 
     // reset all members
     void reset()
@@ -38,6 +38,7 @@ namespace imc
       CSuuid_.clear();
       NTuuid_.clear();
       NOuuid_.clear();
+      NLuuid_.clear();
     }
 
     // get info
@@ -58,7 +59,8 @@ namespace imc
         <<std::setw(width)<<std::left<<"CSuuid:"<<CSuuid_<<"\n"
         //
         <<std::setw(width)<<std::left<<"NTuuid:"<<NTuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"NOuuid:"<<NOuuid_<<"\n";
+        <<std::setw(width)<<std::left<<"NOuuid:"<<NOuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"NLuuid:"<<NLuuid_<<"\n";
       return ss.str();
     }
 
@@ -79,6 +81,7 @@ namespace imc
              <<"\",\"CSuuid\":\""<<CSuuid_
              <<"\",\"NTuuid\":\""<<NTuuid_
              <<"\",\"NOuuid\":\""<<NOuuid_
+             <<"\",\"NLuuid\":\""<<NLuuid_
              <<"\"}";
       return ss.str();
     }
@@ -122,10 +125,11 @@ namespace imc
     std::vector<unsigned char>* buffer_;
 
     // collect meta-data of channels according to env,
-    //  just everything valueable in here
+    // just everything valueable in here
     std::string uuid_;
     std::string name_, comment_;
     std::string origin_, origin_comment_, text_;
+    std::string language_code_, codepage_;
     std::string yname_, yunit_;
     std::string xname_, xunit_;
     double xstepwidth_, xoffset_;
@@ -233,6 +237,19 @@ namespace imc
         origin_comment_ = blocks_->at(chnenv_.NOuuid_).get_parameter(prms[6]);
       }
 
+      // extract associated NL data
+      // codepage:
+      // - http://www.iana.org/assignments/character-sets/character-sets.xhtml
+      // - https://de.wikipedia.org/wiki/Zeichensatztabelle
+      // language-code:
+      // - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c?redirectedfrom=MSDN
+      if ( blocks_->count(chnenv_.NLuuid_) == 1 )
+      {
+        prms = blocks_->at(chnenv_.NLuuid_).get_parameters();
+        codepage_ = blocks_->at(chnenv_.NLuuid_).get_parameter(prms[2]);
+        language_code_ = blocks_->at(chnenv_.NLuuid_).get_parameter(prms[3]);
+      }
+
       // start converting binary buffer to imc::datatype
       if ( !chnenv_.CSuuid_.empty() ) convert_buffer();
     }
@@ -330,6 +347,8 @@ namespace imc
         <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n"
         <<std::setw(width)<<std::left<<"origin:"<<origin_<<"\n"
         <<std::setw(width)<<std::left<<"description:"<<text_<<"\n"
+        <<std::setw(width)<<std::left<<"language-code:"<<language_code_<<"\n"
+        <<std::setw(width)<<std::left<<"codepage:"<<codepage_<<"\n"
         <<std::setw(width)<<std::left<<"yname:"<<yname_<<"\n"
         <<std::setw(width)<<std::left<<"yunit:"<<yunit_<<"\n"
         <<std::setw(width)<<std::left<<"datatype:"<<datatp_<<"\n"
@@ -359,6 +378,8 @@ namespace imc
              <<"\",\"comment\":\""<<comment_
              <<"\",\"origin\":\""<<origin_
              <<"\",\"description\":\""<<text_
+             <<"\",\"language-code\":\""<<language_code_
+             <<"\",\"codepage\":\""<<codepage_
              <<"\",\"yname\":\""<<yname_
              <<"\",\"yunit\":\""<<yunit_
              <<"\",\"significantbits\":\""<<signbits_

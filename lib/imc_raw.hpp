@@ -217,6 +217,7 @@ namespace imc
         else if ( blk.get_key().name_ == "CS" ) chnenv.CSuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "NT" ) chnenv.NTuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "NO" ) chnenv.NOuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "NL" ) chnenv.NLuuid_ = blk.get_uuid();
 
         // check for currently associated channel
         if ( !chnenv.CNuuid_.empty() )

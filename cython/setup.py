@@ -15,7 +15,7 @@ extensions = Extension(
 
 setup(
     name="imc_termite",
-    version='1.2.5',
+    version='1.2.6',
     description='IMCtermite cython extension',
     author='Record Evolution GmbH',
     author_email='mario.fink@record-evolution.de',

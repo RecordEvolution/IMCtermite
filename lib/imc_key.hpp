@@ -87,7 +87,8 @@ namespace imc
     key(false,"ND","(color) display properties",1),
     key(false,"NU","user defined key",1),
     key(false,"Np","property of channel",1),
-    key(false,"NE","extraction rule for BUS channels",1)
+    key(false,"NE","extraction rule for BUS channels",1),
+    key(false,"NL","language info and code page",1)
 
   };
 
