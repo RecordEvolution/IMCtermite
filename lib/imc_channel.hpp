@@ -6,6 +6,7 @@
 #include <sstream>
 #include "imc_datatype.hpp"
 #include "imc_conversion.hpp"
+#include <math.h>
 
 //---------------------------------------------------------------------------//
 
@@ -87,27 +88,49 @@ namespace imc
     }
   };
 
+  // adjust stream object
+  void customize_stream(std::ostream& stout, int prec, bool fixed)
+  {
+    if ( fixed )
+    {
+      stout<<std::setprecision(prec)<<std::fixed;
+    }
+    else
+    {
+      stout<<std::setprecision(prec);
+    }
+  }
+
   // given a list of numeric objects, join it into a string
   template<typename dt>
-  std::string joinvec(std::vector<dt> myvec, unsigned long int limit = 10)
+  std::string joinvec(std::vector<dt> myvec, unsigned long int limit = 10, int prec = 10, bool fixed = true)
   {
-    // include entire list for limit = - 1
+    // include entire list for limit = 0
     limit = (limit == 0) ? myvec.size() : limit;
 
     std::stringstream ss;
     ss<<"[";
     if ( myvec.size() <= limit )
     {
-      for ( dt el: myvec ) ss<<std::setprecision(10)<<el<<",";
+      for ( dt el: myvec )
+      {
+        customize_stream(ss,prec,fixed);
+        ss<<el<<",";
+      }
     }
     else
     {
       unsigned long int heals = (unsigned long int)(limit/2.);
-      for ( unsigned long int i = 0; i < heals; i++ ) ss<<myvec[i]<<",";
+      for ( unsigned long int i = 0; i < heals; i++ )
+      {
+        customize_stream(ss,prec,fixed);
+        ss<<myvec[i]<<",";
+      }
       ss<<"...";
       for ( unsigned long int i = myvec.size()-heals; i < myvec.size(); i++ )
       {
-        ss<<std::setprecision(10)<<myvec[i]<<",";
+        customize_stream(ss,prec,fixed);
+        ss<<myvec[i]<<",";
       }
     }
     std::string sumstr = ss.str();
@@ -133,6 +156,7 @@ namespace imc
     std::string yname_, yunit_;
     std::string xname_, xunit_;
     double xstepwidth_, xoffset_;
+    int xprec_;
 
     // buffer and data
     int signbits_, num_bytes_;
@@ -189,6 +213,9 @@ namespace imc
         xunit_ = blocks_->at(chnenv_.CDuuid_).get_parameter(prms[5]);
         // TODO
         // xname_ = std::string("time");
+
+        // find appropriate precision for "xdata_" by means of "xstepwidth_"
+        xprec_ = (xstepwidth_ > 0 ) ? ceil(fabs(log10(xstepwidth_))) : 10;
       }
 
       // extract associated CP data
@@ -363,8 +390,8 @@ namespace imc
         <<std::setw(width)<<std::left<<"offset:"<<offset_<<"\n"
         <<std::setw(width)<<std::left<<"group:"<<"("<<group_index_<<","<<group_name_
                                                     <<","<<group_comment_<<")"<<"\n"
-        <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_)<<"\n"
-        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<double>(xdata_)<<"\n";
+        <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_,10,9,true)<<"\n"
+        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<double>(xdata_,10,xprec_,true)<<"\n";
         // <<std::setw(width)<<std::left<<"aff. blocks:"<<chnenv_.get_json()<<"\n";
       return ss.str();
     }
@@ -392,8 +419,8 @@ namespace imc
                                <<"\",\"comment\":\""<<group_comment_<<"\""<<"}";
       if ( include_data )
       {
-        ss<<",\"ydata\":"<<imc::joinvec<imc::datatype>(ydata_,0)
-          <<",\"xdata\":"<<imc::joinvec<double>(xdata_,0);
+        ss<<",\"ydata\":"<<imc::joinvec<imc::datatype>(ydata_,0,9,true)
+          <<",\"xdata\":"<<imc::joinvec<double>(xdata_,0,xprec_,true);
       }
       // ss<<"\",\"aff. blocks\":\""<<chnenv_.get_json()
       ss<<"}";
@@ -402,7 +429,7 @@ namespace imc
     }
 
     // print channel
-    void print(std::string filename, const char sep = ',', int width = 25)
+    void print(std::string filename, const char sep = ',', int width = 25, int yprec = 9)
     {
       std::ofstream fou(filename);
 
@@ -423,13 +450,16 @@ namespace imc
       {
         if ( sep == ' ' )
         {
-          fou<<std::setprecision(9)<<std::fixed
+          fou<<std::setprecision(xprec_)<<std::fixed
              <<std::setw(width)<<std::left<<xdata_[i]
+             <<std::setprecision(yprec)<<std::fixed
              <<std::setw(width)<<std::left<<ydata_[i]<<"\n";
         }
         else
         {
-          fou<<xdata_[i]<<sep<<ydata_[i]<<"\n";
+          fou<<std::setprecision(xprec_)<<std::fixed<<xdata_[i]
+             <<sep
+             <<std::setprecision(yprec)<<std::fixed<<ydata_[i]<<"\n";
         }
       }
 
