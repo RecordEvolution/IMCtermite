@@ -390,8 +390,8 @@ namespace imc
         <<std::setw(width)<<std::left<<"offset:"<<offset_<<"\n"
         <<std::setw(width)<<std::left<<"group:"<<"("<<group_index_<<","<<group_name_
                                                     <<","<<group_comment_<<")"<<"\n"
-        <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_,10,9,true)<<"\n"
-        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<double>(xdata_,10,xprec_,true)<<"\n";
+        <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_,6,9,true)<<"\n"
+        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<double>(xdata_,6,xprec_,true)<<"\n";
         // <<std::setw(width)<<std::left<<"aff. blocks:"<<chnenv_.get_json()<<"\n";
       return ss.str();
     }
