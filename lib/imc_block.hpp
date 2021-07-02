@@ -63,7 +63,7 @@ namespace imc
         std::cout<<"WARNING: invalid length parameter in "<<thekey_.name_<<"-block "
                  <<"(block-end:"<<end_<<",buffer-size:"<<buffer_->size()<<")"
                  <<" => resetting block-end to buffer-size\n";
-        end_ = buffer_->size();
+        end_ = (unsigned long int)(buffer_->size());
       }
 
       try {

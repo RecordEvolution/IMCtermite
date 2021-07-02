@@ -123,20 +123,20 @@ namespace imc
                   leng.push_back((char)*(it+pos));
                   pos++;
                 }
-                unsigned long length = std::stoul(leng);
+                unsigned long int length = std::stoul(leng);
 
                 // declare and initialize corresponding key and block
                 // imc::key bkey( *(it+1)==imc::key_crit_ , newkey,
                 //                imc::keys.at(newkey).description_, version );
-                imc::block blk(itkey,it-buffer_.begin(),
-                                     it-buffer_.begin()+pos+1+length,
+                imc::block blk(itkey,(unsigned long int)(it-buffer_.begin()),
+                                     (unsigned long int)(it-buffer_.begin()+pos+1+length),
                                      raw_file_, &buffer_);
 
                 // add block to list
                 rawblocks_.push_back(blk);
 
                 // skip the remaining block according to its length
-                if ( it-buffer_.begin()+length < buffer_.size() )
+                if ( (unsigned long int)(it-buffer_.begin()+length) < (unsigned long int)(buffer_.size()) )
                 {
                   std::advance(it,length);
                 }
@@ -253,7 +253,7 @@ namespace imc
     // provide buffer size
     unsigned long int buffer_size()
     {
-      return buffer_.size();
+      return (unsigned long int)buffer_.size();
     }
 
     // get blocks
@@ -377,7 +377,7 @@ namespace imc
         std::filesystem::path pf = pd / filenam;
 
         // and print the channel
-        it->second.print(pf,sep);
+        it->second.print(pf.u8string(),sep);
       }
     }
 

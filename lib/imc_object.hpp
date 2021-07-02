@@ -500,22 +500,22 @@ namespace imc
       minute_ = std::stoi( get_parameter(buffer,&parameters[6]) );
       second_ = std::stod( get_parameter(buffer,&parameters[7]) );
 
-      time_t rawtime;
-      struct tm ts;
-      time(&rawtime);
-      localtime_r(&rawtime,&ts);
-      ts.tm_mday = day_;
-      ts.tm_mon = month_-1;
-      ts.tm_year = year_-1900;
-      ts.tm_hour = hour_;
-      ts.tm_min = minute_;
-      ts.tm_sec = (int)second_;
-      asctime_r(&ts,&timestamp_[0]);
-      // timestamp_ = std::to_string(year_) + std::string("-") + std::to_string(month_)
-      //                                    + std::string("-") + std::to_string(day_)
-      //                                    + std::string("T") + std::to_string(hour_)
-      //                                    + std::string(":") + std::to_string(minute_)
-      //                                    + std::string(":") + std::to_string(second_);
+      //time_t rawtime;
+      //struct tm ts;
+      //time(&rawtime);
+      //localtime_r(&rawtime,&ts);
+      //ts.tm_mday = day_;
+      //ts.tm_mon = month_-1;
+      //ts.tm_year = year_-1900;
+      //ts.tm_hour = hour_;
+      //ts.tm_min = minute_;
+      //ts.tm_sec = (int)second_;
+      //asctime_r(&ts,&timestamp_[0]);
+      timestamp_ = std::to_string(year_) + std::string("-") + std::to_string(month_)
+                                         + std::string("-") + std::to_string(day_)
+                                         + std::string("T") + std::to_string(hour_)
+                                         + std::string(":") + std::to_string(minute_)
+                                         + std::string(":") + std::to_string(second_);
     }
 
     // get info string

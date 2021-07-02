@@ -48,7 +48,7 @@ namespace imc
   public:
     datatype(): ubyte_(0), sbyte_(0),
                 ushort_(0), sshort_(0),
-                ulint_(0.0), slint_(0.0),
+                ulint_(0), slint_(0),
                 sfloat_(0.0), sdouble_(0.0),
                 sdigital_(0),
                 dtidx_(0) { };
@@ -61,10 +61,10 @@ namespace imc
     datatype(imc_Slongint num): slint_(num), dtidx_(5) {};
     datatype(imc_float num): sfloat_(num), dtidx_(6) {};
     datatype(imc_double num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
-                              ulint_(0.0), slint_(0.0), sfloat_(0.0), sdouble_(num),
+                              ulint_(0), slint_(0), sfloat_(0.0), sdouble_(num),
                               sdigital_(0), dtidx_(7) {};
     datatype(imc_digital num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
-                               ulint_(0.0), slint_(0.0), sfloat_(0.0), sdouble_(num),
+                               ulint_(0), slint_(0), sfloat_(0.0), sdouble_(num),
                                sdigital_(num), dtidx_(10) {};
 
     // identify type

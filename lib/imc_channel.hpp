@@ -215,7 +215,7 @@ namespace imc
         // xname_ = std::string("time");
 
         // find appropriate precision for "xdata_" by means of "xstepwidth_"
-        xprec_ = (xstepwidth_ > 0 ) ? ceil(fabs(log10(xstepwidth_))) : 10;
+        xprec_ = (xstepwidth_ > 0 ) ? (int)ceil(fabs(log10(xstepwidth_))) : 10;
       }
 
       // extract associated CP data
@@ -296,7 +296,7 @@ namespace imc
                                            buffer_->begin()+buffstrt+buffer_size_+1 );
 
       // determine number of values in buffer
-      unsigned long int num_values = CSbuffer.size()/(signbits_/8);
+      unsigned long int num_values = (unsigned long int)(CSbuffer.size()/(signbits_/8));
       if ( num_values*(signbits_/8) != CSbuffer.size() )
       {
         throw std::runtime_error("CSbuffer and significant bits of datatype don't match");
