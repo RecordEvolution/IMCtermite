@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------//
 
-#ifndef IMCCONVRSION
+#ifndef IMCCONVERSION
 #define IMCCONVERSION
 
 #include <vector>

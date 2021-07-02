@@ -133,7 +133,7 @@ void show_version()
 void show_usage()
 {
   std::cout<<"\n"
-           <<"imctermite ["<<gittag<<"-g"<<githash<<"] (github.com/RecordEvolution/IMCtermite.git)"
+           <<"imctermite ["<<gittag<<"-g"<<githash<<"] (https://github.com/RecordEvolution/IMCtermite.git)"
            <<"\n\n"
            <<"Decode IMC raw files and dump data as *.csv"
            <<"\n\n"
