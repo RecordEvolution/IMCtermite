@@ -3,10 +3,12 @@
 #ifndef IMCCHANNEL
 #define IMCCHANNEL
 
-#include <sstream>
 #include "imc_datatype.hpp"
 #include "imc_conversion.hpp"
+#include <sstream>
 #include <math.h>
+#include <chrono>
+#include <ctime>
 
 //---------------------------------------------------------------------------//
 
@@ -152,6 +154,8 @@ namespace imc
     std::string uuid_;
     std::string name_, comment_;
     std::string origin_, origin_comment_, text_;
+    std::chrono::system_clock::time_point trigger_time_, absolute_trigger_time_;
+    double trigger_time_frac_secs_;
     std::string language_code_, codepage_;
     std::string yname_, yunit_;
     std::string xname_, xunit_;
@@ -162,6 +166,7 @@ namespace imc
     int signbits_, num_bytes_;
     // unsigned long int byte_offset_;
     unsigned long int buffer_offset_, buffer_size_;
+    long int addtime_;
     int datatp_;
     imc::datatype dattyp_;
     std::vector<imc::datatype> ydata_;
@@ -235,6 +240,7 @@ namespace imc
         buffer_offset_ = std::stoul(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[6]));
         buffer_size_ = std::stoul(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[7]));
         xoffset_ = std::stod(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[11]));
+        addtime_ = (long int)std::stod(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[12]));
       }
 
       // extract associated CR data
@@ -277,8 +283,35 @@ namespace imc
         language_code_ = blocks_->at(chnenv_.NLuuid_).get_parameter(prms[3]);
       }
 
+      // obtain NT data
+      // - https://en.cppreference.com/w/cpp/chrono/c/tm
+      // - https://en.cppreference.com/w/cpp/io/manip/put_time
+      if ( blocks_->count(chnenv_.NTuuid_) == 1 )
+      {
+        prms = blocks_->at(chnenv_.NTuuid_).get_parameters();
+        //std::tm tm{};
+        std::tm tms = std::tm();
+        tms.tm_mday = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[2]));
+        tms.tm_mon = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[3])) - 1;
+        tms.tm_year = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[4])) - 1900;
+        tms.tm_hour = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[5]));
+        tms.tm_min = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[6]));
+        double secs = std::stold(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[7]));
+        double secs_int;
+        trigger_time_frac_secs_ = modf(secs,&secs_int);
+        tms.tm_sec = (int)secs_int;
+
+        // generate std::chrono::system_clock::time_point type
+        std::time_t ts = std::mktime(&tms);
+        trigger_time_ = std::chrono::system_clock::from_time_t(ts);
+      }
+
       // start converting binary buffer to imc::datatype
       if ( !chnenv_.CSuuid_.empty() ) convert_buffer();
+
+      // calculate absolute trigger-time
+      absolute_trigger_time_ = trigger_time_ + std::chrono::seconds(addtime_);
+      //                                       + std::chrono::nanoseconds((long int)(trigger_time_frac_secs_*1.e9));
     }
 
     // convert buffer to actual datatype
@@ -368,12 +401,18 @@ namespace imc
     // get info string
     std::string get_info(int width = 20)
     {
+      // prepare printable trigger-time
+      //std::time_t tt = std::chrono::system_clock::to_time_t(trigger_time_);
+      std::time_t att = std::chrono::system_clock::to_time_t(absolute_trigger_time_);
+
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"uuid:"<<uuid_<<"\n"
         <<std::setw(width)<<std::left<<"name:"<<name_<<"\n"
         <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n"
         <<std::setw(width)<<std::left<<"origin:"<<origin_<<"\n"
         <<std::setw(width)<<std::left<<"description:"<<text_<<"\n"
+        //<<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::localtime(&tt),"%FT%T")<<"\n"
+        <<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::localtime(&att),"%FT%T")<<"\n"
         <<std::setw(width)<<std::left<<"language-code:"<<language_code_<<"\n"
         <<std::setw(width)<<std::left<<"codepage:"<<codepage_<<"\n"
         <<std::setw(width)<<std::left<<"yname:"<<yname_<<"\n"
@@ -382,6 +421,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"significant bits:"<<signbits_<<"\n"
         <<std::setw(width)<<std::left<<"buffer-offset:"<<buffer_offset_<<"\n"
         <<std::setw(width)<<std::left<<"buffer-size:"<<buffer_size_<<"\n"
+        //<<std::setw(width)<<std::left<<"add-time:"<<addtime_<<"\n"
         <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
         <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
         <<std::setw(width)<<std::left<<"xstepwidth:"<<xstepwidth_<<"\n"
@@ -399,12 +439,17 @@ namespace imc
     // provide JSON string of metadata
     std::string get_json(bool include_data = false)
     {
+      // prepare printable trigger-time
+      //std::time_t tt = std::chrono::system_clock::to_time_t(trigger_time_);
+      std::time_t att = std::chrono::system_clock::to_time_t(absolute_trigger_time_);
+
       std::stringstream ss;
       ss<<"{"<<"\"uuid\":\""<<uuid_
              <<"\",\"name\":\""<<name_
              <<"\",\"comment\":\""<<comment_
              <<"\",\"origin\":\""<<origin_
              <<"\",\"description\":\""<<text_
+             <<"\",\"trigger-time\":\""<<std::put_time(std::localtime(&att),"%FT%T")
              <<"\",\"language-code\":\""<<language_code_
              <<"\",\"codepage\":\""<<codepage_
              <<"\",\"yname\":\""<<yname_
