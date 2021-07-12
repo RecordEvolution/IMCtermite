@@ -402,7 +402,7 @@ namespace imc
     std::string get_info(int width = 20)
     {
       // prepare printable trigger-time
-      //std::time_t tt = std::chrono::system_clock::to_time_t(trigger_time_);
+      std::time_t tt = std::chrono::system_clock::to_time_t(trigger_time_);
       std::time_t att = std::chrono::system_clock::to_time_t(absolute_trigger_time_);
 
       std::stringstream ss;
@@ -411,7 +411,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n"
         <<std::setw(width)<<std::left<<"origin:"<<origin_<<"\n"
         <<std::setw(width)<<std::left<<"description:"<<text_<<"\n"
-        //<<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::localtime(&tt),"%FT%T")<<"\n"
+        <<std::setw(width)<<std::left<<"trigger-time-nt:"<<std::put_time(std::localtime(&tt),"%FT%T")<<"\n"
         <<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::localtime(&att),"%FT%T")<<"\n"
         <<std::setw(width)<<std::left<<"language-code:"<<language_code_<<"\n"
         <<std::setw(width)<<std::left<<"codepage:"<<codepage_<<"\n"
@@ -421,7 +421,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"significant bits:"<<signbits_<<"\n"
         <<std::setw(width)<<std::left<<"buffer-offset:"<<buffer_offset_<<"\n"
         <<std::setw(width)<<std::left<<"buffer-size:"<<buffer_size_<<"\n"
-        //<<std::setw(width)<<std::left<<"add-time:"<<addtime_<<"\n"
+        <<std::setw(width)<<std::left<<"add-time:"<<addtime_<<"\n"
         <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
         <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
         <<std::setw(width)<<std::left<<"xstepwidth:"<<xstepwidth_<<"\n"
@@ -440,7 +440,7 @@ namespace imc
     std::string get_json(bool include_data = false)
     {
       // prepare printable trigger-time
-      //std::time_t tt = std::chrono::system_clock::to_time_t(trigger_time_);
+      std::time_t tt = std::chrono::system_clock::to_time_t(trigger_time_);
       std::time_t att = std::chrono::system_clock::to_time_t(absolute_trigger_time_);
 
       std::stringstream ss;
@@ -449,12 +449,14 @@ namespace imc
              <<"\",\"comment\":\""<<comment_
              <<"\",\"origin\":\""<<origin_
              <<"\",\"description\":\""<<text_
+             <<"\",\"trigger-time-nt\":\""<<std::put_time(std::localtime(&tt),"%FT%T")
              <<"\",\"trigger-time\":\""<<std::put_time(std::localtime(&att),"%FT%T")
              <<"\",\"language-code\":\""<<language_code_
              <<"\",\"codepage\":\""<<codepage_
              <<"\",\"yname\":\""<<yname_
              <<"\",\"yunit\":\""<<yunit_
              <<"\",\"significantbits\":\""<<signbits_
+             <<"\",\"addtime\":\""<<addtime_
              <<"\",\"xname\":\""<<xname_
              <<"\",\"xunit\":\""<<xunit_
              <<"\",\"xstepwidth\":\""<<xstepwidth_
