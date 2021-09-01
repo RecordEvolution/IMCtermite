@@ -20,10 +20,10 @@ CC = g++ -std=c++17
 OPT = -O3 -Wall -Werror -Wunused-variable -Wsign-compare
 
 # determine git version/commit and release tag
-GTAG := $(shell git tag | tail -n1)
+GTAG := $(shell git tag -l --sort=version:refname | tail -n1)
 GHSH := $(shell git rev-parse HEAD | head -c8)
-RTAG := v$(shell cat pip/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]")
-CTAG := v$(shell cat cython/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]")
+RTAG := v$(shell cat pip/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]{1,2}")
+CTAG := v$(shell cat cython/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]{1,2}")
 
 # define install location
 INST := /usr/local/bin
@@ -99,7 +99,7 @@ cython-clean :
 # pip
 
 pip-release: check-vtag $(RTAG) cython-build
-	cd ./pip/ && make publish
+	cd ./pip/ && make publish-source
 
 #-----------------------------------------------------------------------------#
 # clean
