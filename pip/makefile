@@ -8,13 +8,13 @@ publish-binary: bdist upload
 prepdist: ../cython/py_imc_termite.pyx ../cython/imc_termite.pxd ../cython/py_imc_termite.cpp
 	cp -v $? ./
 	cp -v $(shell ls ../lib/imc_*.hpp) ./
-	tail -n 212 ../README.md > ./README.md
+	cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
 	cp -v ../LICENSE ./
 
 sdist: prepdist
 	python3 setup.py sdist
 
-# TODO use manylinux wheel to avoid ERROR "unsupported platform tag 'linux_x86_64'" 
+# TODO use manylinux wheel to avoid ERROR "unsupported platform tag 'linux_x86_64'"
 # see: - https://github.com/pypa/manylinux
 bdist: prepdist
 	python3 setup.py bdist_wheel

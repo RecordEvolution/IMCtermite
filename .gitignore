@@ -30,3 +30,4 @@ pip/README.md
 pip/LICENSE
 pip/*egg-info
 pip/dist/
+pip/build/
