@@ -108,7 +108,8 @@ namespace imc
   std::string joinvec(std::vector<dt> myvec, unsigned long int limit = 10, int prec = 10, bool fixed = true)
   {
     // include entire list for limit = 0
-    limit = (limit == 0) ? (unsigned long int)myvec.size() : limit;
+    unsigned long int myvecsize = (unsigned long int)myvec.size();
+    limit = (limit == 0) ? myvecsize : limit;
 
     std::stringstream ss;
     ss<<"[";
@@ -129,7 +130,7 @@ namespace imc
         ss<<myvec[i]<<",";
       }
       ss<<"...";
-      for ( unsigned long int i = myvec.size()-heals; i < (unsigned long int)myvec.size(); i++ )
+      for ( unsigned long int i = myvecsize-heals; i < myvecsize; i++ )
       {
         customize_stream(ss,prec,fixed);
         ss<<myvec[i]<<",";

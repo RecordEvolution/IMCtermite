@@ -15,6 +15,7 @@ cython/*.cpp
 
 *.log
 *.so
+*.pyd
 *.o
 *.csv
 *.parquet
