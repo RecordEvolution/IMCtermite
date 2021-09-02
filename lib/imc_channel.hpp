@@ -108,7 +108,7 @@ namespace imc
   std::string joinvec(std::vector<dt> myvec, unsigned long int limit = 10, int prec = 10, bool fixed = true)
   {
     // include entire list for limit = 0
-    limit = (limit == 0) ? myvec.size() : limit;
+    limit = (limit == 0) ? (unsigned long int)myvec.size() : limit;
 
     std::stringstream ss;
     ss<<"[";
@@ -122,14 +122,14 @@ namespace imc
     }
     else
     {
-      unsigned long int heals = (unsigned long int)(limit/2.);
+      unsigned long int heals = limit/2;
       for ( unsigned long int i = 0; i < heals; i++ )
       {
         customize_stream(ss,prec,fixed);
         ss<<myvec[i]<<",";
       }
       ss<<"...";
-      for ( unsigned long int i = myvec.size()-heals; i < myvec.size(); i++ )
+      for ( unsigned long int i = myvec.size()-heals; i < (unsigned long int)myvec.size(); i++ )
       {
         customize_stream(ss,prec,fixed);
         ss<<myvec[i]<<",";
@@ -296,9 +296,9 @@ namespace imc
         tms.tm_year = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[4])) - 1900;
         tms.tm_hour = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[5]));
         tms.tm_min = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[6]));
-        double secs = std::stold(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[7]));
+        long double secs = std::stold(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[7]));
         double secs_int;
-        trigger_time_frac_secs_ = modf(secs,&secs_int);
+        trigger_time_frac_secs_ = modf((double)secs,&secs_int);
         tms.tm_sec = (int)secs_int;
 
         // generate std::chrono::system_clock::time_point type
@@ -384,7 +384,7 @@ namespace imc
       // fill xdata_
       for ( unsigned long int i = 0; i < num_values; i++ )
       {
-        xdata_.push_back(xoffset_+i*xstepwidth_);
+        xdata_.push_back(xoffset_+(double)i*xstepwidth_);
       }
 
       // employ data transformation

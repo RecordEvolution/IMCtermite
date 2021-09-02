@@ -17,7 +17,7 @@ HPP = $(wildcard $(LIB)/*.hpp)
 # choose compiler and its options
 CC = g++ -std=c++17
 #OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
-OPT = -O3 -Wall -Werror -Wunused-variable -Wsign-compare
+OPT = -O3 -Wall -Wconversion -Wpedantic -Werror -Wunused-variable -Wsign-compare
 
 # determine git version/commit and release tag
 GTAG := $(shell git tag -l --sort=version:refname | tail -n1)
