@@ -5,7 +5,7 @@ import os
 import sys
 
 print("building on platform: "+sys.platform)
-os.system("git tag > gittags.log")
+os.system("git tag -l --sort=version:refname > gittags.log")
 with open ("gittags.log","r") as gt:
     taglst = gt.readlines()
 os.remove("gittags.log")
