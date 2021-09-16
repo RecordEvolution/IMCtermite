@@ -393,8 +393,9 @@ namespace imc
       {
         for ( imc::datatype& el: ydata_ )
         {
-          // std::cout<<"value:"<<el.as_double()<<"\n";
-          el = imc::datatype(el.as_double()*factor_ + offset_);
+          //std::cout<<"value:"<<el.as_double()<<"\n";
+          double fact = ( factor_ == 0.0 ) ? 1.0 : factor_;
+          el = imc::datatype(el.as_double()*fact + offset_);
         }
       }
     }
