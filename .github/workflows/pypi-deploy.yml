@@ -17,8 +17,10 @@ jobs:
       - uses: actions/setup-python@v2
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.1.2
+        working-directory: python/
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
+        working-directory: python/
 
   build_sdist:
     name: Build source distribution
@@ -27,6 +29,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build sdist
         run: python setup.py sdist
+        working-directory: python/
 
   upload_pypi:
     name: Upload binary wheels to PyPI
@@ -38,3 +41,4 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.IMCTERMITE_GITHUB_WORKFLOW_PYPI_API_TOKEN }}
+        working-directory: python/
