@@ -1,4 +1,0 @@
-include *.hpp
-include *.cpp
-include *.pyx
-include *.pxd
