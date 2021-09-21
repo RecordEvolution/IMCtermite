@@ -11,10 +11,11 @@ jobs:
     name: Prepare environment for wheel builds
     runs-on: ubuntu-20.04
     steps:
-      - name: Install make
-        run: sudo apt-get install -y make
       - name: Prepare files
-        run: make setup
+        run: |
+        cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
+        cp -r ../lib ./
+        cp -v ../LICENSE ./
         working-directory: python/
 
   build_wheels:
