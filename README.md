@@ -224,3 +224,7 @@ can be found in the `python/examples` folder.
 - https://github.com/Apollo3zehn/ImcFamosFile
 - https://apollo3zehn.github.io/ImcFamosFile/api/ImcFamosFile.FamosFileKeyType.html
 - https://pypi.org/help/#apitoken
+- https://sgoel.dev/posts/uploading-binary-wheels-to-pypi-from-github-actions/
+- https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+- https://github.com/pypa/cibuildwheel/blob/main/examples/github-deploy.yml
+- https://cibuildwheel.readthedocs.io/en/stable/deliver-to-pypi/

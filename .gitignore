@@ -41,3 +41,4 @@ python/dist
 python/*.soc
 python/lib/
 python/*.cpp
+python/wheelhouse/

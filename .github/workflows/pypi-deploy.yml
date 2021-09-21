@@ -7,9 +7,20 @@ on:
 
 jobs:
 
+  build_setup:
+    name: Prepare environment for wheel builds
+    runs-on: ubuntu-20.04
+    steps:
+      -name: Install make
+        run: apt-get install make
+      - name: Prepare files
+        run: make setup
+        working-directory: python/
+
   build_wheels:
     name: Build binary wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    needs: [build_setup]
     strategy:
       matrix:
         os: [ubuntu-20.04, windows-2019, macOS-10.15]
@@ -24,10 +35,13 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         working-directory: python/
+        # env:
+        #   CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
 
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
+    needs: [build_setup]
     steps:
       - uses: actions/checkout@v2
       - name: Install cython
