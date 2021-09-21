@@ -3,12 +3,11 @@
 SHELL := /bin/bash
 
 # name of executable and CLI tool
-EXE = imctermite
+EXE = IMCtermite
 
 # directory names
 SRC = src/
 LIB = lib/
-CYT = cython/
 PYT = python/
 
 # list headers
@@ -16,14 +15,14 @@ HPP = $(wildcard $(LIB)/*.hpp)
 
 # choose compiler and its options
 CC = g++ -std=c++17
-#OPT = -O3 -Wall -mavx -mno-tbm -mf16c -mno-f16c
 OPT = -O3 -Wall -Wconversion -Wpedantic -Werror -Wunused-variable -Wsign-compare
 
 # determine git version/commit and release tag
 GTAG := $(shell git tag -l --sort=version:refname | tail -n1)
 GHSH := $(shell git rev-parse HEAD | head -c8)
-RTAG := v$(shell cat pip/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]{1,2}")
-CTAG := v$(shell cat cython/setup.py | grep version | grep -oP "([0-9]\.){2}[0-9]{1,2}")
+
+# current timestamp
+TMS = $(shell date +%Y%m%dT%H%M%S)
 
 # define install location
 INST := /usr/local/bin
@@ -32,7 +31,7 @@ INST := /usr/local/bin
 # C++ and CLI tool
 
 # build exectuable
-$(EXE) : check-vtag $(RTAG) main.o
+$(EXE) : main.o
 	$(CC) $(OPT) main.o -o $@
 
 # build main.cpp and include git version/commit tag
@@ -40,6 +39,7 @@ main.o : src/main.cpp $(HPP)
 	@cp $< $<.cpp
 	@sed -i 's/TAGSTRING/$(GTAG)/g' $<.cpp
 	@sed -i 's/HASHSTRING/$(GHSH)/g' $<.cpp
+	@sed -i 's/TIMESTAMPSTRING/$(TMS)/g' $<.cpp
 	$(CC) -c $(OPT) -I $(LIB) $<.cpp -o $@
 	@rm $<.cpp
 
@@ -54,22 +54,10 @@ cpp-clean :
 	rm -vf *.o
 
 #-----------------------------------------------------------------------------#
-# linter and code check
+# C++ linter
 
 check-code:
 	cppcheck --enable=all -I lib/ src/main.cpp
-
-#-----------------------------------------------------------------------------#
-# check version consistency of git tags and version string in package.json
-
-$(GTAG) :
-	@echo "consistent versions check successful: building $(GTAG)"
-
-check-vtag:
-	@echo "git tag version:  "$(GTAG)
-	@echo "git commit hash:  "$(GHSH)
-	@echo "release version:  "$(RTAG)
-	@echo "module version:   "$(CTAG)
 
 #-----------------------------------------------------------------------------#
 # Docker
@@ -83,28 +71,26 @@ docker-run:
 #-----------------------------------------------------------------------------#
 # python
 
-cython-build : check-vtag $(CTAG) $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
-	python3 $(CYT)setup.py build_ext --inplace
-	cp -v imc_termite.cpython-*.so $(PYT)
+python-build:
+	make -C python/ build-inplace
+	cp python/IMCtermite*.so ./ -v
 
-cython-install : check-vtag $(CTAG) $(CYT)setup.py $(CYT)imc_termite.pxd $(CYT)py_imc_termite.pyx $(HPP)
-	python3 $(CYT)setup.py install --record files_imctermite.txt
-
-cython-clean :
-	rm -vf imc_termite.cpython-*.so
-	rm -vf $(PYT)imc_termite.cpython-*.so
-	rm -rvf build/
-
-#-----------------------------------------------------------------------------#
-# pip
-
-pip-release: check-vtag $(RTAG) cython-build
-	cd ./pip/ && make publish-source
+python-clean:
+	make -C python/ clean
+	rm -vf IMCtermite*.so
 
 #-----------------------------------------------------------------------------#
 # clean
 
-clean: cpp-clean cython-clean
-	cd ./pip/ && make clean
+clean: cpp-clean python-clean
+
+#-----------------------------------------------------------------------------#
+# github actions
+
+github-action-lint: .github/workflows/pypi-deploy.yml
+	actionlint $<
+
+# for reference, see:
+# https://github.com/rhysd/actionlint
 
 #-----------------------------------------------------------------------------#

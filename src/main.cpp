@@ -12,6 +12,7 @@
 
 const std::string gittag("TAGSTRING");
 const std::string githash("HASHSTRING");
+const std::string timestamp("TIMESTAMPSTRING");
 
 //---------------------------------------------------------------------------//
 
@@ -127,13 +128,13 @@ optkeys parse_args(int argc, char* argv[], bool list_args = false)
 
 void show_version()
 {
-  std::cout<<"imctermite ["<<gittag<<"-g"<<githash<<"]"<<"\n";
+  std::cout<<"imctermite ["<<gittag<<"-g"<<githash<<"-"<<timestamp<<"]"<<"\n";
 }
 
 void show_usage()
 {
   std::cout<<"\n"
-           <<"imctermite ["<<gittag<<"-g"<<githash<<"] (https://github.com/RecordEvolution/IMCtermite.git)"
+           <<"imctermite ["<<gittag<<"-g"<<githash<<"-"<<timestamp<<"] (https://github.com/RecordEvolution/IMCtermite.git)"
            <<"\n\n"
            <<"Decode IMC raw files and dump data as *.csv"
            <<"\n\n"
