@@ -1,9 +1,12 @@
 
 name: Build Python Wheels
+
 on:
   push:
     branches: [master]
+
 jobs:
+
   build_wheels:
     name: Build binary wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -41,4 +44,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.IMCTERMITE_GITHUB_WORKFLOW_PYPI_API_TOKEN }}
-        working-directory: python/
