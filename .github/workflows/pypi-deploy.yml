@@ -13,10 +13,9 @@ jobs:
     steps:
       - name: Prepare files
         run: |
-          cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
-          cp -r ../lib ./
-          cp -v ../LICENSE ./
-        working-directory: python/
+          cat README.md | grep '^# IMCtermite' -A 50000 > python/README.md
+          cp -r lib/ python
+          cp -v LICENSE python
 
   build_wheels:
     name: Build binary wheels on ${{ matrix.os }}
