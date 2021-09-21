@@ -1,4 +1,4 @@
-include *.hpp
+include lib/*.hpp
 include *.cpp
 include *.pyx
 include *.pxd
