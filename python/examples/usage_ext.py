@@ -1,12 +1,12 @@
 
-import imc_termite
+import IMCtermite
 import json
 import os
 import datetime
 
 # declare and initialize instance of "imctermite" by passing a raw-file
 try :
-    imcraw = imc_termite.imctermite(b"samples/sampleB.raw")
+    imcraw = IMCtermite.imctermite(b"samples/sampleB.raw")
 except RuntimeError as e :
     raise Exception("failed to load/parse raw-file: " + str(e))
 

@@ -31,3 +31,13 @@ pip/LICENSE
 pip/*egg-info
 pip/dist/
 pip/build/
+
+python/README.md
+python/LICENSE
+python/VERSION
+python/build
+python/*.egg-info
+python/dist
+python/*.soc
+python/lib/
+python/*.cpp
