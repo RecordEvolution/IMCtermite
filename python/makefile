@@ -1,14 +1,11 @@
 
-GITAG := $(shell git tag -l --sort=version:refname | tail -n1 | sed 's/^v//g')
-
 setup:
-	echo $(GITAG) > VERSION
 	cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
 	cp -r ../lib ./
 	cp -v ../LICENSE ./
 
 setup-clean:
-	rm -vf README.md VERSION LICENSE
+	rm -vf README.md LICENSE
 	rm -rf lib/
 
 build: setup

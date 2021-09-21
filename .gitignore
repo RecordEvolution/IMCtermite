@@ -35,7 +35,6 @@ pip/build/
 
 python/README.md
 python/LICENSE
-python/VERSION
 python/build
 python/*.egg-info
 python/dist
