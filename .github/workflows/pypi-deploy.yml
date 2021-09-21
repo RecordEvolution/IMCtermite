@@ -11,7 +11,7 @@ jobs:
     name: Prepare environment for wheel builds
     runs-on: ubuntu-20.04
     steps:
-      -name: Install make
+      - name: Install make
         run: apt-get install make
       - name: Prepare files
         run: make setup
