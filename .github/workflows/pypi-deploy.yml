@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Prepare files
-        run: python/setup.sh
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/.github/setup.sh"
+          "${GITHUB_WORKSPACE}/.github/setup.sh"
 
   build_wheels:
     name: Build binary wheels on ${{ matrix.os }}
