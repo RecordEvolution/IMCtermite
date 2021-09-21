@@ -13,9 +13,9 @@ jobs:
     steps:
       - name: Prepare files
         run: |
-        cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
-        cp -r ../lib ./
-        cp -v ../LICENSE ./
+          cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
+          cp -r ../lib ./
+          cp -v ../LICENSE ./
         working-directory: python/
 
   build_wheels:
