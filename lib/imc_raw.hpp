@@ -58,6 +58,8 @@ namespace imc
     // open file and stream data into buffer
     void fill_buffer()
     {
+      buffer_.clear();
+
       // open file and put data in buffer
       try {
         std::ifstream fin(raw_file_.c_str(),std::ifstream::binary);
@@ -76,6 +78,8 @@ namespace imc
     // parse all raw blocks in buffer
     void parse_blocks()
     {
+      rawblocks_.clear();
+
       // reset counter to identify computational complexity
       cplxcnt_ = 0;
 
@@ -190,6 +194,8 @@ namespace imc
     // generate map of blocks using their uuid
     void generate_block_map()
     {
+      mapblocks_.clear();
+
       for ( imc::block blk: rawblocks_ )
       {
         mapblocks_.insert( std::pair<std::string,imc::block>(blk.get_uuid(),blk) );
@@ -199,6 +205,8 @@ namespace imc
     // generate channel "environments"
     void generate_channel_env()
     {
+      channels_.clear();
+
       // declare single channel environment
       imc::channel_env chnenv;
       chnenv.reset();
@@ -207,7 +215,6 @@ namespace imc
       // BLOCK CORRESPONDENCE GOVERNED BY BLOCK ORDER IN BUFFER!!
       for ( imc::block blk: rawblocks_ )
       {
-
         if ( blk.get_key().name_ == "CN" ) chnenv.CNuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "CD" ) chnenv.CDuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "CT" ) chnenv.CTuuid_ = blk.get_uuid();

@@ -1,7 +1,6 @@
 
 name: Build Python Wheels
 on:
-  schedule:
   push:
     branches:
       - master
@@ -25,10 +24,9 @@ jobs:
   upload_wheels:
     name: Upload binary wheels to PyPI
     needs: [build_wheels]
-    
+
     steps:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.IMCTERMITE_GITHUB_WORKFLOW_PYPI_API_TOKEN }}
-
