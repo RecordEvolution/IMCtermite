@@ -1,11 +1,13 @@
 
 setup:
 	cat ../README.md | grep '^# IMCtermite' -A 50000 > ./README.md
+	#pandoc -f markdown -t rst -o README.rst README.md
+	#python -m rstvalidator README.rst
 	cp -r ../lib ./
 	cp -v ../LICENSE ./
 
 setup-clean:
-	rm -vf README.md LICENSE
+	rm -vf README.md README.rst LICENSE
 	rm -rf lib/
 
 build: setup
@@ -16,9 +18,11 @@ build-inplace: setup
 
 build-sdist: setup
 	python setup.py sdist
+	python -m twine check dist/*
 
 build-bdist: setup
 	python setup.py bdist
+	python -m twine check dist/*
 
 build-clean:
 	python setup.py clean --all

@@ -11,10 +11,9 @@ jobs:
     name: Prepare environment for wheel builds
     runs-on: ubuntu-20.04
     steps:
-      - name: Prepare files
-        run: |
-          chmod +x "${GITHUB_WORKSPACE}/.github/setup.sh"
-          "${GITHUB_WORKSPACE}/.github/setup.sh"
+      - uses: actions/checkout@v2
+      - name: Prepare wheel build
+        run: make -C python/ setup
 
   build_wheels:
     name: Build binary wheels on ${{ matrix.os }}

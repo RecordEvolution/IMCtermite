@@ -91,6 +91,9 @@ python-clean:
 	make -C python/ clean
 	rm -vf IMCtermite*.so
 
+python-test:
+	PYTHONPATH=./ python python/examples/usage.py
+
 #-----------------------------------------------------------------------------#
 # clean
 

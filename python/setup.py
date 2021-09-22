@@ -1,6 +1,5 @@
 from setuptools import Extension, setup
 from Cython.Build import cythonize
-import os
 import sys
 
 print("building on platform: "+sys.platform)
