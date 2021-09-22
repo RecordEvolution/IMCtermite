@@ -26,8 +26,8 @@ jobs:
     needs: [build_setup]
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-11]
-        arch: [auto32, auto64, aarch64, ppc64le, s390x]
+        os: [ubuntu-20.04, windows-2019]
+        arch: [auto32, auto64, aarch64]
 
     steps:
       - uses: actions/checkout@v2
