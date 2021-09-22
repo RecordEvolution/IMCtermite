@@ -79,9 +79,15 @@ jobs:
     needs: [build_wheels, build_sdist]
 
     steps:
-      - name: Get source and binary wheels
+      - name: Get source wheels
         uses: actions/download-artifact@v2
         with:
+          name: source-wheels
+          path: dist/
+      - name: Get binary wheels
+        uses: actions/download-artifact@v2
+        with:
+          name: binary-wheels
           path: dist/
 
       - uses: pypa/gh-action-pypi-publish@release/v1
