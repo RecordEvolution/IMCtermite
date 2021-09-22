@@ -38,6 +38,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: wheel-config
+          path: python/
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         working-directory: python/
@@ -56,6 +57,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: wheel-config
+          path: python/
       - name: Build sdist
         run: python setup.py sdist
         working-directory: python/
