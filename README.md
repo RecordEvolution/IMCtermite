@@ -150,8 +150,10 @@ To install the latest version simply do
 python3 -m pip install IMCtermite
 ```
 
-Note, that _python3_setuptools_ and _gcc version >= 10.2.0_ are required to
-successfully install and use it.
+which provides binary wheels for multiple architectures on _Windows_ and _Linux_
+and most _Python 3.x_ distributions. However, if your platform/architecture is
+not supported you can still compile the source distribution yourself, which 
+requires _python3_setuptools_ and _gcc version >= 10.2.0_.
 
 ## Usage
 
