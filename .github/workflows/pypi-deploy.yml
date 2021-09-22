@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: binary-wheels
-          path: wheelhouse/*.whl
+          path: python/wheelhouse/*.whl
 
   build_sdist:
     name: Build source distribution
@@ -70,7 +70,8 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: source-wheels
-          path: dist/*.tar.gz
+          path: python/dist/*.tar.gz
+
 
   upload_pypi:
     name: Upload binary wheels to PyPI
