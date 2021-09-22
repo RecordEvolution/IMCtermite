@@ -44,6 +44,11 @@ jobs:
         working-directory: python/
         # env:
         #   CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
+      - name: Store source wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: source-wheels
+          path: dist/*.tar.gz
 
   build_sdist:
     name: Build source distribution
@@ -61,6 +66,11 @@ jobs:
       - name: Build sdist
         run: python setup.py sdist
         working-directory: python/
+      - name: Store binary wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: binary-wheels
+          path: wheelhouse/*.whl
 
   upload_pypi:
     name: Upload binary wheels to PyPI
@@ -68,6 +78,11 @@ jobs:
     needs: [build_wheels, build_sdist]
 
     steps:
+      - name: Get source and binary wheels
+        uses: actions/download-artifact@v2
+        with:
+          path: dist/
+
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
