@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 
 # name of executable and CLI tool
-EXE = IMCtermite
+EXE = imctermite
 
 # directory names
 SRC = src/

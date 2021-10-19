@@ -20,8 +20,8 @@ cdef class imctermite:
     self.cppimc.set_file(rawfile)
 
   # get JSON list of channels
-  def get_channels(self, bool data):
-    chnlst = self.cppimc.get_channels(True,data)
+  def get_channels(self, bool include_data):
+    chnlst = self.cppimc.get_channels(True,include_data)
     chnlstjn = [jn.loads(chn.decode(errors="ignore")) for chn in chnlst]
     return chnlstjn
 

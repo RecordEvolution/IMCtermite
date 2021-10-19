@@ -455,12 +455,12 @@ namespace imc
              <<"\",\"trigger-time\":\""<<std::put_time(std::localtime(&att),"%FT%T")
              <<"\",\"language-code\":\""<<language_code_
              <<"\",\"codepage\":\""<<codepage_
-             <<"\",\"yname\":\""<<yname_
-             <<"\",\"yunit\":\""<<yunit_
+             <<"\",\"yname\":\""<<prepjsonstr(yname_)
+             <<"\",\"yunit\":\""<<prepjsonstr(yunit_)
              <<"\",\"significantbits\":\""<<signbits_
              <<"\",\"addtime\":\""<<addtime_
-             <<"\",\"xname\":\""<<xname_
-             <<"\",\"xunit\":\""<<xunit_
+             <<"\",\"xname\":\""<<prepjsonstr(xname_)
+             <<"\",\"xunit\":\""<<prepjsonstr(xunit_)
              <<"\",\"xstepwidth\":\""<<xstepwidth_
              <<"\",\"xoffset\":\""<<xoffset_
              <<"\",\"group\":{"<<"\"index\":\""<<group_index_
@@ -475,6 +475,25 @@ namespace imc
       ss<<"}";
 
       return ss.str();
+    }
+
+    // prepare string value for usage in JSON dump
+    std::string prepjsonstr(std::string value)
+    {
+      std::stringstream ss;
+      ss<<quoted(value);
+      return strip_quotes(ss.str());
+    }
+
+    // remove any leading or trailing double quotes
+    std::string strip_quotes(std::string astring)
+    {
+      // head
+      if ( astring.front() == '"' ) astring.erase(astring.begin()+0);
+      // tail
+      if ( astring.back() == '"' ) astring.erase(astring.end()-1);
+
+      return astring;
     }
 
     // print channel
