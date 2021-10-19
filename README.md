@@ -152,8 +152,9 @@ python3 -m pip install IMCtermite
 
 which provides binary wheels for multiple architectures on _Windows_ and _Linux_
 and most _Python 3.x_ distributions. However, if your platform/architecture is
-not supported you can still compile the source distribution yourself, which 
-requires _python3_setuptools_ and _gcc version >= 10.2.0_.
+not supported you can still compile the source distribution yourself, which
+requires _python3_setuptools_ and an up-to-date compiler supporting C++11
+standard (e.g. _gcc version >= 10.2.0_).
 
 ## Usage
 
@@ -189,23 +190,23 @@ options `imctermite sample-data.raw -b -c -s '|'`.
 
 ### Python
 
-Given the `imctermite` module is available, we can import it and declare an instance
+Given the `IMCtermite` module is available, we can import it and declare an instance
 of it by passing a _raw_ file to the constructor:
 
 ```Python
-import imc_termite
+import IMCtermite
 
-imcraw = imc_termite.imctermite(b"sample/sampleA.raw")
+imcraw = IMCtermite.imctermite(b"sample/sampleA.raw")
 ```
 
 An example of how to create an instance and obtain the list of channels is:
 
 ```Python
-import imc_termite
+import IMCtermite
 
 # declare and initialize instance of "imctermite" by passing a raw-file
 try :
-    imcraw = imc_termite.imctermite(b"samples/sampleA.raw")
+    imcraw = IMCtermite.imctermite(b"samples/sampleA.raw")
 except RuntimeError as e :
     print("failed to load/parse raw-file: " + str(e))
 
