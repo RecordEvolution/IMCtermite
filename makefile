@@ -31,7 +31,7 @@ INST := /usr/local/bin
 #-----------------------------------------------------------------------------#
 # C++ and CLI tool
 
-# build exectuable
+# build executable
 $(EXE): check-tags $(GVSN) main.o
 	$(CC) $(OPT) main.o -o $@
 
