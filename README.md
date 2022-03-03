@@ -31,6 +31,8 @@ On the [Record Evolution Platform](https://www.record-evolution.de/en/home-en/),
 
 ## File format
 
+[Warning: Take a look at [this issue](https://github.com/RecordEvolution/IMCtermite/issues/14) when reading this section regarding the file format.]
+
 A data file of the _IMC Bus Format_ type with the extension _.raw_ is a _mixed text/binary
 file_ featuring a set of markers (keys) that indicate the start of various blocks
 of data that provide meta information and the actual measurement data. Every single
