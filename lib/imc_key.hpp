@@ -84,6 +84,7 @@ namespace imc
     // noncritical keys
     key(false,"NO","origin of data",1),
     key(false,"NT","timestamp of trigger",1),
+    key(false,"NT","timestamp of trigger",2),
     key(false,"ND","(color) display properties",1),
     key(false,"NU","user defined key",1),
     key(false,"Np","property of channel",1),
