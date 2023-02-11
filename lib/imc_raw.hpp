@@ -236,13 +236,27 @@ namespace imc
             // provide UUID for channel
             chnenv.uuid_ = chnenv.CNuuid_;
 
+            // for multichannel data there may be multiple channels referring to
+            // the same (final) CS block (in contrast to what the IMC software
+            // documentation seems to suggest) resulting in all channels missing
+            // a CS block except for the very last
+            if ( chnenv.CSuuid_.empty() ) {
+              for ( imc::block blkCS: rawblocks_ ) {
+                if ( blkCS.get_key().name_ == "CS"
+                  && blkCS.get_begin() > (unsigned long int)stol(chnenv.uuid_) ) {
+                  chnenv.CSuuid_ = blkCS.get_uuid();
+                }
+              }
+            }
+
             // create channel object and add it to the map of channels
             channels_.insert( std::pair<std::string,imc::channel>
               (chnenv.CNuuid_,imc::channel(chnenv,&mapblocks_,&buffer_))
             );
 
             // reset channel uuid
-            chnenv.CNuuid_.clear();
+            chnenv.reset();
+            //chnenv.CNuuid_.clear();
           }
         }
 
@@ -253,7 +267,6 @@ namespace imc
         else if ( blk.get_key().name_ == "CC" ) chnenv.CCuuid_ = blk.get_uuid();
       }
     }
-
 
   public:
 
