@@ -318,16 +318,16 @@ namespace imc
     // convert buffer to actual datatype
     void convert_buffer()
     {
-      // TODO no clue how/if/when to handle buffer offset/mask/subsequent_bytes
-      // etc. and whatever that shit is!
       std::vector<imc::parameter> prms = blocks_->at(chnenv_.CSuuid_).get_parameters();
       if ( prms.size() < 4)
       {
         throw std::runtime_error("CS block is invalid and features to few parameters");
       }
+
+      // extract (channel dependent) part of buffer
       unsigned long int buffstrt = prms[3].begin();
-      std::vector<unsigned char> CSbuffer( buffer_->begin()+buffstrt+1,
-                                           buffer_->begin()+buffstrt+buffer_size_+1 );
+      std::vector<unsigned char> CSbuffer( buffer_->begin()+buffstrt+buffer_offset_+1,
+                                           buffer_->begin()+buffstrt+buffer_offset_+buffer_size_+1 );
 
       // determine number of values in buffer
       unsigned long int num_values = (unsigned long int)(CSbuffer.size()/(signbits_/8));
