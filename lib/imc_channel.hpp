@@ -9,6 +9,7 @@
 #include <math.h>
 #include <chrono>
 #include <ctime>
+#include <time.h>
 
 //---------------------------------------------------------------------------//
 
@@ -301,9 +302,12 @@ namespace imc
         double secs_int;
         trigger_time_frac_secs_ = modf((double)secs,&secs_int);
         tms.tm_sec = (int)secs_int;
+        //tms.tm_isdst = -1;
 
         // generate std::chrono::system_clock::time_point type
-        std::time_t ts = std::mktime(&tms);
+        // ( - https://www.gnu.org/software/libc/manual/html_node/Broken_002ddown-Time.html
+        //   - https://man7.org/linux/man-pages/man3/tzset.3.html )
+        std::time_t ts = timegm(&tms); //std::mktime(&tms);
         trigger_time_ = std::chrono::system_clock::from_time_t(ts);
       }
 
@@ -413,8 +417,8 @@ namespace imc
         <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n"
         <<std::setw(width)<<std::left<<"origin:"<<origin_<<"\n"
         <<std::setw(width)<<std::left<<"description:"<<text_<<"\n"
-        <<std::setw(width)<<std::left<<"trigger-time-nt:"<<std::put_time(std::localtime(&tt),"%FT%T")<<"\n"
-        <<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::localtime(&att),"%FT%T")<<"\n"
+        <<std::setw(width)<<std::left<<"trigger-time-nt:"<<std::put_time(std::gmtime(&tt),"%FT%T")<<"\n"
+        <<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::gmtime(&att),"%FT%T")<<"\n"
         <<std::setw(width)<<std::left<<"language-code:"<<language_code_<<"\n"
         <<std::setw(width)<<std::left<<"codepage:"<<codepage_<<"\n"
         <<std::setw(width)<<std::left<<"yname:"<<yname_<<"\n"
@@ -451,8 +455,8 @@ namespace imc
              <<"\",\"comment\":\""<<comment_
              <<"\",\"origin\":\""<<origin_
              <<"\",\"description\":\""<<text_
-             <<"\",\"trigger-time-nt\":\""<<std::put_time(std::localtime(&tt),"%FT%T")
-             <<"\",\"trigger-time\":\""<<std::put_time(std::localtime(&att),"%FT%T")
+             <<"\",\"trigger-time-nt\":\""<<std::put_time(std::gmtime(&tt),"%FT%T")
+             <<"\",\"trigger-time\":\""<<std::put_time(std::gmtime(&att),"%FT%T")
              <<"\",\"language-code\":\""<<language_code_
              <<"\",\"codepage\":\""<<codepage_
              <<"\",\"yname\":\""<<prepjsonstr(yname_)
