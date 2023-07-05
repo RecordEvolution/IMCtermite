@@ -10,6 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <time.h>
+#include <iconv.h>
 
 //---------------------------------------------------------------------------//
 
@@ -142,6 +143,78 @@ namespace imc
     sumstr += std::string("]");
     return sumstr;
   }
+
+  // convert encoding of any descriptions, channel-names, units etc.
+  class iconverter
+  {
+      std::string in_enc_, out_enc_;
+      iconv_t cd_;
+      size_t out_buffer_size_;
+
+    public:
+
+      iconverter(std::string in_enc, std::string out_enc, size_t out_buffer_size = 1024) :
+        in_enc_(in_enc), out_enc_(out_enc), out_buffer_size_(out_buffer_size)
+      {
+        // allocate descriptor for character set conversion
+        // (https://man7.org/linux/man-pages/man3/iconv_open.3.html)
+        cd_ = iconv_open(out_enc.c_str(), in_enc.c_str());
+
+        if ( (iconv_t)-1 == cd_ )
+        {
+          if ( errno == EINVAL )
+          {
+            std::string errmsg = std::string("The encoding conversion from ") + in_enc
+              + std::string(" to ") + out_enc + std::string(" is not supported by the implementation.");
+            throw std::runtime_error(errmsg);
+          }
+        }
+      }
+
+      void convert(std::string &astring)
+      {
+        if ( astring.empty() ) return;
+
+        std::vector<char> in_buffer(astring.begin(),astring.end());
+        char *inbuf = &in_buffer[0];
+        size_t inbytes = in_buffer.size();
+
+        std::vector<char> out_buffer(out_buffer_size_);
+        char *outbuf = &out_buffer[0];
+        size_t outbytes = out_buffer.size();
+
+        // perform character set conversion
+        // ( - https://man7.org/linux/man-pages/man3/iconv.3.html
+        //   - https://www.ibm.com/docs/en/zos/2.2.0?topic=functions-iconv-code-conversion )
+        while ( inbytes > 0 )
+        {
+          size_t res = iconv(cd_,&inbuf,&inbytes,&outbuf,&outbytes);
+
+          if ( (size_t)-1 == res )
+          {
+            std::string errmsg;
+            if ( errno == EILSEQ )
+            {
+              errmsg = std::string("An invalid multibyte sequence is encountered in the input.");
+              throw std::runtime_error(errmsg);
+            }
+            else if ( errno == EINVAL )
+            {
+              errmsg = std::string("An incomplete multibyte sequence is encountered in the input")
+                     + std::string(" and the input byte sequence terminates after it.");
+            }
+            else if ( errno == E2BIG )
+            {
+              errmsg = std::string("The output buffer has no more room for the next converted character.");
+            }
+            throw std::runtime_error(errmsg);
+          }
+        }
+
+        std::string outstring(out_buffer.begin(),out_buffer.end());
+        astring = outstring;
+      }
+  };
 
   // channel
   struct channel
@@ -317,6 +390,9 @@ namespace imc
       // calculate absolute trigger-time
       absolute_trigger_time_ = trigger_time_ + std::chrono::seconds(addtime_);
       //                                       + std::chrono::nanoseconds((long int)(trigger_time_frac_secs_*1.e9));
+
+      // convert any non-UTF-8 codepage to UTF-8
+      convert_encoding();
     }
 
     // convert buffer to actual datatype
@@ -401,6 +477,33 @@ namespace imc
           double fact = ( factor_ == 0.0 ) ? 1.0 : factor_;
           el = imc::datatype(el.as_double()*fact + offset_);
         }
+      }
+    }
+
+    // convert any description, units etc. to UTF-8 (by default)
+    void convert_encoding()
+    {
+      if ( !codepage_.empty() )
+      {
+        // construct iconv-compatible name for respective codepage
+        std::string cpn = std::string("CP") + codepage_;
+
+        // set up converter
+        std::string utf = std::string("UTF-8");
+        iconverter conv(cpn,utf);
+
+        conv.convert(name_);
+        conv.convert(comment_);
+        conv.convert(origin_);
+        conv.convert(origin_comment_);
+        conv.convert(text_);
+        conv.convert(language_code_);
+        conv.convert(yname_);
+        conv.convert(yunit_);
+        conv.convert(xname_);
+        conv.convert(xunit_);
+        conv.convert(group_name_);
+        conv.convert(group_comment_);
       }
     }
 
