@@ -211,7 +211,7 @@ namespace imc
           }
         }
 
-        std::string outstring(out_buffer.begin(),out_buffer.end());
+        std::string outstring(out_buffer.begin(),out_buffer.end()-outbytes);
         astring = outstring;
       }
   };
