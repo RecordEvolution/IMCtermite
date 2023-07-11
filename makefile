@@ -10,8 +10,11 @@ SRC = src/
 LIB = lib/
 PYT = python/
 
-# list headers
+# list headers and include directories
 HPP = $(wildcard $(LIB)/*.hpp)
+IPP = $(shell find $(LIB) -type f -name '*.hpp')
+KIB = $(shell find $(LIB) -type d)
+MIB = $(foreach dir,$(KIB),-I $(dir))
 
 # choose compiler and its options
 CC = g++ -std=c++17
@@ -36,12 +39,12 @@ $(EXE): check-tags $(GVSN) main.o
 	$(CC) $(OPT) main.o -o $@
 
 # build main.cpp and include git version/commit tag
-main.o: src/main.cpp $(HPP)
+main.o: src/main.cpp $(IPP)
 	@cp $< $<.cpp
 	@sed -i 's/TAGSTRING/$(GTAG)/g' $<.cpp
 	@sed -i 's/HASHSTRING/$(GHSH)/g' $<.cpp
 	@sed -i 's/TIMESTAMPSTRING/$(TMS)/g' $<.cpp
-	$(CC) -c $(OPT) -I $(LIB) $<.cpp -o $@
+	$(CC) -c $(OPT) $(MIB) $<.cpp -o $@
 	@rm $<.cpp
 
 install: $(EXE)
