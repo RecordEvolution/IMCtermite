@@ -5,6 +5,16 @@ from IMCtermite cimport cppimctermite
 
 import json as jn
 import decimal
+import platform
+
+# auxiliary function for codepage conversion
+def get_codepage(chn) :
+    if platform == 'Windows' :
+        chndec = jn.loads(chn.decode(errors="ignore"))
+        chncdp = chndec["codepage"]
+        return 'utf-8' if chncdp is None else chncdp
+    else :
+        return 'utf-8'
 
 cdef class imctermite:
 
@@ -22,7 +32,7 @@ cdef class imctermite:
   # get JSON list of channels
   def get_channels(self, bool include_data):
     chnlst = self.cppimc.get_channels(True,include_data)
-    chnlstjn = [jn.loads(chn.decode(errors="ignore")) for chn in chnlst]
+    chnlstjn = [jn.loads(chn.decode(get_codepage(chn),errors="ignore")) for chn in chnlst]
     return chnlstjn
 
   # print single channel/all channels
