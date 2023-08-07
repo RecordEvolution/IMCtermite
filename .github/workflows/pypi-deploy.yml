@@ -40,16 +40,15 @@ jobs:
         with:
           name: wheel-config
           path: python/
-      - name: Install iconv for Windows
+      - name: Get vcpkg repo
         if: matrix.os == 'windows-2019'
-        steps:
-          - name: Get vcpkg repo
-            run: git clone https://github.com/Microsoft/vcpkg.git
-          - name: Install vcpkg
-            run: .\vcpkg\bootstrap-vcpkg.bat
-            working-directory: vcpkg/
-          - name: Install required package libiconv
-            run: vcpkg install libiconv
+        run: git clone https://github.com/Microsoft/vcpkg.git
+      - name: Build and install vcpkg and install libiconv for windows
+        if: matrix.os == 'windows-2019'
+        run: |
+          .\vcpkg\bootstrap-vcpkg.bat
+          vcpkg install libiconv
+        working-directory: vcpkg/
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         working-directory: python/
