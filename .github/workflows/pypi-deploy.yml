@@ -40,15 +40,12 @@ jobs:
         with:
           name: wheel-config
           path: python/
-      - name: Get vcpkg repo
-        if: matrix.os == 'windows-2019'
-        run: git clone https://github.com/Microsoft/vcpkg.git
-      - name: Build and install vcpkg and install libiconv for windows
+      - name: Install libiconv for windows
         if: matrix.os == 'windows-2019'
         run: |
+          git clone https://github.com/Microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
           vcpkg install libiconv
-        working-directory: vcpkg/
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         working-directory: python/
