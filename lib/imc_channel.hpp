@@ -12,6 +12,8 @@
 #include <time.h>
 #if defined(__linux__) || defined(__APPLE__)
 #include <iconv.h>
+#elif defined(__WIN32__) || defined(_WIN32)
+#define timegm _mkgmtime
 #endif
 
 //---------------------------------------------------------------------------//
