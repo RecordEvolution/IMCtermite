@@ -146,21 +146,19 @@ namespace imc
     return sumstr;
   }
 
+  #if defined(__linux__) || defined(__APPLE__)
   // convert encoding of any descriptions, channel-names, units etc.
   class iconverter
   {
-      #if defined(__linux__) || defined(__APPLE__)
-      iconv_t cd_;
-      #endif
-      std::string in_enc_, out_enc_;
-      size_t out_buffer_size_;
+    std::string in_enc_, out_enc_;
+    iconv_t cd_;
+    size_t out_buffer_size_;
 
     public:
 
       iconverter(std::string in_enc, std::string out_enc, size_t out_buffer_size = 1024) :
         in_enc_(in_enc), out_enc_(out_enc), out_buffer_size_(out_buffer_size)
       {
-        #if defined(__linux__) || defined(__APPLE__)
         // allocate descriptor for character set conversion
         // (https://man7.org/linux/man-pages/man3/iconv_open.3.html)
         cd_ = iconv_open(out_enc.c_str(), in_enc.c_str());
@@ -174,12 +172,10 @@ namespace imc
             throw std::runtime_error(errmsg);
           }
         }
-        #endif
       }
 
       void convert(std::string &astring)
       {
-        #if defined(__linux__) || defined(__APPLE__)
         if ( astring.empty() ) return;
 
         std::vector<char> in_buffer(astring.begin(),astring.end());
@@ -221,8 +217,15 @@ namespace imc
         std::string outstring(out_buffer.begin(),out_buffer.end()-outbytes);
         astring = outstring;
       }
-      #endif
   };
+  #elif defined(__WIN32__) || defined(_WIN32)
+  class iconverter
+  {
+    public:
+      iconverter(std::string in_enc, std::string out_enc, size_t out_buffer_size = 1024) {}
+      void convert(std::string &astring) {}
+  };
+  #endif
 
   // channel
   struct channel
