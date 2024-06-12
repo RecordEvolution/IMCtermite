@@ -532,6 +532,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"name:"<<name_<<"\n"
         <<std::setw(width)<<std::left<<"comment:"<<comment_<<"\n"
         <<std::setw(width)<<std::left<<"origin:"<<origin_<<"\n"
+        <<std::setw(width)<<std::left<<"origin-comment:"<<origin_comment_<<"\n"
         <<std::setw(width)<<std::left<<"description:"<<text_<<"\n"
         <<std::setw(width)<<std::left<<"trigger-time-nt:"<<std::put_time(std::gmtime(&tt),"%FT%T")<<"\n"
         <<std::setw(width)<<std::left<<"trigger-time:"<<std::put_time(std::gmtime(&att),"%FT%T")<<"\n"
@@ -570,6 +571,7 @@ namespace imc
              <<"\",\"name\":\""<<name_
              <<"\",\"comment\":\""<<comment_
              <<"\",\"origin\":\""<<origin_
+             <<"\",\"origin-comment\":\""<<origin_comment_
              <<"\",\"description\":\""<<text_
              <<"\",\"trigger-time-nt\":\""<<std::put_time(std::gmtime(&tt),"%FT%T")
              <<"\",\"trigger-time\":\""<<std::put_time(std::gmtime(&att),"%FT%T")
