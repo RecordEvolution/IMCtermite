@@ -1,7 +1,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/RecordEvolution/IMCtermite)](https://img.shields.io/github/license/RecordEvolution/IMCtermite)
 [![STARS](https://img.shields.io/github/stars/RecordEvolution/IMCtermite)](https://img.shields.io/github/stars/RecordEvolution/IMCtermite)
-![CI/CD](https://github.com/RecordEvolution/IMCtermite/actions/workflows/pypi-deploy.yml/badge.svg?branch=master&event=push)
+![CI Build Wheel](https://github.com/RecordEvolution/IMCtermite/actions/workflows/pypi-deploy.yml/badge.svg?branch=master&event=push)
 [![PYPI](https://img.shields.io/pypi/v/IMCtermite.svg)](https://pypi.org/project/IMCtermite/)
 
 # IMCtermite
