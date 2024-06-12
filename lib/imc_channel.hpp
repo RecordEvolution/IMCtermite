@@ -496,35 +496,28 @@ namespace imc
     // convert any description, units etc. to UTF-8 (by default)
     void convert_encoding()
     {
-      // actual input codepage
-      std::string cpn;
-
       if ( !codepage_.empty() )
       {
         // construct iconv-compatible name for respective codepage
-        cpn = std::string("CP") + codepage_;
-      }
-      else {
-	// assume codepage 1252 by default
-	cpn = std::string("CP1252");
-      }
+        std::string cpn = std::string("CP") + codepage_;
 
-      // set up converter
-      std::string utf = std::string("UTF-8");
-      iconverter conv(cpn,utf);
+        // set up converter
+        std::string utf = std::string("UTF-8");
+        iconverter conv(cpn,utf);
 
-      conv.convert(name_);
-      conv.convert(comment_);
-      conv.convert(origin_);
-      conv.convert(origin_comment_);
-      conv.convert(text_);
-      conv.convert(language_code_);
-      conv.convert(yname_);
-      conv.convert(yunit_);
-      conv.convert(xname_);
-      conv.convert(xunit_);
-      conv.convert(group_name_);
-      conv.convert(group_comment_);
+        conv.convert(name_);
+        conv.convert(comment_);
+        conv.convert(origin_);
+        conv.convert(origin_comment_);
+        conv.convert(text_);
+        conv.convert(language_code_);
+        conv.convert(yname_);
+        conv.convert(yunit_);
+        conv.convert(xname_);
+        conv.convert(xunit_);
+        conv.convert(group_name_);
+        conv.convert(group_comment_);
+      }
     }
 
     // get info string
