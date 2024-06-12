@@ -1,10 +1,8 @@
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/RecordEvolution/IMCtermite.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RecordEvolution/IMCtermite/alerts/)
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/RecordEvolution/IMCtermite.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RecordEvolution/IMCtermite/context:cpp)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/RecordEvolution/IMCtermite.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RecordEvolution/IMCtermite/context:python)
 [![LICENSE](https://img.shields.io/github/license/RecordEvolution/IMCtermite)](https://img.shields.io/github/license/RecordEvolution/IMCtermite)
 [![STARS](https://img.shields.io/github/stars/RecordEvolution/IMCtermite)](https://img.shields.io/github/stars/RecordEvolution/IMCtermite)
-![Build Python Wheels](https://github.com/RecordEvolution/IMCtermite/actions/workflows/pypi-deploy.yml/badge.svg)
+![CI/CD](https://github.com/RecordEvolution/IMCtermite/actions/workflows/pypi-deploy.yml/badge.svg?branch=master&event=push)
+[![PYPI](https://img.shields.io/pypi/v/IMCtermite.svg)](https://pypi.org/project/IMCtermite/)
 
 # IMCtermite
 
