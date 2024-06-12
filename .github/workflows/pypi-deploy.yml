@@ -1,5 +1,5 @@
 
-name: CI/CD
+name: Build Python Wheels
 
 on:
   push:
