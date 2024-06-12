@@ -7,7 +7,7 @@
 # IMCtermite
 
 _IMCtermite_ provides access to the proprietary data format
-_IMC Bus Format_ with the file extension _.raw_ introduced and developed by
+_IMC2 Data Format_ with the file extension _.raw_ (or .dat) introduced and developed by
 [imc Test & Measurement GmbH](https://www.imc-tm.de/). This data format is
 employed i.a. by the measurement hardware
 [imc CRONOSflex](https://www.imc-tm.de/produkte/messtechnik-hardware/imc-cronosflex/ueberblick/)
@@ -18,7 +18,9 @@ for measurement data control and analysis. Thanks to the integrated Python modul
 the extracted measurement data can be stored in any open-source file format
 accessible by Python like i.a. _csv_, _json_ or _parquet_.
 
-On the [Record Evolution Platform](https://www.record-evolution.de/en/home-en/), the library can be used both as a command line tool for interactive usage and as a Python module to integrate the _.raw_  format into any ETL workflow.   
+On the [Record Evolution Platform](https://www.record-evolution.de/en/home-en/),
+the library can be used both as a command line tool for interactive usage and as a
+Python module to integrate the _.raw_  format into any ETL workflow.
 
 ## Overview
 
@@ -31,10 +33,11 @@ On the [Record Evolution Platform](https://www.record-evolution.de/en/home-en/),
 
 [Warning: Take a look at [this issue](https://github.com/RecordEvolution/IMCtermite/issues/14) when reading this section regarding the file format.]
 
-A data file of the _IMC Bus Format_ type with the extension _.raw_ is a _mixed text/binary
+A file of the _IMC2 Data Format_ type with extension _.raw_ (or .dat) is a _mixed text/binary
 file_ featuring a set of markers (keys) that indicate the start of various blocks
 of data that provide meta information and the actual measurement data. Every single
-marker is introduced by the character `"|" = 0x 7c` followed by two uppercase letters that characterize the type of marker. Each block is further divided into several
+marker is introduced by the character `"|" = 0x 7c` followed by two uppercase letters that
+characterize the type of marker. Each block is further divided into several
 parameters separated by commata `"," = 0x 2c` and terminated by a semicolon
 `";" = 0x 3b`. For instance, the header - first 600 bytes - of a raw file may
 look like this (in UTF-8 encoding):
@@ -223,6 +226,8 @@ can be found in the `python/examples` folder.
 
 - https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/funktionen/im-und-export/
 - https://www.imc-tm.de/produkte/messtechnik-hardware/imc-cronosflex/ueberblick/
+- https://www.imc-tm.de/download-center/produkt-downloads/imc-famos/handbuecher
+- https://www.imc-tm.de/fileadmin/Public/Downloads/Manuals/imc_FAMOS/imcGemeinsameKomponenten.pdf
 - https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
 - https://github.com/Apollo3zehn/ImcFamosFile
 - https://apollo3zehn.github.io/ImcFamosFile/api/ImcFamosFile.FamosFileKeyType.html
