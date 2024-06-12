@@ -31,8 +31,6 @@ Python module to integrate the _.raw_  format into any ETL workflow.
 
 ## File format
 
-[Warning: Take a look at [this issue](https://github.com/RecordEvolution/IMCtermite/issues/14) when reading this section regarding the file format.]
-
 A file of the _IMC2 Data Format_ type with extension _.raw_ (or .dat) is a _mixed text/binary
 file_ featuring a set of markers (keys) that indicate the start of various blocks
 of data that provide meta information and the actual measurement data. Every single
