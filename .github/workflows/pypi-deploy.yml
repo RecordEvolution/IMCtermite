@@ -36,7 +36,7 @@ jobs:
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.1.2
       - name: Get wheel configuration files
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: wheel-config
           path: python/
@@ -60,7 +60,7 @@ jobs:
       - name: Install cython
         run: python -m pip install cython==0.29.24
       - name: Get wheel configuration files
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: wheel-config
           path: python/
@@ -81,12 +81,12 @@ jobs:
 
     steps:
       - name: Get source wheels
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: source-wheels
           path: dist/
       - name: Get binary wheels
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: binary-wheels
           path: dist/
