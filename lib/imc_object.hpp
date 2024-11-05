@@ -4,6 +4,7 @@
 #define IMCOBJECT
 
 #include <time.h>
+#include <math.h>
 #include "imc_key.hpp"
 
 //---------------------------------------------------------------------------//
@@ -245,7 +246,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CC");
       component_index_ = std::stoi(get_parameter(buffer,&parameters[2]));
       analog_digital_ = ( std::stoi(get_parameter(buffer,&parameters[3])) == 2 );
     }
@@ -272,7 +273,9 @@ namespace imc
     imc_devices_transitional_recording,
     timestamp_ascii,
     two_byte_word_digital,
-    six_byte_unsigned_long
+    eight_byte_unsigned_long,
+    six_byte_unsigned_long,
+    eight_byte_signed_long
   };
 
   // packaging information of component (corresponds to key CP)
@@ -292,8 +295,8 @@ namespace imc
     {
       if ( parameters.size() < 10 ) throw std::runtime_error("invalid number of parameters in CP");
       buffer_reference_ = std::stoi(get_parameter(buffer,&parameters[2]));
-      numeric_type_ = (numtype)std::stoi(get_parameter(buffer,&parameters[3]));
-      bytes_ = std::stoi(get_parameter(buffer,&parameters[4]));
+      bytes_ = std::stoi(get_parameter(buffer,&parameters[3]));
+      numeric_type_ = (numtype)std::stoi(get_parameter(buffer,&parameters[4]));
       signbits_ = std::stoi(get_parameter(buffer,&parameters[5]));
       mask_ = std::stoi(get_parameter(buffer,&parameters[6]));
       offset_ = std::stoul(get_parameter(buffer,&parameters[7]));
@@ -336,7 +339,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 13 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 13 ) throw std::runtime_error("invalid number of parameters in Cb");
       number_buffers_ = std::stoul(get_parameter(buffer,&parameters[2]));
       bytes_userinfo_ = std::stoul(get_parameter(buffer,&parameters[3]));
       buffer_reference_ = std::stoul(get_parameter(buffer,&parameters[4]));
@@ -378,7 +381,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in CR");
       transform_ = (get_parameter(buffer,&parameters[2]) == std::string("1"));
       factor_ = std::stod(get_parameter(buffer,&parameters[3]));
       offset_ = std::stod(get_parameter(buffer,&parameters[4]));
@@ -410,7 +413,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 9 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 9 ) throw std::runtime_error("invalid number of parameters in CN");
       group_index_ = std::stoul(get_parameter(buffer,&parameters[2]));
       index_bit_ = (get_parameter(buffer,&parameters[4]) == std::string("1"));
       name_ = get_parameter(buffer,&parameters[6]);
@@ -439,7 +442,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 4 ) throw std::runtime_error("invalid number of parameters in CS");
       index_ = std::stoul(get_parameter(buffer,&parameters[2]));
     }
 
@@ -451,6 +454,21 @@ namespace imc
         // <<std::setw(width)<<std::left<<"(begin,end) buffer:"
         //                              <<"("<<begin_buffer_<<","<<end_buffer_<<")"<<"\n";
       return ss.str();
+    }
+  };
+
+  // language (corresponds to key NL)
+  struct language
+  {
+    std::string codepage_;
+    std::string language_code_;
+
+    // construct members by parsing particular parameters from buffer
+    void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
+    {
+      if (parameters.size() < 4) throw std::runtime_error("invalid number of parameters in NL");
+      codepage_ = get_parameter(buffer, &parameters[2]);
+      language_code_ = get_parameter(buffer, &parameters[3]);
     }
   };
 
@@ -484,45 +502,30 @@ namespace imc
   // trigger timestamp (corresponds to key NT1)
   struct triggertime
   {
-    int day_, month_, year_;
-    int hour_, minute_;
-    double second_;
-    std::string timestamp_;
+    std::tm tms_;
+    double trigger_time_frac_secs_;
 
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
       if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in CD2");
-      day_ = std::stoi( get_parameter(buffer,&parameters[2]) );
-      month_ = std::stoi( get_parameter(buffer,&parameters[3]) );
-      year_ = std::stoi( get_parameter(buffer,&parameters[4]) );
-      hour_ = std::stoi( get_parameter(buffer,&parameters[5]) );
-      minute_ = std::stoi( get_parameter(buffer,&parameters[6]) );
-      second_ = std::stod( get_parameter(buffer,&parameters[7]) );
-
-      //time_t rawtime;
-      //struct tm ts;
-      //time(&rawtime);
-      //localtime_r(&rawtime,&ts);
-      //ts.tm_mday = day_;
-      //ts.tm_mon = month_-1;
-      //ts.tm_year = year_-1900;
-      //ts.tm_hour = hour_;
-      //ts.tm_min = minute_;
-      //ts.tm_sec = (int)second_;
-      //asctime_r(&ts,&timestamp_[0]);
-      timestamp_ = std::to_string(year_) + std::string("-") + std::to_string(month_)
-                                         + std::string("-") + std::to_string(day_)
-                                         + std::string("T") + std::to_string(hour_)
-                                         + std::string(":") + std::to_string(minute_)
-                                         + std::string(":") + std::to_string(second_);
+      tms_ = std::tm();
+      tms_.tm_mday = std::stoi( get_parameter(buffer,&parameters[2]) );
+      tms_.tm_mon = std::stoi( get_parameter(buffer,&parameters[3]) ) - 1;
+      tms_.tm_year = std::stoi( get_parameter(buffer,&parameters[4]) ) - 1900;
+      tms_.tm_hour = std::stoi( get_parameter(buffer,&parameters[5]) );
+      tms_.tm_min = std::stoi( get_parameter(buffer,&parameters[6]) );
+      long double secs = std::stold( get_parameter(buffer,&parameters[7]) );
+      double secs_int;
+      trigger_time_frac_secs_ = modf((double)secs,&secs_int);
+      tms_.tm_sec = (int)secs_int;
     }
 
     // get info string
     std::string get_info(int width = 20)
     {
       std::stringstream ss;
-      ss<<std::setw(width)<<std::left<<"timestamp:"<<timestamp_<<"\n";
+      ss<<std::setw(width)<<std::left<<"timestamp:"<<std::put_time(&tms_, "%Y-%m-%dT%H:%M:%S")<<"\n";
       return ss.str();
     }
   };

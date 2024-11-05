@@ -211,29 +211,61 @@ namespace imc
       imc::channel_env chnenv;
       chnenv.reset();
 
+      imc::component_env *compenv_ptr = nullptr;
+
       // collect affiliate blocks for every channel WITH CHANNEL and AFFILIATE
       // BLOCK CORRESPONDENCE GOVERNED BY BLOCK ORDER IN BUFFER!!
       for ( imc::block blk: rawblocks_ )
       {
-        if ( blk.get_key().name_ == "CN" ) chnenv.CNuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "CD" ) chnenv.CDuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "CT" ) chnenv.CTuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "Cb" ) chnenv.Cbuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "CP" ) chnenv.CPuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "CR" ) chnenv.CRuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "CS" ) chnenv.CSuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "NT" ) chnenv.NTuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "NO" ) chnenv.NOuuid_ = blk.get_uuid();
+        if ( blk.get_key().name_ == "NO" ) chnenv.NOuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "NL" ) chnenv.NLuuid_ = blk.get_uuid();
 
+        else if ( blk.get_key().name_ == "CB" ) chnenv.CBuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CG" ) chnenv.CGuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CI" ) chnenv.CIuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CT" ) chnenv.CTuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CN" ) chnenv.CNuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CS" ) chnenv.CSuuid_ = blk.get_uuid();
+
+        else if ( blk.get_key().name_ == "CC" )
+        {
+          // a new component group is started
+          // TODO: can we avoid to parse the whole component here?
+          imc::component component;
+          component.parse(&buffer_, blk.get_parameters());
+          if ( component.component_index_ == 1 ) compenv_ptr = &chnenv.compenv1_;
+          else if ( component.component_index_ == 2 ) compenv_ptr = &chnenv.compenv2_;
+          else throw std::runtime_error("invalid component index in CC block");
+          compenv_ptr->CCuuid_ = blk.get_uuid();
+          compenv_ptr->uuid_ = compenv_ptr->CCuuid_;
+        }
+        else if ( blk.get_key().name_ == "CD" )
+        {
+          if (compenv_ptr == nullptr) chnenv.CDuuid_ = blk.get_uuid();
+          else compenv_ptr->CDuuid_ = blk.get_uuid();
+        }
+        else if ( blk.get_key().name_ == "NT" )
+        {
+          if (compenv_ptr == nullptr) chnenv.NTuuid_ = blk.get_uuid();
+          else compenv_ptr->NTuuid_ = blk.get_uuid();
+        }
+        else if ( blk.get_key().name_ == "Cb" ) compenv_ptr->Cbuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CP" ) compenv_ptr->CPuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CR" ) compenv_ptr->CRuuid_ = blk.get_uuid();
+
+
         // check for currently associated channel
+        // TODO: CNuuid is not unique for multichannel data
         if ( !chnenv.CNuuid_.empty() )
         {
-          // any component/channel is closed by any of {CS, CC, CG, CB}
-          if ( blk.get_key().name_ == "CS" || blk.get_key().name_ == "CC"
-            || blk.get_key().name_ == "CG" || blk.get_key().name_ == "CB" )
+          // at the moment only a single channel is supported
+          // any channel is closed by any of {CB, CG, CI, CT, CS}
+          if ( blk.get_key().name_ == "CB" || blk.get_key().name_ == "CG"
+            || blk.get_key().name_ == "CI" || blk.get_key().name_ == "CT"
+            || blk.get_key().name_ == "CS" )
           {
             // provide UUID for channel
+            // for multi component channels exactly one CN is available
             chnenv.uuid_ = chnenv.CNuuid_;
 
             // for multichannel data there may be multiple channels referring to
@@ -255,8 +287,15 @@ namespace imc
             );
 
             // reset channel uuid
-            chnenv.reset();
-            //chnenv.CNuuid_.clear();
+            chnenv.CNuuid_.clear();
+
+            chnenv.CBuuid_.clear();
+            chnenv.CGuuid_.clear();
+            chnenv.CIuuid_.clear();
+            chnenv.CTuuid_.clear();
+            chnenv.CSuuid_.clear();
+
+            compenv_ptr = nullptr;
           }
         }
 
@@ -264,7 +303,8 @@ namespace imc
         // already belong to NEXT component
         if ( blk.get_key().name_ == "CB" ) chnenv.CBuuid_ = blk.get_uuid();
         else if ( blk.get_key().name_ == "CG" ) chnenv.CGuuid_ = blk.get_uuid();
-        else if ( blk.get_key().name_ == "CC" ) chnenv.CCuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CI" ) chnenv.CIuuid_ = blk.get_uuid();
+        else if ( blk.get_key().name_ == "CT" ) chnenv.CTuuid_ = blk.get_uuid();
       }
     }
 

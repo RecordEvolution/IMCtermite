@@ -5,6 +5,7 @@
 
 #include "imc_datatype.hpp"
 #include "imc_conversion.hpp"
+#include "imc_block.hpp"
 #include <sstream>
 #include <math.h>
 #include <chrono>
@@ -20,34 +21,62 @@
 
 namespace imc
 {
+  struct component_env
+  {
+    std::string uuid_;
+    // required channel components for CG channels only
+    std::string CCuuid_, CPuuid_;
+    // optional channel components for CG channels only
+    std::string CDuuid_, NTuuid_;
+    std::string Cbuuid_, CRuuid_;
+
+    // reset all members
+    void reset()
+    {
+      uuid_.clear();
+      CCuuid_.clear();
+      CPuuid_.clear();
+      CDuuid_.clear();
+      Cbuuid_.clear();
+      CRuuid_.clear();
+      NTuuid_.clear();
+    }
+  };
+
   // collect uuid's of blocks required for full channel reconstruction
   struct channel_env
   {
     // define unique identifer for channel_env
     std::string uuid_;
 
+    // collect common affiliate blocks for every channel
+    std::string NOuuid_, NLuuid_;
     // collect affiliate blocks for a single channel
-    std::string CBuuid_, CGuuid_, CCuuid_, CNuuid_;
-    std::string CDuuid_, CTuuid_, Cbuuid_, CPuuid_, CRuuid_, CSuuid_;
-    std::string NTuuid_, NOuuid_, NLuuid_;
+    // channel types
+    std::string CBuuid_, CGuuid_, CIuuid_, CTuuid_;
+    std::string CNuuid_, CDuuid_, NTuuid_;
+    std::string CSuuid_;
+
+    component_env compenv1_;
+    component_env compenv2_;
+
 
     // reset all members
     void reset()
     {
       uuid_.clear();
-      CBuuid_.clear();
-      CGuuid_.clear();
-      CCuuid_.clear();
-      CNuuid_.clear();
-      CDuuid_.clear();
-      CTuuid_.clear();
-      Cbuuid_.clear();
-      CPuuid_.clear();
-      CRuuid_.clear();
-      CSuuid_.clear();
-      NTuuid_.clear();
       NOuuid_.clear();
       NLuuid_.clear();
+      CBuuid_.clear();
+      CGuuid_.clear();
+      CIuuid_.clear();
+      CTuuid_.clear();
+      CNuuid_.clear();
+      CDuuid_.clear();
+      NTuuid_.clear();
+      CSuuid_.clear();
+      compenv1_.reset();
+      compenv2_.reset();
     }
 
     // get info
@@ -55,21 +84,23 @@ namespace imc
     {
       std::stringstream ss;
       ss<<std::setw(width)<<std::left<<"uuid:"<<uuid_<<"\n"
+        <<std::setw(width)<<std::left<<"NOuuid:"<<NOuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"NLuuid:"<<NLuuid_<<"\n"
+        //
         <<std::setw(width)<<std::left<<"CBuuid:"<<CBuuid_<<"\n"
         <<std::setw(width)<<std::left<<"CGuuid:"<<CGuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"CCuuid:"<<CCuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"CIuuid:"<<CIuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"CTuuid:"<<CTuuid_<<"\n"
         <<std::setw(width)<<std::left<<"CNuuid:"<<CNuuid_<<"\n"
         //
-        <<std::setw(width)<<std::left<<"CDuuid:"<<CDuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"CTuuid:"<<CTuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"Cbuuid:"<<Cbuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"CPuuid:"<<CPuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"CRuuid:"<<CRuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"CSuuid:"<<CSuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"CCuuid:"<<compenv1_.CCuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"CPuuid:"<<compenv1_.CPuuid_<<"\n"
         //
-        <<std::setw(width)<<std::left<<"NTuuid:"<<NTuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"NOuuid:"<<NOuuid_<<"\n"
-        <<std::setw(width)<<std::left<<"NLuuid:"<<NLuuid_<<"\n";
+        <<std::setw(width)<<std::left<<"CDuuid:"<<compenv1_.CDuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"Cbuuid:"<<compenv1_.Cbuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"CRuuid:"<<compenv1_.CRuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"NTuuid:"<<compenv1_.NTuuid_<<"\n"
+        <<std::setw(width)<<std::left<<"CSuuid:"<<CSuuid_<<"\n";
       return ss.str();
     }
 
@@ -78,19 +109,20 @@ namespace imc
     {
       std::stringstream ss;
       ss<<"{"<<"\"uuid\":\""<<uuid_
-             <<"\",\"CBuuid\":\""<<CBuuid_
-             <<"\",\"CGuuid\":\""<<CGuuid_
-             <<"\",\"CCuuid\":\""<<CCuuid_
-             <<"\",\"CNuuid\":\""<<CNuuid_
-             <<"\",\"CDuuid\":\""<<CDuuid_
-             <<"\",\"CTuuid\":\""<<CTuuid_
-             <<"\",\"Cbuuid\":\""<<Cbuuid_
-             <<"\",\"CPuuid\":\""<<CPuuid_
-             <<"\",\"CRuuid\":\""<<CRuuid_
-             <<"\",\"CSuuid\":\""<<CSuuid_
-             <<"\",\"NTuuid\":\""<<NTuuid_
              <<"\",\"NOuuid\":\""<<NOuuid_
              <<"\",\"NLuuid\":\""<<NLuuid_
+             <<"\",\"CBuuid\":\""<<CBuuid_
+             <<"\",\"CGuuid\":\""<<CGuuid_
+             <<"\",\"CIuuid\":\""<<CIuuid_
+             <<"\",\"CTuuid\":\""<<CTuuid_
+             <<"\",\"CNuuid\":\""<<CNuuid_
+             <<"\",\"CCuuid\":\""<<compenv1_.CCuuid_
+             <<"\",\"CPuuid\":\""<<compenv1_.CPuuid_
+             <<"\",\"CDuuid\":\""<<compenv1_.CDuuid_
+             <<"\",\"Cbuuid\":\""<<compenv1_.Cbuuid_
+             <<"\",\"CRuuid\":\""<<compenv1_.CRuuid_
+             <<"\",\"NTuuid\":\""<<compenv1_.NTuuid_
+             <<"\",\"CSuuid\":\""<<CSuuid_
              <<"\"}";
       return ss.str();
     }
@@ -229,6 +261,50 @@ namespace imc
   };
   #endif
 
+  struct component_group
+  {
+    imc::component CC_;
+    imc::packaging CP_;
+    imc::abscissa CD_;
+    imc::buffer Cb_;
+    imc::range CR_;
+    imc::channelobj CN_;
+    imc::triggertime NT_;
+
+    component_env compenv_;
+
+    // Constructor to parse the associated blocks
+    component_group(component_env &compenv, std::map<std::string, imc::block>* blocks, std::vector<unsigned char>* buffer)
+        : compenv_(compenv)
+    {
+        if (blocks->count(compenv.CCuuid_) == 1)
+        {
+            CC_.parse(buffer, blocks->at(compenv.CCuuid_).get_parameters());
+        }
+        if (blocks->count(compenv.CPuuid_) == 1)
+        {
+            CP_.parse(buffer, blocks->at(compenv.CPuuid_).get_parameters());
+        }
+        if (blocks->count(compenv.CDuuid_) == 1)
+        {
+            CD_.parse(buffer, blocks->at(compenv.CDuuid_).get_parameters());
+        }
+        if (blocks->count(compenv.Cbuuid_) == 1)
+        {
+            Cb_.parse(buffer, blocks->at(compenv.Cbuuid_).get_parameters());
+        }
+        if (blocks->count(compenv.CRuuid_) == 1)
+        {
+            CR_.parse(buffer, blocks->at(compenv.CRuuid_).get_parameters());
+        }
+        if (blocks->count(compenv.NTuuid_) == 1)
+        {
+            NT_.parse(buffer, blocks->at(compenv.NTuuid_).get_parameters());
+        }
+    }
+  };
+
+
   // channel
   struct channel
   {
@@ -237,8 +313,15 @@ namespace imc
     std::map<std::string,imc::block>* blocks_;
     std::vector<unsigned char>* buffer_;
 
+    imc::origin_data NO_;
+
+    imc::text CT_;
+    imc::groupobj CB_;
+    imc::datafield CG_;
+
     // collect meta-data of channels according to env,
     // just everything valueable in here
+    // TODO: is this necessary?
     std::string uuid_;
     std::string name_, comment_;
     std::string origin_, origin_comment_, text_;
@@ -249,16 +332,17 @@ namespace imc
     std::string xname_, xunit_;
     double xstepwidth_, xoffset_;
     int xprec_;
+    int dimension_;
 
     // buffer and data
-    int signbits_, num_bytes_;
+    int xsignbits_, xnum_bytes_;
+    int ysignbits_, ynum_bytes_;
     // unsigned long int byte_offset_;
-    unsigned long int buffer_offset_, buffer_size_;
+    unsigned long int xbuffer_offset_, ybuffer_offset_;
+    unsigned long int xbuffer_size_, ybuffer_size_;
     long int addtime_;
-    int datatp_;
-    imc::datatype dattyp_;
-    std::vector<imc::datatype> ydata_;
-    std::vector<double> xdata_;
+    imc::numtype xdatatp_, ydatatp_;
+    std::vector<imc::datatype> xdata_, ydata_;
 
     // range, factor and offset
     double factor_, offset_;
@@ -274,127 +358,73 @@ namespace imc
       factor_(1.), offset_(0.),
       group_index_(-1)
     {
-      // declare list of block parameters
-      std::vector<imc::parameter> prms;
-
       // use uuid from CN block
       uuid_ = chnenv_.CNuuid_;
 
       // extract associated CB data
       if ( blocks_->count(chnenv_.CBuuid_) == 1 )
       {
-        prms = blocks_->at(chnenv_.CBuuid_).get_parameters();
-        group_index_ = std::stoi(blocks_->at(chnenv_.CBuuid_).get_parameter(prms[2]));
-        group_name_ = blocks_->at(chnenv_.CBuuid_).get_parameter(prms[4]);
-        group_comment_ = blocks_->at(chnenv_.CBuuid_).get_parameter(prms[6]);
+        CB_.parse(buffer_, blocks_->at(chnenv_.CBuuid_).get_parameters());
       }
 
       // extract associated CT data
       if ( blocks_->count(chnenv_.CTuuid_) == 1 )
       {
-        prms = blocks_->at(chnenv_.CTuuid_).get_parameters();
-        text_ = blocks_->at(chnenv_.CTuuid_).get_parameter(prms[4]) + std::string(" - ")
-              + blocks_->at(chnenv_.CTuuid_).get_parameter(prms[6]) + std::string(" - ")
-              + blocks_->at(chnenv_.CTuuid_).get_parameter(prms[8]);
+        CT_.parse(buffer_, blocks_->at(chnenv_.CTuuid_).get_parameters());
+        text_ = CT_.name_ + std::string(" - ")
+              + CT_.text_ + std::string(" - ")
+              + CT_.comment_;
       }
 
-      // extract associated CD data
-      if ( blocks_->count(chnenv_.CDuuid_) == 1 )
+      if ( !chnenv_.compenv1_.uuid_.empty() && chnenv_.compenv2_.uuid_.empty() )
       {
-        prms = blocks_->at(chnenv_.CDuuid_).get_parameters();
-        xstepwidth_ = std::stod(blocks_->at(chnenv_.CDuuid_).get_parameter(prms[2]));
-        xunit_ = blocks_->at(chnenv_.CDuuid_).get_parameter(prms[5]);
-        // TODO
-        // xname_ = std::string("time");
+        // normal dataset (single component)
+        // comp_group1 contains y-data, x-data is based on xstepwidth_, xoffset_ and the length of y-data
+        component_group comp_group1(chnenv_.compenv1_, blocks_, buffer_);
+        dimension_ = 1;
 
-        // find appropriate precision for "xdata_" by means of "xstepwidth_"
-        xprec_ = (xstepwidth_ > 0 ) ? (int)ceil(fabs(log10(xstepwidth_))) : 10;
-      }
-
-      // extract associated CP data
-      if ( blocks_->count(chnenv_.CPuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.CPuuid_).get_parameters();
-        num_bytes_ = std::stoi(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[3]));
-        datatp_ = std::stoi(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[4]));
-        signbits_ = std::stoi(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[5]));
-        // byte_offset_ = std::stoul(blocks_->at(chnenv_.CPuuid_).get_parameter(prms[7]));
-      }
-
-      // extract associated Cb data
-      if ( blocks_->count(chnenv_.Cbuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.Cbuuid_).get_parameters();
-        buffer_offset_ = std::stoul(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[6]));
-        buffer_size_ = std::stoul(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[7]));
-        xoffset_ = std::stod(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[11]));
-        addtime_ = (long int)std::stod(blocks_->at(chnenv_.Cbuuid_).get_parameter(prms[12]));
-      }
-
-      // extract associated CR data
-      if ( blocks_->count(chnenv_.CRuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.CRuuid_).get_parameters();
-        factor_ = std::stod(blocks_->at(chnenv_.CRuuid_).get_parameter(prms[3]));
-        offset_ = std::stod(blocks_->at(chnenv_.CRuuid_).get_parameter(prms[4]));
-        yunit_ = blocks_->at(chnenv_.CRuuid_).get_parameter(prms[7]);
-      }
-
-      // extract associated CN data
-      if ( blocks_->count(chnenv_.CNuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.CNuuid_).get_parameters();
-        name_ = blocks_->at(chnenv_.CNuuid_).get_parameter(prms[6]);
-        yname_ = name_;
-        comment_ = blocks_->at(chnenv_.CNuuid_).get_parameter(prms[8]);
-        // group_index_ = std::stoi(blocks_->at(chnenv_.CNuuid_).get_parameter(prms[2]));
-      }
-
-      // extract associated NO data
-      if ( blocks_->count(chnenv_.NOuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.NOuuid_).get_parameters();
-        origin_ = blocks_->at(chnenv_.NOuuid_).get_parameter(prms[4]);
-        origin_comment_ = blocks_->at(chnenv_.NOuuid_).get_parameter(prms[6]);
-      }
-
-      // extract associated NL data
-      // codepage:
-      // - http://www.iana.org/assignments/character-sets/character-sets.xhtml
-      // - https://de.wikipedia.org/wiki/Zeichensatztabelle
-      // language-code:
-      // - https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c?redirectedfrom=MSDN
-      if ( blocks_->count(chnenv_.NLuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.NLuuid_).get_parameters();
-        codepage_ = blocks_->at(chnenv_.NLuuid_).get_parameter(prms[2]);
-        language_code_ = blocks_->at(chnenv_.NLuuid_).get_parameter(prms[3]);
-      }
-
-      // obtain NT data
-      // - https://en.cppreference.com/w/cpp/chrono/c/tm
-      // - https://en.cppreference.com/w/cpp/io/manip/put_time
-      if ( blocks_->count(chnenv_.NTuuid_) == 1 )
-      {
-        prms = blocks_->at(chnenv_.NTuuid_).get_parameters();
-        //std::tm tm{};
-        std::tm tms = std::tm();
-        tms.tm_mday = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[2]));
-        tms.tm_mon = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[3])) - 1;
-        tms.tm_year = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[4])) - 1900;
-        tms.tm_hour = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[5]));
-        tms.tm_min = std::stoi(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[6]));
-        long double secs = std::stold(blocks_->at(chnenv_.NTuuid_).get_parameter(prms[7]));
-        double secs_int;
-        trigger_time_frac_secs_ = modf((double)secs,&secs_int);
-        tms.tm_sec = (int)secs_int;
-        //tms.tm_isdst = -1;
-
+        xstepwidth_ = comp_group1.CD_.dx_;
+        xunit_ = comp_group1.CD_.unit_;
+        ybuffer_offset_ = comp_group1.Cb_.offset_buffer_;
+        ybuffer_size_ = comp_group1.Cb_.number_bytes_;
+        xoffset_ = comp_group1.Cb_.x0_;
+        addtime_ = static_cast<long int>(comp_group1.Cb_.add_time_);
+        factor_ = comp_group1.CR_.factor_;
+        offset_ = comp_group1.CR_.offset_;
+        yunit_ = comp_group1.CR_.unit_;
+        name_ = comp_group1.CN_.name_;
+        yname_ = comp_group1.CN_.name_;
+        comment_ = comp_group1.CN_.comment_;
+        ynum_bytes_ = comp_group1.CP_.bytes_;
+        ydatatp_ = comp_group1.CP_.numeric_type_;
+        ysignbits_ = comp_group1.CP_.signbits_;
         // generate std::chrono::system_clock::time_point type
-        // ( - https://www.gnu.org/software/libc/manual/html_node/Broken_002ddown-Time.html
-        //   - https://man7.org/linux/man-pages/man3/tzset.3.html )
-        std::time_t ts = timegm(&tms); //std::mktime(&tms);
+        std::time_t ts = timegm(&comp_group1.NT_.tms_); // std::mktime(&tms);
         trigger_time_ = std::chrono::system_clock::from_time_t(ts);
+        trigger_time_frac_secs_ = comp_group1.NT_.trigger_time_frac_secs_;
+      }
+      else if ( !chnenv_.compenv1_.uuid_.empty() && !chnenv_.compenv2_.uuid_.empty() )
+      {
+        // XY dataset (two components)
+        // comp_group1 contains x-data, comp_group2 contains y-data
+        component_group comp_group1(chnenv_.compenv1_, blocks_, buffer_);
+        component_group comp_group2(chnenv_.compenv2_, blocks_, buffer_);
+        dimension_ = 2;
+
+        xbuffer_offset_ = comp_group1.Cb_.offset_buffer_;
+        xbuffer_size_ = comp_group1.Cb_.number_bytes_;
+        ybuffer_offset_ = comp_group2.Cb_.offset_buffer_;
+        ybuffer_size_ = comp_group2.Cb_.number_bytes_;
+        factor_ = comp_group2.CR_.factor_;
+        offset_ = comp_group2.CR_.offset_;
+        xdatatp_ = comp_group1.CP_.numeric_type_;
+        xsignbits_ = comp_group1.CP_.signbits_;
+        ydatatp_ = comp_group2.CP_.numeric_type_;
+        ysignbits_ = comp_group2.CP_.signbits_;
+      }
+      else
+      {
+        // no datafield
       }
 
       // start converting binary buffer to imc::datatype
@@ -419,77 +449,109 @@ namespace imc
 
       // extract (channel dependent) part of buffer
       unsigned long int buffstrt = prms[3].begin();
-      std::vector<unsigned char> CSbuffer( buffer_->begin()+buffstrt+buffer_offset_+1,
-                                           buffer_->begin()+buffstrt+buffer_offset_+buffer_size_+1 );
+      std::vector<unsigned char> yCSbuffer( buffer_->begin()+buffstrt+ybuffer_offset_+1,
+                                           buffer_->begin()+buffstrt+ybuffer_offset_+ybuffer_size_+1 );
 
       // determine number of values in buffer
-      unsigned long int num_values = (unsigned long int)(CSbuffer.size()/(signbits_/8));
-      if ( num_values*(signbits_/8) != CSbuffer.size() )
+      unsigned long int ynum_values = (unsigned long int)(yCSbuffer.size()/(ysignbits_/8));
+      if ( ynum_values*(ysignbits_/8) != yCSbuffer.size() )
       {
-        throw std::runtime_error("CSbuffer and significant bits of datatype don't match");
+        throw std::runtime_error("CSbuffer and significant bits of y datatype don't match");
       }
 
-      // adjust size of ydata
-      ydata_.resize(num_values);
 
-      // distinguish numeric datatypes included in "imc_datatype"
-      if ( datatp_ == 1 )
+      if (dimension_ ==  1)
       {
-        imc::convert_data_to_type<imc_Ubyte>(CSbuffer,ydata_);
+        // process y-data
+        process_data(ydata_, ynum_values, ydatatp_, yCSbuffer);
+
+        // find appropriate precision for "xdata_" by means of "xstepwidth_"
+        xprec_ = (xstepwidth_ > 0 ) ? (int)ceil(fabs(log10(xstepwidth_))) : 10;
+
+        // fill xdata_
+        for ( unsigned long int i = 0; i < ynum_values; i++ )
+        {
+          xdata_.push_back(xoffset_+(double)i*xstepwidth_);
+        }
       }
-      else if ( datatp_ == 2 )
+      else if (dimension_ == 2)
       {
-        imc::convert_data_to_type<imc_Sbyte>(CSbuffer,ydata_);
-      }
-      else if ( datatp_ == 3 )
-      {
-        imc::convert_data_to_type<imc_Ushort>(CSbuffer,ydata_);
-      }
-      else if ( datatp_ == 4 )
-      {
-        imc::convert_data_to_type<imc_Sshort>(CSbuffer,ydata_);
-      }
-      else if ( datatp_ == 5 )
-      {
-        imc::convert_data_to_type<imc_Ulongint>(CSbuffer,ydata_);
-      }
-      else if ( datatp_ == 6 )
-      {
-        imc::convert_data_to_type<imc_Slongint>(CSbuffer,ydata_);
-      }
-      else if ( datatp_ == 7 )
-      {
-        imc::convert_data_to_type<imc_float>(CSbuffer,ydata_);
-      }
-      else if ( datatp_ == 8 )
-      {
-        imc::convert_data_to_type<imc_double>(CSbuffer,ydata_);
-      }
-      // ...
-      else if ( datatp_ == 11 )
-      {
-        imc::convert_data_to_type<imc_digital>(CSbuffer,ydata_);
+        // process x- and y-data
+        std::vector<unsigned char> xCSbuffer( buffer_->begin()+buffstrt+xbuffer_offset_+1,
+                                            buffer_->begin()+buffstrt+xbuffer_offset_+xbuffer_size_+1 );
+
+        // determine number of values in buffer
+        unsigned long int xnum_values = (unsigned long int)(xCSbuffer.size()/(xsignbits_/8));
+        if ( xnum_values*(xsignbits_/8) != xCSbuffer.size() )
+        {
+          throw std::runtime_error("CSbuffer and significant bits of x datatype don't match");
+        }
+        if ( xnum_values != ynum_values )
+        {
+          throw std::runtime_error("x and y data have different number of values");
+        }
+
+        process_data(xdata_, xnum_values, xdatatp_, xCSbuffer);
+        process_data(ydata_, ynum_values, ydatatp_, yCSbuffer);
       }
       else
       {
-        throw std::runtime_error(std::string("unsupported/unknown datatype") + std::to_string(datatp_));
-      }
-
-      // fill xdata_
-      for ( unsigned long int i = 0; i < num_values; i++ )
-      {
-        xdata_.push_back(xoffset_+(double)i*xstepwidth_);
+        throw std::runtime_error("unsupported dimension");
       }
 
       // employ data transformation
-      if ( factor_ != 1.0 || offset_ != 0.0 )
+      if (factor_ != 1.0 || offset_ != 0.0)
       {
-        for ( imc::datatype& el: ydata_ )
-        {
-          //std::cout<<"value:"<<el.as_double()<<"\n";
-          double fact = ( factor_ == 0.0 ) ? 1.0 : factor_;
-          el = imc::datatype(el.as_double()*fact + offset_);
-        }
+          for (imc::datatype& el : ydata_)
+          {
+              //std::cout<<"value:"<<el.as_double()<<"\n";
+              double fact = (factor_ == 0.0) ? 1.0 : factor_;
+              el = imc::datatype(el.as_double() * fact + offset_);
+          }
+      }
+    }
+
+    // handle data type conversion
+    void process_data(std::vector<imc::datatype>& data_, size_t num_values, numtype datatp_, std::vector<unsigned char>& CSbuffer)
+    {
+      // adjust size of data
+      data_.resize(num_values);
+
+      // handle data type conversion
+      switch (datatp_)
+      {
+          case numtype::unsigned_byte:
+              imc::convert_data_to_type<imc_Ubyte>(CSbuffer, data_);
+              break;
+          case numtype::signed_byte:
+              imc::convert_data_to_type<imc_Sbyte>(CSbuffer, data_);
+              break;
+          case numtype::unsigned_short:
+              imc::convert_data_to_type<imc_Ushort>(CSbuffer, data_);
+              break;
+          case numtype::signed_short:
+              imc::convert_data_to_type<imc_Sshort>(CSbuffer, data_);
+              break;
+          case numtype::unsigned_long:
+              imc::convert_data_to_type<imc_Ulongint>(CSbuffer, data_);
+              break;
+          case numtype::signed_long:
+              imc::convert_data_to_type<imc_Slongint>(CSbuffer, data_);
+              break;
+          case numtype::ffloat:
+              imc::convert_data_to_type<imc_float>(CSbuffer, data_);
+              break;
+          case numtype::ddouble:
+              imc::convert_data_to_type<imc_double>(CSbuffer, data_);
+              break;
+          case numtype::two_byte_word_digital:
+              imc::convert_data_to_type<imc_digital>(CSbuffer, data_);
+              break;
+          case numtype::six_byte_unsigned_long:
+              imc::convert_data_to_type<imc_sixbyte>(CSbuffer, data_);
+              break;
+          default:
+              throw std::runtime_error(std::string("unsupported/unknown datatype ") + std::to_string(datatp_));
       }
     }
 
@@ -540,10 +602,10 @@ namespace imc
         <<std::setw(width)<<std::left<<"codepage:"<<codepage_<<"\n"
         <<std::setw(width)<<std::left<<"yname:"<<yname_<<"\n"
         <<std::setw(width)<<std::left<<"yunit:"<<yunit_<<"\n"
-        <<std::setw(width)<<std::left<<"datatype:"<<datatp_<<"\n"
-        <<std::setw(width)<<std::left<<"significant bits:"<<signbits_<<"\n"
-        <<std::setw(width)<<std::left<<"buffer-offset:"<<buffer_offset_<<"\n"
-        <<std::setw(width)<<std::left<<"buffer-size:"<<buffer_size_<<"\n"
+        <<std::setw(width)<<std::left<<"datatype:"<<ydatatp_<<"\n"
+        <<std::setw(width)<<std::left<<"significant bits:"<<ysignbits_<<"\n"
+        <<std::setw(width)<<std::left<<"buffer-offset:"<<ybuffer_offset_<<"\n"
+        <<std::setw(width)<<std::left<<"buffer-size:"<<ybuffer_size_<<"\n"
         <<std::setw(width)<<std::left<<"add-time:"<<addtime_<<"\n"
         <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
         <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
@@ -554,7 +616,7 @@ namespace imc
         <<std::setw(width)<<std::left<<"group:"<<"("<<group_index_<<","<<group_name_
                                                     <<","<<group_comment_<<")"<<"\n"
         <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_,6,9,true)<<"\n"
-        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<double>(xdata_,6,xprec_,true)<<"\n";
+        <<std::setw(width)<<std::left<<"xdata:"<<imc::joinvec<imc::datatype>(xdata_,6,xprec_,true)<<"\n";
         // <<std::setw(width)<<std::left<<"aff. blocks:"<<chnenv_.get_json()<<"\n";
       return ss.str();
     }
@@ -579,8 +641,9 @@ namespace imc
              <<"\",\"codepage\":\""<<codepage_
              <<"\",\"yname\":\""<<prepjsonstr(yname_)
              <<"\",\"yunit\":\""<<prepjsonstr(yunit_)
-             <<"\",\"significantbits\":\""<<signbits_
+             <<"\",\"significantbits\":\""<<ysignbits_
              <<"\",\"addtime\":\""<<addtime_
+             <<"\",\"buffer-size\":\""<<ybuffer_size_
              <<"\",\"xname\":\""<<prepjsonstr(xname_)
              <<"\",\"xunit\":\""<<prepjsonstr(xunit_)
              <<"\",\"xstepwidth\":\""<<xstepwidth_
@@ -591,7 +654,7 @@ namespace imc
       if ( include_data )
       {
         ss<<",\"ydata\":"<<imc::joinvec<imc::datatype>(ydata_,0,9,true)
-          <<",\"xdata\":"<<imc::joinvec<double>(xdata_,0,xprec_,true);
+          <<",\"xdata\":"<<imc::joinvec<imc::datatype>(xdata_,0,xprec_,true);
       }
       // ss<<"\",\"aff. blocks\":\""<<chnenv_.get_json()
       ss<<"}";
