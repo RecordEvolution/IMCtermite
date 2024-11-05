@@ -330,7 +330,7 @@ namespace imc
     std::string language_code_, codepage_;
     std::string yname_, yunit_;
     std::string xname_, xunit_;
-    double xstepwidth_, xoffset_;
+    double xstepwidth_, xstart_;
     int xprec_;
     int dimension_;
 
@@ -345,7 +345,8 @@ namespace imc
     std::vector<imc::datatype> xdata_, ydata_;
 
     // range, factor and offset
-    double factor_, offset_;
+    double xfactor_, yfactor_;
+    double xoffset_, yoffset_;
 
     // group reference the channel belongs to
     int group_index_;
@@ -355,7 +356,7 @@ namespace imc
     channel(channel_env &chnenv, std::map<std::string,imc::block>* blocks,
                                  std::vector<unsigned char>* buffer):
       chnenv_(chnenv), blocks_(blocks), buffer_(buffer),
-      factor_(1.), offset_(0.),
+      xfactor_(1.), yfactor_(1.), xoffset_(0.), yoffset_(0.),
       group_index_(-1)
     {
       // use uuid from CN block
@@ -379,7 +380,11 @@ namespace imc
       if ( !chnenv_.compenv1_.uuid_.empty() && chnenv_.compenv2_.uuid_.empty() )
       {
         // normal dataset (single component)
-        // comp_group1 contains y-data, x-data is based on xstepwidth_, xoffset_ and the length of y-data
+        // set common NT and CD keys if no others are specified
+        if (chnenv_.compenv1_.NTuuid_.empty()) chnenv_.compenv1_.NTuuid_ = chnenv_.NTuuid_;
+        if (chnenv_.compenv1_.CDuuid_.empty()) chnenv_.compenv1_.CDuuid_ = chnenv_.CDuuid_;
+
+        // comp_group1 contains y-data, x-data is based on xstepwidth_, xstart_ and the length of y-data
         component_group comp_group1(chnenv_.compenv1_, blocks_, buffer_);
         dimension_ = 1;
 
@@ -387,10 +392,10 @@ namespace imc
         xunit_ = comp_group1.CD_.unit_;
         ybuffer_offset_ = comp_group1.Cb_.offset_buffer_;
         ybuffer_size_ = comp_group1.Cb_.number_bytes_;
-        xoffset_ = comp_group1.Cb_.x0_;
+        xstart_ = comp_group1.Cb_.x0_;
         addtime_ = static_cast<long int>(comp_group1.Cb_.add_time_);
-        factor_ = comp_group1.CR_.factor_;
-        offset_ = comp_group1.CR_.offset_;
+        yfactor_ = comp_group1.CR_.factor_;
+        yoffset_ = comp_group1.CR_.offset_;
         yunit_ = comp_group1.CR_.unit_;
         name_ = comp_group1.CN_.name_;
         yname_ = comp_group1.CN_.name_;
@@ -406,21 +411,33 @@ namespace imc
       else if ( !chnenv_.compenv1_.uuid_.empty() && !chnenv_.compenv2_.uuid_.empty() )
       {
         // XY dataset (two components)
+        // set common NT and CD keys if no others are specified
+        if (chnenv_.compenv1_.NTuuid_.empty()) chnenv_.compenv1_.NTuuid_ = chnenv_.NTuuid_;
+        if (chnenv_.compenv1_.CDuuid_.empty()) chnenv_.compenv1_.CDuuid_ = chnenv_.CDuuid_;
+        if (chnenv_.compenv2_.NTuuid_.empty()) chnenv_.compenv2_.NTuuid_ = chnenv_.NTuuid_;
+        if (chnenv_.compenv2_.CDuuid_.empty()) chnenv_.compenv2_.CDuuid_ = chnenv_.CDuuid_;
+
         // comp_group1 contains x-data, comp_group2 contains y-data
         component_group comp_group1(chnenv_.compenv1_, blocks_, buffer_);
         component_group comp_group2(chnenv_.compenv2_, blocks_, buffer_);
         dimension_ = 2;
 
-        xbuffer_offset_ = comp_group1.Cb_.offset_buffer_;
-        xbuffer_size_ = comp_group1.Cb_.number_bytes_;
-        ybuffer_offset_ = comp_group2.Cb_.offset_buffer_;
-        ybuffer_size_ = comp_group2.Cb_.number_bytes_;
-        factor_ = comp_group2.CR_.factor_;
-        offset_ = comp_group2.CR_.offset_;
-        xdatatp_ = comp_group1.CP_.numeric_type_;
-        xsignbits_ = comp_group1.CP_.signbits_;
-        ydatatp_ = comp_group2.CP_.numeric_type_;
-        ysignbits_ = comp_group2.CP_.signbits_;
+        xbuffer_offset_ = comp_group2.Cb_.offset_buffer_;
+        xbuffer_size_ = comp_group2.Cb_.number_bytes_;
+        ybuffer_offset_ = comp_group1.Cb_.offset_buffer_;
+        ybuffer_size_ = comp_group1.Cb_.number_bytes_;
+        xfactor_ = comp_group2.CR_.factor_;
+        xoffset_ = comp_group2.CR_.offset_;
+        yfactor_ = comp_group1.CR_.factor_;
+        yoffset_ = comp_group1.CR_.offset_;
+        xdatatp_ = comp_group2.CP_.numeric_type_;
+        xsignbits_ = comp_group2.CP_.signbits_;
+        ydatatp_ = comp_group1.CP_.numeric_type_;
+        ysignbits_ = comp_group1.CP_.signbits_;
+        // generate std::chrono::system_clock::time_point type
+        std::time_t ts = timegm(&comp_group2.NT_.tms_); // std::mktime(&tms);
+        trigger_time_ = std::chrono::system_clock::from_time_t(ts);
+        trigger_time_frac_secs_ = comp_group2.NT_.trigger_time_frac_secs_;
       }
       else
       {
@@ -471,7 +488,7 @@ namespace imc
         // fill xdata_
         for ( unsigned long int i = 0; i < ynum_values; i++ )
         {
-          xdata_.push_back(xoffset_+(double)i*xstepwidth_);
+          xdata_.push_back(xstart_+(double)i*xstepwidth_);
         }
       }
       else if (dimension_ == 2)
@@ -499,16 +516,8 @@ namespace imc
         throw std::runtime_error("unsupported dimension");
       }
 
-      // employ data transformation
-      if (factor_ != 1.0 || offset_ != 0.0)
-      {
-          for (imc::datatype& el : ydata_)
-          {
-              //std::cout<<"value:"<<el.as_double()<<"\n";
-              double fact = (factor_ == 0.0) ? 1.0 : factor_;
-              el = imc::datatype(el.as_double() * fact + offset_);
-          }
-      }
+      transformData(xdata_, xfactor_, xoffset_);
+      transformData(ydata_, yfactor_, yoffset_);
     }
 
     // handle data type conversion
@@ -553,6 +562,15 @@ namespace imc
           default:
               throw std::runtime_error(std::string("unsupported/unknown datatype ") + std::to_string(datatp_));
       }
+    }
+
+    void transformData(std::vector<imc::datatype>& data, double factor, double offset) {
+        if (factor != 1.0 || offset != 0.0) {
+            for (imc::datatype& el : data) {
+                double fact = (factor == 0.0) ? 1.0 : factor;
+                el = imc::datatype(el.as_double() * fact + offset);
+            }
+        }
     }
 
     // convert any description, units etc. to UTF-8 (by default)
@@ -610,9 +628,9 @@ namespace imc
         <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
         <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
         <<std::setw(width)<<std::left<<"xstepwidth:"<<xstepwidth_<<"\n"
-        <<std::setw(width)<<std::left<<"xoffset:"<<xoffset_<<"\n"
-        <<std::setw(width)<<std::left<<"factor:"<<factor_<<"\n"
-        <<std::setw(width)<<std::left<<"offset:"<<offset_<<"\n"
+        <<std::setw(width)<<std::left<<"xoffset:"<<xstart_<<"\n"
+        <<std::setw(width)<<std::left<<"factor:"<<yfactor_<<"\n"
+        <<std::setw(width)<<std::left<<"offset:"<<yoffset_<<"\n"
         <<std::setw(width)<<std::left<<"group:"<<"("<<group_index_<<","<<group_name_
                                                     <<","<<group_comment_<<")"<<"\n"
         <<std::setw(width)<<std::left<<"ydata:"<<imc::joinvec<imc::datatype>(ydata_,6,9,true)<<"\n"
@@ -647,7 +665,7 @@ namespace imc
              <<"\",\"xname\":\""<<prepjsonstr(xname_)
              <<"\",\"xunit\":\""<<prepjsonstr(xunit_)
              <<"\",\"xstepwidth\":\""<<xstepwidth_
-             <<"\",\"xoffset\":\""<<xoffset_
+             <<"\",\"xoffset\":\""<<xstart_
              <<"\",\"group\":{"<<"\"index\":\""<<group_index_
                                <<"\",\"name\":\""<<group_name_
                                <<"\",\"comment\":\""<<group_comment_<<"\""<<"}";
