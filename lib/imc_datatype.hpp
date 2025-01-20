@@ -16,12 +16,12 @@ namespace imc
   //
   // e.g. ARM Cortex-A72 armv7l gcc version 10.2.0 (Ubuntu 10.2.0-13ubuntu1)
   // #ifdef __arm__
-  typedef unsigned long int imc_Ulongint;
-  typedef signed long int imc_Slongint;
+  // typedef unsigned long int imc_Ulongint;
+  // typedef signed long int imc_Slongint;
   // e.g. Intel(R) Core(TM) i7-3520M CPU @ 2.90GHz x86_64 gcc version 10.2.0 (Ubuntu 10.2.0-13ubuntu1)
   // #ifdef i386 __i386 __i386__
-  // typedef unsigned int imc_Ulongint;
-  // typedef signed int imc_Slongint;
+  typedef unsigned int imc_Ulongint;
+  typedef signed int imc_Slongint;
   //
   typedef float imc_float;
   typedef double imc_double;
@@ -30,7 +30,11 @@ namespace imc
   // typedef <whatever that is ->... > "imc Devices Transitional Recording"
   // typedf <sometimestamptype>  "Timestamp Ascii"
   typedef char16_t imc_digital;
-  // typedef <  > imc_sixbyte "6byte unsigned long"
+  //
+  typedef struct {
+      unsigned char bytes[6];
+  } imc_sixbyte;
+
 
   class datatype
   {
@@ -44,13 +48,14 @@ namespace imc
     imc_float sfloat_;     // 6
     imc_double sdouble_;   // 7
     imc_digital sdigital_; // 10
-    short int dtidx_;      // \in \{0,...,7,10\}
+    imc_sixbyte sixbyte_;  // 13
+    short int dtidx_;      // \in \{0,...,7,10,13\}
   public:
     datatype(): ubyte_(0), sbyte_(0),
                 ushort_(0), sshort_(0),
                 ulint_(0), slint_(0),
                 sfloat_(0.0), sdouble_(0.0),
-                sdigital_(0),
+                sdigital_(0), sixbyte_({0}),
                 dtidx_(0) { };
     // every supported datatype gets its own constructor
     datatype(imc_Ubyte num): ubyte_(num), dtidx_(0) {};
@@ -62,10 +67,13 @@ namespace imc
     datatype(imc_float num): sfloat_(num), dtidx_(6) {};
     datatype(imc_double num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
                               ulint_(0), slint_(0), sfloat_(0.0), sdouble_(num),
-                              sdigital_(0), dtidx_(7) {};
+                              sdigital_(0), sixbyte_({0}), dtidx_(7) {};
     datatype(imc_digital num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
-                               ulint_(0), slint_(0), sfloat_(0.0), sdouble_(num),
-                               sdigital_(num), dtidx_(10) {};
+                               ulint_(0), slint_(0), sfloat_(0.0), sdouble_(0.0),
+                               sdigital_(num), sixbyte_({0}), dtidx_(10) {};
+    datatype(imc_sixbyte num): ubyte_(0), sbyte_(0), ushort_(0), sshort_(0),
+                               ulint_(0), slint_(0), sfloat_(0.0), sdouble_(0.0),
+                               sdigital_(0), sixbyte_(num), dtidx_(13) {};
 
     // identify type
     short int& dtype() { return dtidx_; }
@@ -82,6 +90,7 @@ namespace imc
       this->sfloat_ = num.sfloat_;
       this->sdouble_ = num.sdouble_;
       this->sdigital_ = num.sdigital_;
+      this->sixbyte_ = num.sixbyte_;
       this->dtidx_ = num.dtidx_;
     }
 
@@ -99,6 +108,7 @@ namespace imc
         this->sfloat_ = num.sfloat_;
         this->sdouble_ = num.sdouble_;
         this->sdigital_ = num.sdigital_;
+        this->sixbyte_ = num.sixbyte_;
         this->dtidx_ = num.dtidx_;
       }
 
@@ -160,6 +170,12 @@ namespace imc
       this->dtidx_ = 10;
       return *this;
     }
+    datatype& operator=(const imc_sixbyte &num)
+    {
+      this->sixbyte_ = num;
+      this->dtidx_ = 13;
+      return *this;
+    }
 
     // obtain number as double
     double as_double()
@@ -174,6 +190,13 @@ namespace imc
       else if ( dtidx_ == 6 ) num = (double)sfloat_;
       else if ( dtidx_ == 7 ) num = (double)sdouble_;
       else if ( dtidx_ == 10 ) num = static_cast<double>(sdigital_);
+      else if ( dtidx_ == 13 ) {
+        unsigned long long value = 0;
+        for (int i = 0; i < 6; ++i) {
+            value |= static_cast<unsigned long long>(sixbyte_.bytes[i]) << (8 * i);
+        }
+        num = static_cast<double>(value);
+      }
       return num;
     }
 
@@ -189,6 +212,13 @@ namespace imc
       else if ( num.dtidx_ == 6 ) out<<num.sfloat_;
       else if ( num.dtidx_ == 7 ) out<<num.sdouble_;
       else if ( num.dtidx_ == 10 ) out<<static_cast<double>(num.sdigital_);
+      else if ( num.dtidx_ == 13 ) {
+        unsigned long long value = 0;
+        for (int i = 0; i < 6; ++i) {
+            value |= static_cast<unsigned long long>(num.sixbyte_.bytes[i]) << (8 * i);
+        }
+        out<<static_cast<double>(value);
+      }
       return out;
     }
 
