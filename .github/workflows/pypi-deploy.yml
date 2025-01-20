@@ -16,7 +16,7 @@ jobs:
       - name: Prepare wheel build
         run: make -C python/ setup
       - name: Store wheel configuration files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: wheel-config
           path: python/
@@ -46,7 +46,7 @@ jobs:
         # env:
         #   CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
       - name: Store binary wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: binary-wheels
           path: python/wheelhouse/*.whl
@@ -68,7 +68,7 @@ jobs:
         run: python setup.py sdist
         working-directory: python/
       - name: Store source wheels
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: source-wheels
           path: python/dist/*.tar.gz
