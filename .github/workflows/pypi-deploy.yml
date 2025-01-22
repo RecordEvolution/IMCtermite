@@ -88,7 +88,7 @@ jobs:
       - name: Get binary wheels
         uses: actions/download-artifact@v4.1.7
         with:
-          name: binary-wheels
+          name: binary-wheels-*
           path: dist/
 
       - uses: pypa/gh-action-pypi-publish@release/v1
