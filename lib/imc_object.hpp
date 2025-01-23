@@ -482,7 +482,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 7 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 7 ) throw std::runtime_error("invalid number of parameters in NO");
       origin_ = ( get_parameter(buffer,&parameters[2]) == std::string("1") );
       generator_ = get_parameter(buffer,&parameters[4]);
       comment_ = get_parameter(buffer,&parameters[6]);
@@ -508,7 +508,7 @@ namespace imc
     // construct members by parsing particular parameters from buffer
     void parse(const std::vector<unsigned char>* buffer, const std::vector<parameter>& parameters)
     {
-      if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in CD2");
+      if ( parameters.size() < 8 ) throw std::runtime_error("invalid number of parameters in NT1");
       tms_ = std::tm();
       tms_.tm_mday = std::stoi( get_parameter(buffer,&parameters[2]) );
       tms_.tm_mon = std::stoi( get_parameter(buffer,&parameters[3]) ) - 1;
