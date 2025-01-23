@@ -508,6 +508,8 @@ namespace imc
           throw std::runtime_error("x and y data have different number of values");
         }
 
+        xprec_ = 9;
+
         process_data(xdata_, xnum_values, xdatatp_, xCSbuffer);
         process_data(ydata_, ynum_values, ydatatp_, yCSbuffer);
       }
