@@ -393,7 +393,6 @@ namespace imc
         ybuffer_offset_ = comp_group1.Cb_.offset_buffer_;
         ybuffer_size_ = comp_group1.Cb_.number_bytes_;
         xstart_ = comp_group1.Cb_.x0_;
-        addtime_ = static_cast<long int>(comp_group1.Cb_.add_time_);
         yfactor_ = comp_group1.CR_.factor_;
         yoffset_ = comp_group1.CR_.offset_;
         yunit_ = comp_group1.CR_.unit_;
@@ -407,6 +406,10 @@ namespace imc
         std::time_t ts = timegm(&comp_group1.NT_.tms_); // std::mktime(&tms);
         trigger_time_ = std::chrono::system_clock::from_time_t(ts);
         trigger_time_frac_secs_ = comp_group1.NT_.trigger_time_frac_secs_;
+        // calculate absolute trigger-time
+        addtime_ = static_cast<long int>(comp_group1.Cb_.add_time_);
+        absolute_trigger_time_ = trigger_time_ + std::chrono::seconds(addtime_);
+        //                                       + std::chrono::nanoseconds((long int)(trigger_time_frac_secs_*1.e9));
       }
       else if ( !chnenv_.compenv1_.uuid_.empty() && !chnenv_.compenv2_.uuid_.empty() )
       {
@@ -438,6 +441,7 @@ namespace imc
         std::time_t ts = timegm(&comp_group2.NT_.tms_); // std::mktime(&tms);
         trigger_time_ = std::chrono::system_clock::from_time_t(ts);
         trigger_time_frac_secs_ = comp_group2.NT_.trigger_time_frac_secs_;
+        absolute_trigger_time_ = trigger_time_;
       }
       else
       {
@@ -446,10 +450,6 @@ namespace imc
 
       // start converting binary buffer to imc::datatype
       if ( !chnenv_.CSuuid_.empty() ) convert_buffer();
-
-      // calculate absolute trigger-time
-      absolute_trigger_time_ = trigger_time_ + std::chrono::seconds(addtime_);
-      //                                       + std::chrono::nanoseconds((long int)(trigger_time_frac_secs_*1.e9));
 
       // convert any non-UTF-8 codepage to UTF-8
       convert_encoding();
@@ -624,7 +624,6 @@ namespace imc
         <<std::setw(width)<<std::left<<"significant bits:"<<ysignbits_<<"\n"
         <<std::setw(width)<<std::left<<"buffer-offset:"<<ybuffer_offset_<<"\n"
         <<std::setw(width)<<std::left<<"buffer-size:"<<ybuffer_size_<<"\n"
-        <<std::setw(width)<<std::left<<"add-time:"<<addtime_<<"\n"
         <<std::setw(width)<<std::left<<"xname:"<<xname_<<"\n"
         <<std::setw(width)<<std::left<<"xunit:"<<xunit_<<"\n"
         <<std::setw(width)<<std::left<<"xstepwidth:"<<xstepwidth_<<"\n"
@@ -660,7 +659,6 @@ namespace imc
              <<"\",\"yname\":\""<<prepjsonstr(yname_)
              <<"\",\"yunit\":\""<<prepjsonstr(yunit_)
              <<"\",\"significantbits\":\""<<ysignbits_
-             <<"\",\"addtime\":\""<<addtime_
              <<"\",\"buffer-size\":\""<<ybuffer_size_
              <<"\",\"xname\":\""<<prepjsonstr(xname_)
              <<"\",\"xunit\":\""<<prepjsonstr(xunit_)
