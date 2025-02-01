@@ -43,7 +43,7 @@ jobs:
           name: wheel-config
           path: python/
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse/
+        run: python -m cibuildwheel --output-dir wheelhouse
         working-directory: python/
         # env:
         #   CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
