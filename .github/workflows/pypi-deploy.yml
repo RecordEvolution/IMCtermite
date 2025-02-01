@@ -20,6 +20,8 @@ jobs:
         with:
           name: wheel-config
           path: python/
+      - name: Display files
+        run: ls -lR
 
   build_wheels:
     name: Build binary wheels on ${{ matrix.os }}
@@ -41,7 +43,7 @@ jobs:
           name: wheel-config
           path: python/
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse/
         working-directory: python/
         # env:
         #   CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
@@ -50,6 +52,8 @@ jobs:
         with:
           name: binary-wheels-${{matrix.os}}-${{matrix.arch}}
           path: python/wheelhouse/*.whl
+      - name: Display files
+        run: ls -lR
 
   build_sdist:
     name: Build source distribution
@@ -72,6 +76,8 @@ jobs:
         with:
           name: source-wheels
           path: python/dist/*.tar.gz
+      - name: Display files
+        run: ls -lR
 
 
   upload_pypi:
@@ -88,8 +94,11 @@ jobs:
       - name: Get binary wheels
         uses: actions/download-artifact@v4.1.7
         with:
-          name: binary-wheels-*
-          path: dist/
+          path: dist/binary-wheels
+          pattern: dist/binary-wheels-*
+          merge-multiple: true
+      - name: Display files
+        run: ls -lR
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
