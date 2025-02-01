@@ -52,8 +52,6 @@ jobs:
         with:
           name: binary-wheels-${{matrix.os}}-${{matrix.arch}}
           path: python/wheelhouse/*.whl
-      - name: Display files
-        run: ls -lR
 
   build_sdist:
     name: Build source distribution
