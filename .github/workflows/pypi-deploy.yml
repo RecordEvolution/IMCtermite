@@ -79,7 +79,7 @@ jobs:
 
 
   upload_pypi:
-    name: Upload binary wheels to PyPI
+    name: Upload wheels to PyPI
     runs-on: ubuntu-24.04
     needs: [build_wheels, build_sdist]
 
@@ -88,11 +88,11 @@ jobs:
         uses: actions/download-artifact@v4.1.7
         with:
           name: source-wheels
-          path: sdist/
+          path: dist/
       - name: Get binary wheels
         uses: actions/download-artifact@v4.1.7
         with:
-          path: bdist/
+          path: dist/
           pattern: binary-wheels-*
           merge-multiple: true
       - name: Display files
