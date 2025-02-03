@@ -88,12 +88,12 @@ jobs:
         uses: actions/download-artifact@v4.1.7
         with:
           name: source-wheels
-          path: dist/
+          path: sdist/
       - name: Get binary wheels
         uses: actions/download-artifact@v4.1.7
         with:
-          path: dist/binary-wheels
-          pattern: dist/binary-wheels-*
+          path: bdist/
+          pattern: binary-wheels-*
           merge-multiple: true
       - name: Display files
         run: ls -lR
