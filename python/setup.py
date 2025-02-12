@@ -11,8 +11,8 @@ cmpArgs = {
 }
 
 extension = Extension(
-    "IMCtermite",
-    sources=["IMCtermite.pyx"],
+    "imctermite",
+    sources=["imctermite.pyx"],
     extra_compile_args=cmpArgs[sys.platform]
 )
 

@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: language_level = 3
 
-from IMCtermite cimport cppimctermite
+from imctermite cimport cppimctermite
 
 import json as jn
 import decimal

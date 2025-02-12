@@ -1,5 +1,5 @@
 
-import IMCtermite
+import imctermite
 import json
 import os
 
@@ -15,7 +15,7 @@ for fl in rawlist1:
 
     # declare and initialize instance of "imctermite" by passing a raw-file
     try :
-        imcraw = IMCtermite.imctermite(fl.encode())
+        imcraw = imctermite.imctermite(fl.encode())
     except RuntimeError as e :
         raise Exception("failed to load/parse raw-file: " + str(e))
 

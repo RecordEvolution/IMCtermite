@@ -1,5 +1,5 @@
 
-import IMCtermite
+import imctermite
 import pandas
 import datetime
 
@@ -11,7 +11,7 @@ def add_trigger_time(trigger_time, add_time) :
 if __name__ == "__main__" :
 
     # read file and extract data
-    imctm = IMCtermite.imctermite(b"Measurement.raw")
+    imctm = imctermite.imctermite(b"Measurement.raw")
     chns = imctm.get_channels(True)
     
     # prepare abscissa

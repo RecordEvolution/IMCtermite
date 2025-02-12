@@ -1,5 +1,5 @@
 
-from IMCtermite import imctermite
+import imctermite import imctermite
 
 def show_results(imcraw) :
 

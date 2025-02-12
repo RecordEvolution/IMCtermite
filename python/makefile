@@ -29,6 +29,7 @@ build-clean:
 	rm -vf imctermite*.so imctermite*.cpp
 	rm -vf IMCtermite*.so IMCtermite*.cpp
 	rm -rvf dist/ IMCtermite.egg-info/
+	rm -rvf dist/ imctermite.egg-info/
 
 cibuildwheel-build: setup
 	cibuildwheel --platform linux

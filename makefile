@@ -88,11 +88,11 @@ docker-run:
 
 python-build: check-tags $(GVSN)
 	make -C python/ build-inplace
-	cp python/IMCtermite*.so ./ -v
+	cp python/imctermite*.so ./ -v
 
 python-clean:
 	make -C python/ clean
-	rm -vf IMCtermite*.so
+	rm -vf imctermite*.so
 
 python-test:
 	PYTHONPATH=./ python python/examples/usage.py
