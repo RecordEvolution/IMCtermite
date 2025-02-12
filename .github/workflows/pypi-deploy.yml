@@ -29,7 +29,7 @@ jobs:
     needs: [build_setup]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         arch: [auto32, auto64, aarch64]
 
     steps:
