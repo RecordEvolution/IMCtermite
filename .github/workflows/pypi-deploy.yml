@@ -23,40 +23,13 @@ jobs:
       - name: Display files
         run: ls -lR
 
-  build_wheels_ubuntu:
+  build_wheels:
     name: Build binary wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: [build_setup]
     strategy:
       matrix:
-        os: [ubuntu-latest]
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.1.2
-      - name: Get wheel configuration files
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: wheel-config
-          path: python/
-      - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
-        working-directory: python/
-      - name: Store binary wheels
-        uses: actions/upload-artifact@v4.6.0
-        with:
-          name: binary-wheels-${{matrix.os}}-${{ strategy.job-index }}
-          path: python/wheelhouse/*.whl
-
-  build_wheels_windows:
-    name: Build binary wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    needs: [build_setup]
-    strategy:
-      matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -105,7 +78,7 @@ jobs:
   upload_pypi:
     name: Upload wheels to PyPI
     runs-on: ubuntu-24.04
-    needs: [build_wheels_ubuntu, build_wheels_windows, build_sdist]
+    needs: [build_wheels, build_sdist]
 
     steps:
       - name: Get source wheels
