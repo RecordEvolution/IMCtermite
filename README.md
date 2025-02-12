@@ -2,7 +2,7 @@
 [![LICENSE](https://img.shields.io/github/license/RecordEvolution/IMCtermite)](https://img.shields.io/github/license/RecordEvolution/IMCtermite)
 [![STARS](https://img.shields.io/github/stars/RecordEvolution/IMCtermite)](https://img.shields.io/github/stars/RecordEvolution/IMCtermite)
 ![CI Build Wheel](https://github.com/RecordEvolution/IMCtermite/actions/workflows/pypi-deploy.yml/badge.svg?branch=&event=push)
-[![PYPI](https://img.shields.io/pypi/v/IMCtermite.svg)](https://pypi.org/project/IMCtermite/)
+[![PYPI](https://img.shields.io/pypi/v/IMCtermite.svg)](https://pypi.org/project/imctermite/)
 
 # IMCtermite
 
@@ -144,11 +144,11 @@ However, in a production environment, a proper installation of the module with
 #### Installation with pip
 
 The package is also available in the [Python Package Index](https://pypi.org)
-at [IMCtermite](https://pypi.org/project/IMCtermite/).
+at [imctermite](https://pypi.org/project/imctermite/).
 To install the latest version simply do
 
 ```Shell
-python3 -m pip install IMCtermite
+python3 -m pip install imctermite
 ```
 
 which provides binary wheels for multiple architectures on _Windows_ and _Linux_
@@ -195,9 +195,9 @@ Given the `IMCtermite` module is available, we can import it and declare an inst
 of it by passing a _raw_ file to the constructor:
 
 ```Python
-import IMCtermite
+import imctermite
 
-imcraw = IMCtermite.imctermite(b"sample/sampleA.raw")
+imcraw = imctermite.imctermite(b"sample/sampleA.raw")
 ```
 
 An example of how to create an instance and obtain the list of channels is:
