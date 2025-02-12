@@ -314,10 +314,11 @@ namespace imc
     std::vector<unsigned char>* buffer_;
 
     imc::origin_data NO_;
-
+    imc::language NL_;
     imc::text CT_;
     imc::groupobj CB_;
     imc::datafield CG_;
+    imc::channelobj CN_;
 
     // collect meta-data of channels according to env,
     // just everything valueable in here
@@ -349,7 +350,7 @@ namespace imc
     double xoffset_, yoffset_;
 
     // group reference the channel belongs to
-    int group_index_;
+    unsigned long int group_index_;
     std::string group_uuid_, group_name_, group_comment_;
 
     // constructor takes channel's block environment
@@ -361,6 +362,22 @@ namespace imc
     {
       // use uuid from CN block
       uuid_ = chnenv_.CNuuid_;
+
+      // extract associated NO data
+      if ( blocks_->count(chnenv_.NOuuid_) == 1 )
+      {
+	NO_.parse(buffer_, blocks_->at(chnenv_.NOuuid_).get_parameters());
+	origin_ = NO_.generator_;
+	comment_ = NO_.comment_;
+      }
+
+      // extract associated NL data
+      if ( blocks_->count(chnenv_.NLuuid_) == 1 )
+      {
+	NL_.parse(buffer_, blocks_->at(chnenv_.NLuuid_).get_parameters());
+	codepage_ = NL_.codepage_;
+	language_code_ = NL_.language_code_;
+      }
 
       // extract associated CB data
       if ( blocks_->count(chnenv_.CBuuid_) == 1 )
@@ -375,6 +392,15 @@ namespace imc
         text_ = CT_.name_ + std::string(" - ")
               + CT_.text_ + std::string(" - ")
               + CT_.comment_;
+      }
+
+      // extract associated CN data
+      if ( blocks_->count(chnenv_.CNuuid_) == 1 )
+      {
+        CN_.parse(buffer_, blocks_->at(chnenv_.CNuuid_).get_parameters());
+	group_index_ = CN_.group_index_;
+	group_name_ = CN_.name_;
+	group_comment_ = CN_.comment_;
       }
 
       if ( !chnenv_.compenv1_.uuid_.empty() && chnenv_.compenv2_.uuid_.empty() )
@@ -451,8 +477,9 @@ namespace imc
       // start converting binary buffer to imc::datatype
       if ( !chnenv_.CSuuid_.empty() ) convert_buffer();
 
-      // convert any non-UTF-8 codepage to UTF-8
+      // convert any non-UTF-8 codepage to UTF-8 and cleanse any text
       convert_encoding();
+      cleanse_text();
     }
 
     // convert buffer to actual datatype
@@ -599,6 +626,35 @@ namespace imc
         conv.convert(xunit_);
         conv.convert(group_name_);
         conv.convert(group_comment_);
+      }
+    }
+
+    void cleanse_text()
+    {
+      escape_backslash(name_);
+      escape_backslash(comment_);
+      escape_backslash(origin_);
+      escape_backslash(origin_comment_);
+      escape_backslash(text_);
+      escape_backslash(language_code_);
+      escape_backslash(yname_);
+      escape_backslash(yunit_);
+      escape_backslash(xname_);
+      escape_backslash(xunit_);
+      escape_backslash(group_name_);
+      escape_backslash(group_comment_);
+    }
+
+    void escape_backslash(std::string &text)
+    {
+      char backslash = 0x5c;
+      std::string doublebackslash("\\\\");
+      for ( std::string::iterator it = text.begin(); it != text.end(); ++it )
+      {
+	if ( int(*it) == backslash ) {
+	  text.replace(it,it+1,doublebackslash);
+	  ++it;
+	}
       }
     }
 
