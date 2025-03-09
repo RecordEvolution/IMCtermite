@@ -131,15 +131,12 @@ which may require root permissions.
 
 ### Python
 
-To integrate the library into a customized ETL toolchain, several cython targets
+To integrate the library into a customized ETL toolchain, several python targets
 are available. For a local build that enables you to run the examples, use:
 
 ```
-make cython-build
+make python-build
 ```
-
-However, in a production environment, a proper installation of the module with
-`make cython-install` is recommended for system-wide availability of the module.
 
 #### Installation with pip
 
