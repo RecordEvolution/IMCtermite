@@ -221,7 +221,7 @@ can be found in the `python/examples` folder.
 
 ### IMC
 
-- https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/funktionen/im-und-export/
+- https://www.imc-tm.de/produkte/messtechnik-software/imc-famos/import-export
 - https://www.imc-tm.de/produkte/messtechnik-hardware/imc-cronosflex/ueberblick/
 - https://www.imc-tm.de/download-center/produkt-downloads/imc-famos/handbuecher
 - https://www.imc-tm.de/fileadmin/Public/Downloads/Manuals/imc_FAMOS/imcGemeinsameKomponenten.pdf
